@@ -26,3 +26,7 @@ dev = [
 [tool.pytest.ini_options]
 pythonpath = ".."
 testpaths = ["tests"]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["api*", "config*", "domain*", "infrastructure*", "services*"]
