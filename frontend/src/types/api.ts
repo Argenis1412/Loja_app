@@ -17,7 +17,7 @@ export interface Pagamento {
   parcelas: number
   valor_parcela: number
   informacoes_adicionais: string | null
+  taxa: number
+  tipo_taxa: string
   created_at: string
 }
-
-

@@ -10,7 +10,7 @@ from backend.infrastructure.database import Base
 from backend.infrastructure.db.models.recibo_models import ReciboModel  # ensure model is imported into Base metadata
 
 
-def test_get_pagamentos_with_postgres_backend_simulated():
+def test_deve_persistir_e_recuperar_lista_de_pagamentos_usando_repositorio_postgres():
     # Força o backend como 'postgres' para o fluxo de seleção
     os.environ["STORAGE_BACKEND"] = "postgres"
 
@@ -30,10 +30,13 @@ def test_get_pagamentos_with_postgres_backend_simulated():
 
     from backend.infrastructure.repositories.postgres_recibo_repository import PostgresReciboRepository
     from backend.services.pagamento_service import PagamentoService
+    from backend.domain.calculadora import Calculadora
     from backend.api.deps import get_pagamento_service
 
     repo = PostgresReciboRepository(db)
-    service = PagamentoService(repo)
+    calculadora = Calculadora()
+    taxas = {"desconto_vista": 10.0, "juros_parcelamento": 10.0}
+    service = PagamentoService(repo, calculadora, taxas)
 
     # Recarrega a app principal e sobrescreve a dependência para usar nosso service
     main = importlib.reload(importlib.import_module("backend.api.main"))

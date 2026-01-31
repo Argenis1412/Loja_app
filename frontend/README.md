@@ -37,6 +37,7 @@ frontend/
 |   |   ├── PagamentoForm.tsx
 |   |   └── Recibo.tsx
 |   ├── hooks/                  # custom hooks for UI state/orchestration only
+|   ├── tests/                  # unit and integration tests
 |   ├── pages/
 |   |   ├── Home.tsx
 |   |   └── StepPagamento.tsx
@@ -109,26 +110,34 @@ npm install
 npm run dev
 ```
 
-App runs at: http://localhost:5173
+## ▶️ Execução
 
-Backend must be running at http://127.0.0.1:8000
+Para iniciar o servidor de desenvolvimento:
 
-## 🧪 Error Handling Philosophy
+```bash
+npm run dev
+```
 
-- Network errors are surfaced clearly
-- Backend domain errors are displayed to the user (not reinterpreted)
-- No silent failures
+A aplicação estará disponível em `http://localhost:5173`.
 
-## 🌐 Internationalization (i18n)
+## 🧪 Testes Automatizados
 
-**Planned:** Portuguese, Spanish, English.
+O projeto possui uma suíte robusta de testes configurada com **Vitest**.
 
-## ✅ Summary
+Para executar todos os testes:
 
-- Backend-driven frontend
-- Strict typing via TypeScript
-- Explicit integration via `src/services`
+```bash
+npm test
+```
 
----
+### Cobertura dos Testes
+Os testes estão localizados em `src/tests` e cobrem:
 
-<!-- Author and License are declared in the repository root README -->
+- **Unitários**: Verificação isolada de componentes como `PagamentoForm` e `Recibo`.
+- **Integração**: Teste do fluxo completo do usuário em `App.test.tsx`, simulando desde o preenchimento do formulário, passando pela simulação de valores na API, até a confirmação e exibição do recibo.
+
+## 📁 Estrutura
+
+- `src/components`: Componentes reutilizáveis da UI.
+- `src/tests`: Arquivos de teste e configuração (`setup.ts`).
+- `src/types`: Definições de tipos TypeScript compartilhados.

@@ -2,7 +2,7 @@ from typing import List
 from sqlalchemy.orm import Session
 from backend.domain.recibo import Recibo
 from backend.infrastructure.db.models.recibo_models import ReciboModel
-from backend.services.recibo_repository import ReciboRepository
+from backend.domain.recibo_repository import ReciboRepository
 from backend.infrastructure.db.mappers.recibo_mapper import to_entity
 
 class PostgresReciboRepository(ReciboRepository):

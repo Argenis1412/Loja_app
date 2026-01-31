@@ -12,7 +12,8 @@ class Calculadora:
         juros_parcelamento: float = 10.0,
     ) -> Recibo:
 
-        if valor <= 0:
+        # Validar que o valor seja positivo e tenha sentido monetário (>= 0.01)
+        if round(valor, 2) <= 0:
             raise RegraPagamentoInvalida("Valor inválido")
 
         if opcao == 1:
@@ -45,8 +46,8 @@ class Calculadora:
         else:
             raise RegraPagamentoInvalida("Opção inválida")
 
-        valor_parcela = round(total / parcelas, 2)
         total = round(total, 2)
+        valor_parcela = round(total / parcelas, 2)
 
         recibo = Recibo(
             metodo=metodo,
@@ -58,3 +59,6 @@ class Calculadora:
         # Armazena valor original para uso na API
         recibo._original_valor = valor
         return recibo
+
+# Alias para compatibilidade com código antigo/testes
+CalculadoraPagamentos = Calculadora

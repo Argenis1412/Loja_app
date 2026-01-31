@@ -41,14 +41,13 @@ All payment rules live exclusively in the domain layer. They are framework-agnos
 | Cash (upfront)   | Immediate payment    | 10% discount      |
 | Debit card (upfront) | Immediate payment    | 5% discount       |
 | Short installments  | 2x – 6x              | No interest       |
-| Long installments   | 12x – 24x            | Fixed 10% increase|
+| Card with interest  | 2x – 12x             | Fixed 10% increase|
 
 > **Note:** "Debit card" and "credit card" are treated as distinct options. "Card" is never ambiguous in the API contract. This distinction avoids implicit assumptions common in simplified payment examples.
 
 ### Validation Rules
 
-- Installments 7–11 are invalid
-- Installments > 24 are invalid
+- Installments > 12 are invalid (for any method)
 - Invalid business inputs raise domain exceptions (not HTTP errors)
 - No rule is duplicated outside the domain
 
@@ -105,7 +104,7 @@ The API accepts an internal `opcao` integer that identifies the payment mode. Th
 | 1 | À vista (cash) — 10% discount |
 | 2 | Débito (debit card) — 5% discount |
 | 3 | Parcelado sem juros (short installments, 2–6x) — no interest |
-| 4 | Cartão com juros (long installments, 12–24x) — fixed increase |
+| 4 | Cartão com juros (installments, 2–12x) — fixed increase |
 
 > **Note:** "Debit card" (opcao 2) is not "credit card". Credit and debit are always separated in the contract.
 

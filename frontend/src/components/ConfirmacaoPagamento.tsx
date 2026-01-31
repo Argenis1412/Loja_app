@@ -1,7 +1,15 @@
 import type { CriarPagamentoRequest } from '../types/api'
 
+export interface PagamentoSimulacao {
+  total: number
+  valor_parcela: number
+  taxa: number
+  tipo_taxa: string
+}
+
 interface ConfirmacaoPagamentoProps {
   dados: CriarPagamentoRequest
+  simulacao?: PagamentoSimulacao
   onConfirmar: () => void
   onVoltar: () => void
   loading?: boolean
@@ -9,37 +17,63 @@ interface ConfirmacaoPagamentoProps {
 
 export function ConfirmacaoPagamento({
   dados,
+  simulacao,
   onConfirmar,
   onVoltar,
   loading,
 }: ConfirmacaoPagamentoProps) {
-  const DESCONTO_VISTA = 10 // percent
-  const JUROS_PARCELAMENTO = 10 // percent
-  const DESCONTO_DEBITO = 5 // percent
 
   const parcelas = dados.parcelas ?? 1
 
-  let totalPreview = dados.valor
-  let valorParcelaPreview = dados.valor
+  // Fallback de taxas para exibição imediata (caso a simulação ainda não tenha carregado)
+  const taxasPadrao = {
+    descontoVista: 10,
+    jurosParcelamento: 10,
+    descontoDebito: 5,
+  }
+
+  // Usar valores simulados se existirem, ou fallback para cálculo local
+  // Corrigimos o total usando o valor da parcela para garantir que o desconto/juros esteja aplicado
+  let totalPreview = simulacao ? simulacao.valor_parcela * parcelas : undefined
+  let valorParcelaPreview = simulacao?.valor_parcela
   let informacaoPreview: string | null = null
 
-  if (dados.metodo === 'avista') {
-    totalPreview = Number((dados.valor * (1 - DESCONTO_VISTA / 100)).toFixed(2))
-    valorParcelaPreview = totalPreview
-    informacaoPreview = `${DESCONTO_VISTA}% de desconto à vista`
-  } else if (dados.metodo === 'parcelado_sem_juros') {
-    totalPreview = Number(dados.valor.toFixed(2))
-    valorParcelaPreview = Number((totalPreview / parcelas).toFixed(2))
-    informacaoPreview = `Parcelado em ${parcelas}x sem juros`
-  } else if (dados.metodo === 'cartao_com_juros') {
-    totalPreview = Number((dados.valor * (1 + JUROS_PARCELAMENTO / 100)).toFixed(2))
-    valorParcelaPreview = Number((totalPreview / parcelas).toFixed(2))
-    informacaoPreview = `${JUROS_PARCELAMENTO}% de juros`
+  if (totalPreview === undefined) {
+    if (dados.metodo === 'avista') {
+      totalPreview = dados.valor * (1 - taxasPadrao.descontoVista / 100)
+    } else if (dados.metodo === 'debito') {
+      totalPreview = dados.valor * (1 - taxasPadrao.descontoDebito / 100)
+    } else if (dados.metodo === 'cartao_com_juros') {
+      totalPreview = dados.valor * (1 + taxasPadrao.jurosParcelamento / 100)
+    } else {
+      totalPreview = dados.valor
+    }
   }
-  if (dados.metodo === 'debito') {
-    totalPreview = Number((dados.valor * (1 - DESCONTO_DEBITO / 100)).toFixed(2))
-    valorParcelaPreview = totalPreview
-    informacaoPreview = `${DESCONTO_DEBITO}% de desconto no débito`
+  if (valorParcelaPreview === undefined) {
+    valorParcelaPreview = totalPreview / parcelas
+  }
+
+  if (simulacao) {
+    switch (simulacao.tipo_taxa) {
+      case 'desconto_vista':
+        informacaoPreview = `${simulacao.taxa}% de desconto à vista`
+        break
+      case 'juros_cartao':
+        informacaoPreview = `${simulacao.taxa}% de juros`
+        break
+      case 'sem_juros':
+        informacaoPreview = `Parcelado em ${parcelas}x sem juros`
+        break
+      case 'desconto_debito':
+        informacaoPreview = `${simulacao.taxa}% de desconto no débito`
+        break
+    }
+  } else {
+    // Fallback de texto
+    if (dados.metodo === 'avista') informacaoPreview = `${taxasPadrao.descontoVista}% de desconto à vista`
+    if (dados.metodo === 'debito') informacaoPreview = `${taxasPadrao.descontoDebito}% de desconto no débito`
+    if (dados.metodo === 'cartao_com_juros') informacaoPreview = `${taxasPadrao.jurosParcelamento}% de juros`
+    if (dados.metodo === 'parcelado_sem_juros') informacaoPreview = `Parcelado em ${parcelas}x sem juros`
   }
   return (
     <div className="mx-auto max-w-md space-y-6 rounded-lg bg-white p-6 shadow dark:bg-zinc-900">
@@ -64,14 +98,21 @@ export function ConfirmacaoPagamento({
         </div>
 
         <div className="flex justify-between">
-          <span className="font-medium">Total a pagar</span>
-          <span>R$ {totalPreview.toFixed(2)}</span>
+          <span className="text-zinc-500">Subtotal (Valor base)</span>
+          <span className="text-zinc-500">R$ {dados.valor.toFixed(2)}</span>
         </div>
 
         <div className="flex justify-between">
-          <span className="font-medium">Parcelas</span>
-          <span>{parcelas}x • R$ {valorParcelaPreview.toFixed(2)}</span>
+          <span className="font-bold text-zinc-900 dark:text-zinc-100">Total a pagar</span>
+          <span className="font-bold text-zinc-900 dark:text-zinc-100">R$ {totalPreview.toFixed(2)}</span>
         </div>
+
+        {parcelas > 1 && (
+          <div className="flex justify-between">
+            <span className="font-medium">Parcelas</span>
+            <span>{parcelas}x • R$ {valorParcelaPreview.toFixed(2)}</span>
+          </div>
+        )}
 
         {informacaoPreview && (
           <div className="text-xs text-zinc-500">{informacaoPreview}</div>
@@ -112,4 +153,3 @@ function formatarMetodo(metodo: string) {
       return metodo
   }
 }
-

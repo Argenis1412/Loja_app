@@ -28,6 +28,7 @@
 
 ## 🧱 Repository Structure
 
+
 ```
 .
 ├── backend/        # REST API (FastAPI + Clean Architecture)
@@ -48,6 +49,7 @@
 └── run.ps1 / run-tests.ps1
 ```
 
+
 Each main folder contains its own **README**, explaining:
 
 - Internal structure and organization
@@ -64,13 +66,13 @@ The system simulates multiple payment modes with **explicit, testable rules**:
 | Payment Mode | Condition | Applied Rule |
 |---------------------|---------------------|---------------------|
 | Cash (upfront) | Immediate payment | **10% discount** |
-| Card (upfront) | Immediate payment | **5% discount** |
+| Debit card | Immediate payment | **5% discount** |
 | Short installments | 2x to 6x | **0% interest** |
-| Long installments | 12x to 24x | **Fixed 10% increase** |
+| Long installments | 2x to 12x | **Fixed 10% increase** |
 
 ### ⚠️ Important Constraints
 
-- Installment counts **outside allowed ranges** (e.g., 7x, 11x, 25x) must raise a **domain validation error**, not a technical error
+- Installment counts **outside allowed ranges** (e.g., 1x, 13x, 25x) must raise a **domain validation error**, not a technical error
 - All business logic is centralized in the domain layer
 - Rules are framework-agnostic and fully unit-tested
 
@@ -151,6 +153,7 @@ Full setup details and migration instructions are in the **backend README**.
 └─────────────────────────┘
 ```
 
+
 ### Key Principles
 
 - ✅ The **frontend does not know business rules** — it only displays and collects data
@@ -199,7 +202,7 @@ These topics are acknowledged but excluded to preserve **focus and learning dept
 1. **Clone the repository**
 
 ```bash
-git clone https://github.com/argenis972/Loja_app.git
+git clone https://github.com/argenis972/Loja_app.git 
 cd Loja_app
 ```
 

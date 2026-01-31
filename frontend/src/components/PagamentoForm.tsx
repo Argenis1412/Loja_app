@@ -1,6 +1,6 @@
-import { useState } from 'react'
+import { useState, type FormEvent } from 'react'
 
-type MetodoPagamento = 'avista' | 'debito' | 'parcelado_sem_juros' | 'cartao_com_juros'
+export type MetodoPagamento = 'avista' | 'debito' | 'parcelado_sem_juros' | 'cartao_com_juros'
 
 interface PagamentoFormProps {
   onSubmit?: (dados: {
@@ -13,22 +13,37 @@ interface PagamentoFormProps {
     metodo: MetodoPagamento
     parcelas: number
   }) => void
+  limitesParcelas?: Record<
+    Exclude<MetodoPagamento, 'avista' | 'debito'>,
+    { min: number; max: number }
+  >
 }
 
-export function PagamentoForm({ onSubmit, onContinuar }: PagamentoFormProps) {
+const DEFAULT_LIMITES_PARCELAS: Record<
+  Exclude<MetodoPagamento, 'avista' | 'debito'>,
+  { min: number; max: number }
+> = {
+  parcelado_sem_juros: { min: 2, max: 6 },
+  cartao_com_juros: { min: 2, max: 12 },
+}
+
+// Helper para converter o método (string) para a opção (int) esperada pelo backend
+export function converterMetodoParaOpcao(metodo: MetodoPagamento): number {
+  const mapa: Record<MetodoPagamento, number> = {
+    avista: 1,
+    debito: 2,
+    parcelado_sem_juros: 3,
+    cartao_com_juros: 4,
+  }
+  return mapa[metodo]
+}
+
+export function PagamentoForm({ onSubmit, onContinuar, limitesParcelas = DEFAULT_LIMITES_PARCELAS }: PagamentoFormProps) {
   const [valor, setValor] = useState<number | ''>('')
   const [metodo, setMetodo] = useState<MetodoPagamento>('avista')
   const [parcelas, setParcelas] = useState<number>(2)
 
-  const limitesParcelas: Record<
-    Exclude<MetodoPagamento, 'avista' | 'debito'>,
-    { min: number; max: number }
-  > = {
-    parcelado_sem_juros: { min: 2, max: 6 },
-    cartao_com_juros: { min: 2, max: 12 },
-  }
-
-  function handleSubmit(e: React.FormEvent) {
+  function handleSubmit(e: FormEvent) {
     e.preventDefault()
 
     if (!valor || valor <= 0) {
@@ -92,15 +107,21 @@ export function PagamentoForm({ onSubmit, onContinuar }: PagamentoFormProps) {
 
       {/* Valor */}
       <div>
-        <label className="block text-sm text-zinc-700 dark:text-zinc-300">
+        <label htmlFor="valor" className="block text-sm text-zinc-700 dark:text-zinc-300">
           Valor da compra
         </label>
         <input
+          id="valor"
           type="number"
           min={1}
           step="0.01"
           placeholder="Digite o valor da compra"
           value={valor || ''}
+          onKeyDown={(e) => {
+            if (['e', 'E', '+', '-'].includes(e.key)) {
+              e.preventDefault()
+            }
+          }}
           onChange={e => setValor(e.target.value === '' ? '' : Number(e.target.value))}
           className="w-full rounded-lg border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100"
         />
@@ -162,10 +183,11 @@ export function PagamentoForm({ onSubmit, onContinuar }: PagamentoFormProps) {
       {/* Parcelas */}
       {showParcelas && (
         <div>
-          <label className="block text-sm text-zinc-700 dark:text-zinc-300">
+          <label htmlFor="parcelas" className="block text-sm text-zinc-700 dark:text-zinc-300">
             Parcelas
           </label>
           <select
+            id="parcelas"
             value={parcelas}
             onChange={e => setParcelas(Number(e.target.value))}
             className="w-full rounded-lg border p-2 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100"
