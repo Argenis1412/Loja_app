@@ -20,7 +20,7 @@ jobs:
         cache: 'pip'
         
     - name: Install dependencies
-      run: pip install flake8
+      run: pip install .[dev]
       
     - name: Lint with flake8
       run: flake8 .

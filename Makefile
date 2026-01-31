@@ -1,10 +1,10 @@
 .PHONY: install test run clean
 
 install:
-	pip install -r backend/requirements.txt
+	pip install -e backend/.[dev]
 
 test:
-	pytest -c backend/pytest.ini
+	cd backend && pytest
 
 run:
 	uvicorn backend.api.main:app --reload
