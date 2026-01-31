@@ -103,41 +103,39 @@ The frontend converts user-facing `metodo` values into the internal `opcao` inte
 - Node.js 18+
 
 ### Install & Run
-
 ```bash
 cd frontend
 npm install
 npm run dev
 ```
 
-## ▶️ Execução
+## ▶️ Execution
 
-Para iniciar o servidor de desenvolvimento:
-
+To start the development server:
 ```bash
 npm run dev
 ```
 
-A aplicação estará disponível em `http://localhost:5173`.
+The application will be available at `http://localhost:5173`.
 
-## 🧪 Testes Automatizados
+## 🧪 Automated Testing
 
-O projeto possui uma suíte robusta de testes configurada com **Vitest**.
+The project has a robust test suite configured with **Vitest**.
 
-Para executar todos os testes:
-
+To run all tests:
 ```bash
 npm test
 ```
 
-### Cobertura dos Testes
-Os testes estão localizados em `src/tests` e cobrem:
+### Test Coverage
 
-- **Unitários**: Verificação isolada de componentes como `PagamentoForm` e `Recibo`.
-- **Integração**: Teste do fluxo completo do usuário em `App.test.tsx`, simulando desde o preenchimento do formulário, passando pela simulação de valores na API, até a confirmação e exibição do recibo.
+Tests are located in `src/tests` and cover:
 
-## 📁 Estrutura
+- **Unit Tests**: Isolated verification of components like `PagamentoForm` and `Recibo`.
+- **Integration Tests**: Complete user flow testing in `App.test.tsx`, simulating everything from form filling, API value simulation, to confirmation and receipt display.
 
-- `src/components`: Componentes reutilizáveis da UI.
-- `src/tests`: Arquivos de teste e configuração (`setup.ts`).
-- `src/types`: Definições de tipos TypeScript compartilhados.
+## 📁 Structure
+
+- `src/components`: Reusable UI components.
+- `src/tests`: Test files and configuration (`setup.ts`).
+- `src/types`: Shared TypeScript type definitions.
