@@ -1,11 +1,19 @@
+from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from backend.api.pagamentos_api import router as pagamentos_router
 from backend.services.pagamento_service import PagamentoService
 from backend.api.dtos.pagamento_response import PagamentoResponse
+from backend.infrastructure.database import engine
+from backend.infrastructure.db.base import Base
 
-app = FastAPI(title="Loja App - Pagamentos")
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    Base.metadata.create_all(bind=engine)
+    yield
+
+app = FastAPI(title="Loja App - Pagamentos", lifespan=lifespan)
 
 origens_permitidas = [
     "http://localhost:5173",
