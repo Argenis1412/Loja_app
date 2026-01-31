@@ -2,6 +2,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
+from pydantic_settings import BaseSettings
 from backend.api.pagamentos_api import router as pagamentos_router
 from backend.services.pagamento_service import PagamentoService
 from backend.api.dtos.pagamento_response import PagamentoResponse
@@ -15,13 +16,14 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(title="Loja App - Pagamentos", lifespan=lifespan)
 
-origens_permitidas = [
-    "http://localhost:5173",
-]
+class Settings(BaseSettings):
+    origens_permitidas: list[str] = ["http://localhost:5173"]
+
+settings = Settings()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origens_permitidas,
+    allow_origins=settings.origens_permitidas,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
