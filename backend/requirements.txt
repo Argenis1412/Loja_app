@@ -19,4 +19,3 @@ requests>=2.31
 
 # Tooling
 python-dotenv>=1.0
-
