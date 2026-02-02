@@ -21,3 +21,5 @@ export interface Pagamento {
   tipo_taxa: string
   created_at: string
 }
+
+export type PagamentoResponse = Pagamento

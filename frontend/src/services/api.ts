@@ -56,4 +56,11 @@ export async function criarPagamento(dados: CriarPagamentoRequest) {
   }
 }
 
+export async function listarPagamentos() {
+  const response = await fetch('http://127.0.0.1:8000/pagamentos/')
 
+  if (!response.ok) {
+    throw new Error('Erro ao buscar pagamentos')
+  }
+  return response.json()
+}
