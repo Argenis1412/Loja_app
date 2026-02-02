@@ -15,7 +15,7 @@ async def lifespan(app: FastAPI):
     yield
 
 app = FastAPI(title="Loja App - Pagamentos", lifespan=lifespan)
-
+ 
 class Settings(BaseSettings):
     origens_permitidas: list[str] = ["http://localhost:5173"]
 
@@ -28,6 +28,10 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+@app.get("/health", tags=["Health"])
+def health_check():
+    return {"status": "ok"}
 
 class SimularPagamentoRequest(BaseModel):
     opcao: int

@@ -44,9 +44,10 @@
 │   ├── public/
 │   └── README.md
 │
+├── Makefile
 ├── README.md       # Project overview (this file)
 ├── requirements.txt
-└── run.ps1 / run-tests.ps1
+└── run.tests.sh / run-tests.ps1
 ```
 
 
@@ -223,6 +224,20 @@ cd frontend
 ---
 
 ## 🧪 Running Tests
+
+### Automated (Recommended)
+
+**Windows:**
+```powershell
+.\run_tests.ps1
+```
+
+**Linux / WSL:**
+```bash
+./run_tests.sh
+```
+
+### Manual
 
 ```bash
 # Backend tests

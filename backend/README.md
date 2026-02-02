@@ -28,6 +28,23 @@ The frontend is treated as a consumer, never as a source of truth.
 
 Each layer has one responsibility and no shortcuts.
 
+### Architecture Diagram
+
+```mermaid
+graph TD
+    Client[Frontend / Client] -->|HTTP/JSON| API[API Layer\n(FastAPI)]
+    
+    subgraph Backend
+        API -->|DTOs -> Domain| Service[Service Layer\n(Orchestration)]
+        Service -->|Domain Objects| Domain[Domain Layer\n(Business Rules)]
+        Service -->|Domain Objects| Repo[Infrastructure\n(Repositories)]
+        Repo -->|SQL| DB[(PostgreSQL)]
+    end
+    
+    classDef domain fill:#f96,stroke:#333,stroke-width:2px;
+    class Domain domain;
+```
+
 ---
 
 ## 🧮 Domain & Business Rules
@@ -170,11 +187,13 @@ backend/
 ├── services/                # application services / use-cases
 │   └── pagamento_service.py
 ├── alembic/                 # migrations (managed by Alembic)
-└── tests/                   # unit and integration tests
-    ├── conftest.py
-    ├── domain/              # domain-level unit tests (e.g. test_calculadora.py)
-    ├── services/            # service-level unit tests (e.g. test_pagamento_service.py)
-    └── integration tests    # integration files at tests/ root (e.g. test_integration_postgres.py using loja_test_db)
+├── tests/                   # unit and integration tests
+│   ├── conftest.py
+│   ├── domain/              # domain-level unit tests (e.g. test_calculadora.py)
+│   └── ...
+├── Makefile                 # Command runner (install, test, run, lint)
+├── pyproject.toml           # Project dependencies and tool config
+└── README.md
 ```
 
 **Notes:**

@@ -21,6 +21,10 @@ dev = [
     "pytest",
     "httpx",
     "flake8",
+    "black",
+    "isort",
+    "mypy",
+    "types-requests",
 ]
 
 [tool.pytest.ini_options]
@@ -30,3 +34,17 @@ testpaths = ["tests"]
 [tool.setuptools.packages.find]
 where = ["."]
 include = ["api*", "config*", "domain*", "infrastructure*", "services*"]
+
+[tool.black]
+line-length = 88
+target-version = ['py311']
+
+[tool.isort]
+profile = "black"
+line_length = 88
+multi_line_output = 3
+
+[tool.mypy]
+python_version = "3.11"
+strict = true
+ignore_missing_imports = true

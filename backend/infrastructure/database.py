@@ -1,4 +1,3 @@
-import os
 from contextlib import contextmanager
 from typing import Generator
 
@@ -14,7 +13,7 @@ engine = create_engine(settings.database_url, future=True)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 
-def init_db() -> None:
+def init_db() -> Generator:
     Base.metadata.create_all(bind=engine)
 
     db = SessionLocal()

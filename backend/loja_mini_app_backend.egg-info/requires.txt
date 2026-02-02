@@ -1,0 +1,15 @@
+fastapi
+uvicorn
+pydantic
+pydantic-settings
+sqlalchemy
+psycopg
+
+[dev]
+pytest
+httpx
+flake8
+black
+isort
+mypy
+types-requests
