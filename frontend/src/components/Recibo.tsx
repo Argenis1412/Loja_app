@@ -2,7 +2,7 @@ import type { Pagamento } from '../types/api'
 
 interface ReciboProps {
   pagamento: Pagamento
-  onNovoPagamento: () => void
+  onNovoPagamento?: () => void
 }
 
 export function Recibo({ pagamento, onNovoPagamento }: ReciboProps) {
@@ -88,12 +88,14 @@ export function Recibo({ pagamento, onNovoPagamento }: ReciboProps) {
         </div>
       )}
 
-      <button
-        onClick={onNovoPagamento}
-        className="w-full rounded-lg bg-blue-600 py-2.5 font-medium text-white transition hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-zinc-900"
-      >
-        Fazer novo pagamento
-      </button>
+      {onNovoPagamento && (
+        <button
+          onClick={onNovoPagamento}
+          className="w-full rounded-lg bg-blue-600 py-2.5 font-medium text-white transition hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-zinc-900"
+        >
+          Fazer novo pagamento
+        </button>
+      )}
     </div>
   )
 }

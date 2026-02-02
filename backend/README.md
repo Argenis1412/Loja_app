@@ -28,23 +28,6 @@ The frontend is treated as a consumer, never as a source of truth.
 
 Each layer has one responsibility and no shortcuts.
 
-### Architecture Diagram
-
-```mermaid
-graph TD
-    Client[Frontend / Client] -->|HTTP/JSON| API[API Layer\n(FastAPI)]
-    
-    subgraph Backend
-        API -->|DTOs -> Domain| Service[Service Layer\n(Orchestration)]
-        Service -->|Domain Objects| Domain[Domain Layer\n(Business Rules)]
-        Service -->|Domain Objects| Repo[Infrastructure\n(Repositories)]
-        Repo -->|SQL| DB[(PostgreSQL)]
-    end
-    
-    classDef domain fill:#f96,stroke:#333,stroke-width:2px;
-    class Domain domain;
-```
-
 ---
 
 ## 🧮 Domain & Business Rules

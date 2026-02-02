@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { buscarPagamentos } from "../services/api";
+import { listarPagamentos } from "../services/api";
 import type { PagamentoResponse } from "../types/api";
 import { Recibo } from "../components/Recibo";
 
@@ -8,7 +8,7 @@ export function Home() {
   const [erro, setErro] = useState<string | null>(null);
 
   useEffect(() => {
-    buscarPagamentos()
+    listarPagamentos()
       .then(setPagamentos)
       .catch(() => setErro("Erro ao carregar pagamentos"));
   }, []);
