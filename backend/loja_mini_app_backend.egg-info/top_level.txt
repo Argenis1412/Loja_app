@@ -1,5 +1,0 @@
-api
-config
-domain
-infrastructure
-services
