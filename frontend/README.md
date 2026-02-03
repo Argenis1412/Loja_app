@@ -19,16 +19,16 @@ The frontend exists to consume the backend-first Payments API and present a simp
 ## 🧰 Tech Stack
 
 - React 19 (see `package.json`)
-- Vite (servidor de desarrollo y build)
+- Vite (dev server and build)
 - TypeScript 5.9 (strict)
 - Tailwind CSS
-- Vitest (para tests)
-- ESLint + Prettier (para calidad de código)
-- Fetch API (sin wrappers HTTP adicionales)
+- Vitest (for tests)
+- ESLint + Prettier (for code quality)
+- Fetch API (no extra HTTP wrappers)
 
-## 🏛️ Arquitectura
+## 🏛️ Architecture
 
-El frontend sigue una arquitectura por capas para separar responsabilidades, inspirada en principios de Clean Architecture.
+The frontend follows a layered architecture to separate responsibilities, inspired by Clean Architecture principles.
 
 ```
 frontend/

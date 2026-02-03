@@ -20,8 +20,8 @@ export function Home() {
   return (
     <div className="min-h-screen bg-zinc-100 dark:bg-zinc-950 p-6">
       <div className="space-y-6">
-        {pagamentos.map((pagamento) => (
-          <Recibo key={pagamento.id ?? Math.random()} pagamento={pagamento} />
+        {pagamentos.map((pagamento, index) => (
+          <Recibo key={pagamento.id ?? index} pagamento={pagamento} />
         ))}
       </div>
     </div>

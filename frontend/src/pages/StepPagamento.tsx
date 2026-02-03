@@ -1,7 +1,11 @@
-import { PagamentoForm } from '../components/PagamentoForm'
+import { PagamentoForm, type MetodoPagamento } from '../components/PagamentoForm'
 
 export function StepPagamento() {
-  function handleCriarPagamento(dados: any) {
+  function handleCriarPagamento(dados: {
+    valor: number
+    metodo: MetodoPagamento
+    parcelas: number
+  }) {
     console.log('Pagamento enviado:', dados)
     // próximo passo: chamar API
   }

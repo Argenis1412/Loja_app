@@ -9,7 +9,7 @@ describe('Componente PagamentoForm', () => {
     expect(screen.getByText('Loja Argenis Lopez')).toBeInTheDocument()
     expect(screen.getByLabelText('Valor da compra')).toBeInTheDocument()
     // Verifica se o método padrão (à vista) está selecionado
-    expect(screen.getByLabelText(/À vista \(efectivo\)/i)).toBeChecked()
+    expect(screen.getByLabelText(/À vista \(dinheiro\)/i)).toBeChecked()
   })
 
   it('deve atualizar o valor quando o usuário digita', () => {

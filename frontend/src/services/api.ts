@@ -21,8 +21,7 @@ export async function criarPagamento(dados: CriarPagamentoRequest) {
     valor: dados.valor,
     parcelas: dados.parcelas ?? 1,
   }
-  // Debug: log payload being sent
-  // eslint-disable-next-line no-console
+  // Debug log do payload antes de enviar a requisição
   console.log('criarPagamento payload:', payload)
 
   const response = await fetch('http://127.0.0.1:8000/pagamentos/', {
@@ -36,7 +35,6 @@ export async function criarPagamento(dados: CriarPagamentoRequest) {
   const bodyText = await response.text()
 
   if (!response.ok) {
-    // eslint-disable-next-line no-console
     console.error('criarPagamento error:', response.status, bodyText)
     let parsed = bodyText
     try {

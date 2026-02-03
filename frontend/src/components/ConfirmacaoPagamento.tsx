@@ -142,7 +142,7 @@ export function ConfirmacaoPagamento({
 function formatarMetodo(metodo: string) {
   switch (metodo) {
     case 'avista':
-      return 'À vista (efectivo)'
+      return 'À vista (dinheiro)'
     case 'debito':
       return 'À vista (débito)'
     case 'parcelado_sem_juros':

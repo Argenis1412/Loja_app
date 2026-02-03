@@ -27,7 +27,6 @@ const DEFAULT_LIMITES_PARCELAS: Record<
   cartao_com_juros: { min: 2, max: 12 },
 }
 
-// Helper para converter o método (string) para a opção (int) esperada pelo backend
 export function converterMetodoParaOpcao(metodo: MetodoPagamento): number {
   const mapa: Record<MetodoPagamento, number> = {
     avista: 1,
@@ -141,7 +140,7 @@ export function PagamentoForm({ onSubmit, onContinuar, limitesParcelas = DEFAULT
               checked={metodo === 'avista'}
               onChange={() => setMetodo('avista')}
             />
-            <span className="font-medium">À vista (efectivo)</span>
+            <span className="font-medium">À vista (dinheiro)</span>
             <span className="text-xs text-green-600 ml-2">10% de desconto</span>
           </label>
 
@@ -215,7 +214,7 @@ export function PagamentoForm({ onSubmit, onContinuar, limitesParcelas = DEFAULT
 
       <button
         type="submit"
-        className="w-full rounded-lg bg-blue-600 py-2 font-medium text-white transition hover:bg-blue-700"
+        className="w-full rounded-lg bg-blue-600 py-2 font-medium text-white transition hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-zinc-900"
       >
         Continuar →
       </button>

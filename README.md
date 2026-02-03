@@ -1,4 +1,4 @@
-﻿# 🧪 Loja App — Payments Architecture Lab
+﻿﻿# 🧪 Loja App — Payments Architecture Lab
 
 ## 📌 Overview
 
@@ -30,7 +30,7 @@
 
 
 ```
-.
+Loja_app/
 ├── backend/        # REST API (FastAPI + Clean Architecture)
 │   ├── api/
 │   ├── config/
