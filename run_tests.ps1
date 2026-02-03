@@ -61,9 +61,14 @@ isort --check .
 mypy .
 Pop-Location
 
+Write-Host "🎨 Verificando estilo de código do Frontend (Linting)..."
+Push-Location frontend
+npm run lint
+Pop-Location
+
 Write-Host "🐍 Executando testes do Backend..."
 Push-Location backend
-pytest
+pytest --cov=. --cov-report=term-missing
 Pop-Location
 
 Write-Host "⚛️  Executando testes do Frontend..."

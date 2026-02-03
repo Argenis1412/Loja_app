@@ -1,10 +1,11 @@
 # 🛍️ Loja App — Frontend (React + Vite + TypeScript)
 
 ![Node.js](https://img.shields.io/badge/Node-%3E%3D18-brightgreen?style=flat&logo=node.js&logoColor=white)
-![React](https://img.shields.io/badge/React-%3E=18-blue?style=flat&logo=react&logoColor=white)
+![React](https://img.shields.io/badge/React-19-blue?style=flat&logo=react&logoColor=white)
 ![Vite](https://img.shields.io/badge/Vite-^7.2.4-646cff?style=flat&logo=vite)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.9.3-3178c6?style=flat&logo=typescript&logoColor=white)
 ![Tailwind CSS](https://img.shields.io/badge/TailwindCSS-3.4.19-06B6D4?style=flat&logo=tailwind-css)
+![ESLint](https://img.shields.io/badge/ESLint-8.57.0-4B32C3?style=flat&logo=eslint)
 ![License](https://img.shields.io/badge/License-MIT-green)
 
 This frontend is a thin, performance-focused consumer of the Payments API. It demonstrates clean frontend architecture, TypeScript typing, and correct API consumption — it intentionally does not duplicate business logic.
@@ -18,14 +19,16 @@ The frontend exists to consume the backend-first Payments API and present a simp
 ## 🧰 Tech Stack
 
 - React 19 (see `package.json`)
-- Vite (dev server and build)
+- Vite (servidor de desarrollo y build)
 - TypeScript 5.9 (strict)
 - Tailwind CSS
-- Fetch API (no extra HTTP wrappers)
+- Vitest (para tests)
+- ESLint + Prettier (para calidad de código)
+- Fetch API (sin wrappers HTTP adicionales)
 
-## 📁 Project Structure
+## 🏛️ Arquitectura
 
-Simplified developer view (folders shown; only key files listed):
+El frontend sigue una arquitectura por capas para separar responsabilidades, inspirada en principios de Clean Architecture.
 
 ```
 frontend/
