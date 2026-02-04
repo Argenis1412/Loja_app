@@ -2,7 +2,9 @@ from fastapi import Depends
 from sqlalchemy.orm import Session
 
 from infrastructure.database import get_db
-from infrastructure.repositories.postgres_recibo_repository import PostgresReciboRepository
+from infrastructure.repositories.postgres_recibo_repository import (
+    PostgresReciboRepository,
+)
 from services.pagamento_service import PagamentoService
 from domain.recibo_repository import ReciboRepository
 

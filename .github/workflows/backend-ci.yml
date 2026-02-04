@@ -130,18 +130,15 @@ jobs:
       
       - name: Instalar dependências de segurança
         run: |
-          cd backend
           python -m pip install --upgrade pip
           pip install safety bandit
       
       - name: Verificar vulnerabilidades em dependências
         run: |
-          cd backend
           safety check --json || echo "⚠️ Vulnerabilidades encontradas"
         continue-on-error: true
       
       - name: Análise estática de segurança
         run: |
-          cd backend
           bandit -r . -ll || echo "⚠️ Problemas de segurança encontrados"
         continue-on-error: true

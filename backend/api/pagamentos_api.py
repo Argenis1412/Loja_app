@@ -24,7 +24,9 @@ def criar_pagamento(
     return PagamentoResponse.from_domain(recibo)
 
 
-@router.post("/simular", response_model=PagamentoResponse, status_code=status.HTTP_200_OK)
+@router.post(
+    "/simular", response_model=PagamentoResponse, status_code=status.HTTP_200_OK
+)
 def simular_pagamento(dados: PagamentoRequest):
     """
     Simula um pagamento para exibir os cálculos (juros, parcelas) sem persistir no banco.

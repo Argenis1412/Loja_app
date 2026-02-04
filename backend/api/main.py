@@ -23,6 +23,7 @@ async def domain_exception_handler(request: Request, exc: Exception):
 
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"])
 
+
 # Endpoint de verificação de saúde da API
 @app.get("/saude", status_code=status.HTTP_200_OK)
 def verificar_saude():

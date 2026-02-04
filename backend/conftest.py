@@ -31,6 +31,7 @@ infrastructure.database.SessionLocal = sessionmaker(
     autocommit=False, autoflush=False, bind=test_engine
 )
 
+
 @pytest.fixture(scope="session", autouse=True)
 def setup_database():
     Base.metadata.create_all(bind=test_engine)
