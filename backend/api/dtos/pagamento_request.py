@@ -1,7 +1,7 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 
-class CriarPagamentoRequest(BaseModel):
-    opcao: int = Field(..., ge=1, le=4)
-    valor: float = Field(..., gt=0)
-    parcelas: int = Field(..., ge=1)
 
+class PagamentoRequest(BaseModel):
+    opcao: int
+    valor: float
+    parcelas: int | None = None

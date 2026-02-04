@@ -1,4 +1,12 @@
-﻿﻿# 🧪 Loja App — Payments Architecture Lab
+﻿﻿# 🏦 Loja App — Sistem of pagaments
+
+[![Backend CI](https://github.com/argenis972/Loja_app/actions/workflows/backend-ci.yml/badge.svg?branch=CI/CD_automatizado)](https://github.com/argenis972/Loja_app/actions/workflows/backend-ci.yml)
+[![Frontend CI](https://github.com/argenis972/Loja_app/actions/workflows/frontend-ci.yml/badge.svg?branch=CI/CD_automatizado)](https://github.com/argenis972/Loja_app/actions/workflows/frontend-ci.yml)
+[![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
+[![TypeScript](https://img.shields.io/badge/typescript-5.0+-blue.svg)](https://www.typescriptlang.org/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE.txt)
+
+---
 
 ## 📌 Overview
 
@@ -47,7 +55,10 @@ Loja_app/
 ├── Makefile
 ├── README.md       # Project overview (this file)
 ├── requirements.txt
-└── run.tests.sh / run-tests.ps1
+├── run_backend.ps1
+├── run_frontend.ps1
+├── run_tests.ps1
+└── setup.ps1
 ```
 
 

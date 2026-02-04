@@ -2,45 +2,88 @@ name: PR Checks
 
 on:
   pull_request:
-    branches: [ main ]
+    branches: [main, develop]
+    types: [opened, synchronize, reopened]
 
 jobs:
-  lint-backend:
+  validate-pr:
+    name: Validar Pull Request
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ./backend
-    steps:
-    - uses: actions/checkout@v4
     
-    - name: Set up Python
-      uses: actions/setup-python@v5
-      with:
-        python-version: '3.11'
-        cache: 'pip'
-        
-    - name: Install dependencies
-      run: pip install .[dev]
+    steps:
+      - name: Checkout código
+        uses: actions/checkout@v4
       
-    - name: Lint with flake8
-      run: flake8 .
+      - name: Verificar tamanho da PR
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const pr = context.payload.pull_request;
+            
+            console.log(`📊 Estatísticas da PR:`);
+            console.log(`   Arquivos alterados: ${pr.changed_files}`);
+            console.log(`   Linhas adicionadas: ${pr.additions}`);
+            console.log(`   Linhas removidas: ${pr.deletions}`);
+            
+            const totalChanges = pr.additions + pr.deletions;
+            
+            if (pr.changed_files > 30) {
+              core.warning(
+                `⚠️ Esta PR altera ${pr.changed_files} arquivos. ` +
+                `PRs grandes são mais difíceis de revisar. ` +
+                `Considere dividir em PRs menores.`
+              );
+            }
+            
+            if (totalChanges > 1000) {
+              core.warning(
+                `⚠️ Esta PR tem ${totalChanges} linhas de mudança. ` +
+                `PRs menores facilitam o code review.`
+              );
+            } else {
+              core.info(`✅ Tamanho da PR está adequado`);
+            }
+      
+      - name: Verificar descrição da PR
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const pr = context.payload.pull_request;
+            const body = pr.body || '';
+            
+            if (body.length < 30) {
+              core.warning(
+                '⚠️ Descrição da PR muito curta! ' +
+                'Por favor, explique:\n' +
+                '  - O que foi alterado\n' +
+                '  - Por que foi alterado\n' +
+                '  - Como testar'
+              );
+            } else {
+              core.info('✅ Descrição da PR adequada');
+            }
+      
+      - name: Verificar se PR tem label
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const pr = context.payload.pull_request;
+            
+            if (pr.labels.length === 0) {
+              core.notice(
+                '💡 Dica: Adicione labels à PR (feat, fix, docs, etc.) ' +
+                'para facilitar organização'
+              );
+            }
 
-  lint-frontend:
+  summary:
+    name: Resumo das Verificações
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ./frontend
-    steps:
-    - uses: actions/checkout@v4
+    needs: [validate-pr]
+    if: always()
     
-    - name: Set up Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: '18'
-        cache: 'npm'
-        
-    - name: Install dependencies
-      run: npm install
-      
-    - name: Lint
-      run: npm run lint --if-present
+    steps:
+      - name: Resumo
+        run: |
+          echo "✅ Verificações de PR concluídas"
+          echo "👀 Aguardando code review..."

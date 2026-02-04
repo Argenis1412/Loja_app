@@ -1,30 +1,35 @@
-from contextlib import contextmanager
 from typing import Generator
 
 from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import sessionmaker, Session
+ 
+from config.settings import settings
+from infrastructure.db.base import Base
+from infrastructure.db.models.recibo_models import ReciboModel  # noqa: F401
 
-from backend.config.settings import settings
-from backend.infrastructure.db.base import Base
-from backend.infrastructure.db.models.recibo_models import ReciboModel  # noqa: F401
+engine_args = {"future": True}
+# Para SQLite, é necessário permitir o uso em múltiplos threads, como o FastAPI faz.
+if settings.database_url.startswith("sqlite"):
+    engine_args["connect_args"] = {"check_same_thread": False}
 
 # Engine e SessionLocal centralizados
-engine = create_engine(settings.database_url, future=True)
+engine = create_engine(settings.database_url, **engine_args)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 
-def init_db() -> Generator:
+def create_db_and_tables():
+    """
+    Função para criar as tabelas no banco de dados.
+    Deve ser chamada na inicialização da aplicação.
+    """
     Base.metadata.create_all(bind=engine)
 
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
 
-
-@contextmanager
-def session_scope() -> Generator:
+def get_db() -> Generator[Session, None, None]:
+    """
+    Dependência do FastAPI para obter uma sessão de banco de dados por requisição.
+    Garante que a transação seja commitada em caso de sucesso ou revertida em caso de erro.
+    """
     db = SessionLocal()
     try:
         yield db

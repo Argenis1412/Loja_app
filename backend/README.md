@@ -159,11 +159,9 @@ backend/
 │   ├── recibo.py            # domain model for receipts
 │   └── exceptions.py        # domain-specific exceptions
 ├── infrastructure/          # adapters and infra concerns
-│   ├── database.py          # engine / session setup
-│   ├── storage.py           # file/storage helpers (if any)
+│   ├── database.py          # engine / session setup           
 │   ├── db/                  # DB-specific modules (models, mappers)
 │   │   ├── base.py
-│   │   ├── postgres.py
 │   │   ├── models/
 │   │   └── mappers/
 │   └── repositories/        # repository implementations (Postgres)
@@ -172,7 +170,8 @@ backend/
 ├── alembic/                 # migrations (managed by Alembic)
 ├── tests/                   # unit and integration tests
 │   ├── conftest.py
-│   ├── domain/              # domain-level unit tests (e.g. test_calculadora.py)
+│   ├── services/
+│   |── unit/   # domain-level unit tests (e.g. test_calculadora.py)
 │   └── ...
 ├── Makefile                 # Command runner (install, test, run, lint)
 ├── pyproject.toml           # Project dependencies and tool config

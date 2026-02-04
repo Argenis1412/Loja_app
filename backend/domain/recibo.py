@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 
 
 class Recibo:
@@ -22,11 +22,12 @@ class Recibo:
         self.informacoes_adicionais = informacoes_adicionais
         # Opcional: id persistido no banco
         self.id = id
-        self.data_hora = data_hora or datetime.utcnow()
+        self.data_hora = data_hora or datetime.now(timezone.utc)
         # Se valor_parcela não for passado, calcula automaticamente
         self.valor_parcela = (
             round(self.total / self.parcelas, 2)
-            if valor_parcela is None else valor_parcela
+            if valor_parcela is None
+            else valor_parcela
         )
 
     @property

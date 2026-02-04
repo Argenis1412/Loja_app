@@ -1,5 +1,6 @@
 from sqlalchemy import Column, DateTime, Float, Integer, String, func
-from backend.infrastructure.db.base import Base
+
+from infrastructure.db.base import Base
 
 
 class ReciboModel(Base):

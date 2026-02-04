@@ -1,8 +1,8 @@
-import type { Pagamento } from '../types/api'
+import type { Pagamento } from '../types/api';
 
 interface ReciboPagamentoProps {
-  pagamento: Pagamento
-  onNovoPagamento: () => void
+  pagamento: Pagamento;
+  onNovoPagamento: () => void;
 }
 
 export function ReciboPagamento({
@@ -14,15 +14,21 @@ export function ReciboPagamento({
       <h1 className="text-xl font-semibold">Recibo de Pagamento</h1>
 
       <div className="space-y-1 text-sm text-zinc-700 dark:text-zinc-300">
-        <p><strong>ID:</strong> #{pagamento.id}</p>
-        <p><strong>Método:</strong> {pagamento.metodo}</p>
-        <p><strong>Parcelas:</strong> {pagamento.parcelas}x</p>
-        <p><strong>Valor da parcela:</strong> R$ {pagamento.valor_parcela}</p>
+        <p>
+          <strong>ID:</strong> #{pagamento.id}
+        </p>
+        <p>
+          <strong>Método:</strong> {pagamento.metodo}
+        </p>
+        <p>
+          <strong>Parcelas:</strong> {pagamento.parcelas}x
+        </p>
+        <p>
+          <strong>Valor da parcela:</strong> R$ {pagamento.valor_parcela}
+        </p>
 
         {pagamento.informacoes_adicionais && (
-          <p className="text-amber-600">
-            {pagamento.informacoes_adicionais}
-          </p>
+          <p className="text-amber-600">{pagamento.informacoes_adicionais}</p>
         )}
       </div>
 
@@ -37,5 +43,5 @@ export function ReciboPagamento({
         Novo pagamento
       </button>
     </div>
-  )
+  );
 }

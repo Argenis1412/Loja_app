@@ -1,7 +1,7 @@
-import { useEffect, useState } from "react";
-import { listarPagamentos } from "../services/api";
-import type { PagamentoResponse } from "../types/api";
-import { Recibo } from "../components/Recibo";
+import { useEffect, useState } from 'react';
+import { listarPagamentos } from '../services/api';
+import type { PagamentoResponse } from '../types/api';
+import { Recibo } from '../components/Recibo';
 
 export function Home() {
   const [pagamentos, setPagamentos] = useState<PagamentoResponse[]>([]);
@@ -10,7 +10,7 @@ export function Home() {
   useEffect(() => {
     listarPagamentos()
       .then(setPagamentos)
-      .catch(() => setErro("Erro ao carregar pagamentos"));
+      .catch(() => setErro('Erro ao carregar pagamentos'));
   }, []);
 
   if (erro) {

@@ -1,5 +1,5 @@
-from backend.domain.recibo import Recibo
-from backend.infrastructure.db.models import ReciboModel
+from domain.recibo import Recibo
+from infrastructure.db.models import ReciboModel
 
 
 def to_model(entity: Recibo) -> ReciboModel:
@@ -23,4 +23,3 @@ def to_entity(model: ReciboModel) -> Recibo:
         data_hora=model.created_at,
         id=getattr(model, "id", None),
     )
-

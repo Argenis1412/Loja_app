@@ -1,53 +1,32 @@
-from contextlib import asynccontextmanager
-from fastapi import FastAPI
+from fastapi import FastAPI, Request, status
+from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
-from pydantic_settings import BaseSettings
-from backend.api.pagamentos_api import router as pagamentos_router
-from backend.services.pagamento_service import PagamentoService
-from backend.api.dtos.pagamento_response import PagamentoResponse
-from backend.infrastructure.database import engine
-from backend.infrastructure.db.base import Base
 
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    Base.metadata.create_all(bind=engine)
-    yield
+from api.pagamentos_api import router as pagamentos_router
+from infrastructure.database import create_db_and_tables
+from domain.exceptions import DomainError
 
-app = FastAPI(title="Loja App - Pagamentos", lifespan=lifespan)
- 
-class Settings(BaseSettings):
-    origens_permitidas: list[str] = ["http://localhost:5173"]
+# Garante que as tabelas sejam criadas ao iniciar
+create_db_and_tables()
 
-settings = Settings()
+app = FastAPI(title="Loja Mini App")
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=settings.origens_permitidas,
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
 
-@app.get("/health", tags=["Health"])
-def health_check():
-    return {"status": "ok"}
-
-class SimularPagamentoRequest(BaseModel):
-    opcao: int
-    valor: float
-    parcelas: int
-
-@app.post("/pagamentos/simular", response_model=PagamentoResponse)
-def simular_pagamento(dados: SimularPagamentoRequest):
-    # inicializa o serviço de pagamento sem repositório para apenas simular
-    service = PagamentoService(repository=None)
-    
-    recibo = service.criar_pagamento(
-        opcao=dados.opcao,
-        valor=dados.valor,
-        parcelas=dados.parcelas
+# Manipulador de exceções de domínio para retornar 400 Bad Request
+@app.exception_handler(DomainError)
+async def domain_exception_handler(request: Request, exc: Exception):
+    return JSONResponse(
+        status_code=status.HTTP_400_BAD_REQUEST,
+        content={"detail": str(exc)},
     )
-    return PagamentoResponse.from_domain(recibo)
+
+
+app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"])
+
+# Endpoint de verificação de saúde da API
+@app.get("/saude", status_code=status.HTTP_200_OK)
+def verificar_saude():
+    return {"status": "operacional"}
+
 
 app.include_router(pagamentos_router)

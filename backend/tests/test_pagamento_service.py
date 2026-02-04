@@ -1,4 +1,4 @@
-from backend.services.pagamento_service import PagamentoService
+from services.pagamento_service import PagamentoService
 
 
 def test_servico_utiliza_taxas_injetadas():

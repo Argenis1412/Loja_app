@@ -1,17 +1,17 @@
-import type { CriarPagamentoRequest } from '../types/api'
+import type { CriarPagamentoRequest } from '../types/api';
 
 function metodoParaOpcao(metodo: CriarPagamentoRequest['metodo']) {
   switch (metodo) {
     case 'avista':
-      return 1
+      return 1;
     case 'debito':
-      return 2
+      return 2;
     case 'parcelado_sem_juros':
-      return 3
+      return 3;
     case 'cartao_com_juros':
-      return 4
+      return 4;
     default:
-      return 1
+      return 1;
   }
 }
 
@@ -20,9 +20,9 @@ export async function criarPagamento(dados: CriarPagamentoRequest) {
     opcao: metodoParaOpcao(dados.metodo),
     valor: dados.valor,
     parcelas: dados.parcelas ?? 1,
-  }
+  };
   // Debug log do payload antes de enviar a requisição
-  console.log('criarPagamento payload:', payload)
+  console.log('criarPagamento payload:', payload);
 
   const response = await fetch('http://127.0.0.1:8000/pagamentos/', {
     method: 'POST',
@@ -30,35 +30,35 @@ export async function criarPagamento(dados: CriarPagamentoRequest) {
       'Content-Type': 'application/json',
     },
     body: JSON.stringify(payload),
-  })
+  });
 
-  const bodyText = await response.text()
+  const bodyText = await response.text();
 
   if (!response.ok) {
-    console.error('criarPagamento error:', response.status, bodyText)
-    let parsed = bodyText
+    console.error('criarPagamento error:', response.status, bodyText);
+    let parsed = bodyText;
     try {
-      parsed = JSON.parse(bodyText)
+      parsed = JSON.parse(bodyText);
     } catch {
       // manter bodyText como está
     }
     throw new Error(
       `Erro ao processar pagamento (${response.status}): ${JSON.stringify(parsed)}`,
-    )
+    );
   }
 
   try {
-    return JSON.parse(bodyText)
+    return JSON.parse(bodyText);
   } catch {
-    return bodyText
+    return bodyText;
   }
 }
 
 export async function listarPagamentos() {
-  const response = await fetch('http://127.0.0.1:8000/pagamentos/')
+  const response = await fetch('http://127.0.0.1:8000/pagamentos/');
 
   if (!response.ok) {
-    throw new Error('Erro ao buscar pagamentos')
+    throw new Error('Erro ao buscar pagamentos');
   }
-  return response.json()
+  return response.json();
 }

@@ -1,10 +1,15 @@
 from datetime import datetime
+
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from backend.domain.recibo import Recibo
-from backend.infrastructure.database import Base
-from backend.infrastructure.db.models import ReciboModel
-from backend.infrastructure.repositories.postgres_recibo_repository import PostgresReciboRepository
+
+from domain.recibo import Recibo
+from infrastructure.database import Base
+from infrastructure.db.models import ReciboModel
+from infrastructure.repositories.postgres_recibo_repository import (
+    PostgresReciboRepository,
+)
+
 
 # Teste unitário para PostgresReciboRepository
 def test_postgres_repository_salvar_com_sqlite():

@@ -1,5 +1,7 @@
 from abc import ABC, abstractmethod
-from backend.domain.recibo import Recibo
+
+from domain.recibo import Recibo
+
 
 class ReciboRepository(ABC):
     @abstractmethod

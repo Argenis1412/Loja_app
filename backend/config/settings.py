@@ -1,7 +1,5 @@
-from pydantic_settings import BaseSettings
-
-
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
 
 class Settings(BaseSettings):
     DB_USER: str = "loja_user"
@@ -13,12 +11,14 @@ class Settings(BaseSettings):
 
     @property
     def database_url(self) -> str:
+        # Se a DATABASE_URL for definida no ambiente, use-a (permite usar Postgres em produção)
         if self.DATABASE_URL:
             return self.DATABASE_URL
-        return (
-            f"postgresql+psycopg://{self.DB_USER}:{self.DB_PASSWORD}@{self.DB_HOST}:{self.DB_PORT}/{self.DB_NAME}"
-        )
+        return f"postgresql+psycopg://{self.DB_USER}:{self.DB_PASSWORD}@{self.DB_HOST}:{self.DB_PORT}/{self.DB_NAME}"
 
-    model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="allow")
+    model_config = SettingsConfigDict(
+        env_file=".env", env_file_encoding="utf-8", extra="allow"
+    )
+
 
 settings = Settings()

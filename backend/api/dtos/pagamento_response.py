@@ -3,7 +3,7 @@ from typing import Optional
 
 from pydantic import BaseModel, ConfigDict
 
-from backend.domain.recibo import Recibo
+from domain.recibo import Recibo
 
 
 class PagamentoResponse(BaseModel):
@@ -29,9 +29,11 @@ class PagamentoResponse(BaseModel):
             informacoes_adicionais=getattr(recibo, "informacoes_adicionais", None),
             taxa=getattr(recibo, "taxa", 0.0),
             tipo_taxa=getattr(recibo, "tipo_taxa", None),
-            created_at=getattr(recibo, "data_hora", getattr(recibo, "created_at", None)),
+            created_at=getattr(
+                recibo, "data_hora", getattr(recibo, "created_at", None)
+            ),
         )
-        
+
         return cls(**d)
 
     model_config = ConfigDict(from_attributes=True)

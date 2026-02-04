@@ -1,6 +1,8 @@
 import pytest
-from backend.domain.calculadora import Calculadora
-from backend.domain.exceptions import RegraPagamentoInvalida
+
+from domain.calculadora import Calculadora
+from domain.exceptions import RegraPagamentoInvalida
+
 
 class TestCalculadora:
     def setup_method(self):
@@ -9,7 +11,7 @@ class TestCalculadora:
     def test_valor_invalido_deve_lancar_excecao(self):
         with pytest.raises(RegraPagamentoInvalida, match="Valor inválido"):
             self.calculadora.calcular(opcao=1, valor=0, parcelas=1)
-        
+
         with pytest.raises(RegraPagamentoInvalida, match="Valor inválido"):
             self.calculadora.calcular(opcao=1, valor=-10, parcelas=1)
 
@@ -20,7 +22,7 @@ class TestCalculadora:
     def test_pagamento_a_vista_deve_aplicar_desconto(self):
         # Opção 1: À vista com 10% de desconto (padrão)
         recibo = self.calculadora.calcular(opcao=1, valor=100.0, parcelas=1)
-        
+
         assert recibo.total == 90.0
         assert recibo.parcelas == 1
         assert recibo.metodo == "À vista"
@@ -29,7 +31,7 @@ class TestCalculadora:
     def test_pagamento_debito_deve_aplicar_desconto_fixo(self):
         # Opção 2: Débito com 5% de desconto fixo
         recibo = self.calculadora.calcular(opcao=2, valor=100.0, parcelas=1)
-        
+
         assert recibo.total == 95.0
         assert recibo.parcelas == 1
         assert recibo.metodo == "Débito à vista"
@@ -45,7 +47,7 @@ class TestCalculadora:
         # Testar limites
         with pytest.raises(RegraPagamentoInvalida):
             self.calculadora.calcular(opcao=3, valor=100, parcelas=1)
-        
+
         with pytest.raises(RegraPagamentoInvalida):
             self.calculadora.calcular(opcao=3, valor=100, parcelas=7)
 
@@ -53,12 +55,9 @@ class TestCalculadora:
         # Opção 4: Juros simples de 10% (padrão)
         # Valor 100 + 10% = 110
         recibo = self.calculadora.calcular(
-            opcao=4, 
-            valor=100.0, 
-            parcelas=10,
-            juros_parcelamento=10.0
+            opcao=4, valor=100.0, parcelas=10, juros_parcelamento=10.0
         )
-        
+
         assert recibo.total == 110.0
         assert recibo.valor_parcela == 11.0  # 110 / 10
         assert recibo.metodo == "Cartão com juros"

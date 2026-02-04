@@ -1,9 +1,5 @@
 def test_criar_pagamento_com_juros(client):
-    payload = {
-        "opcao": 4,
-        "valor": 440,
-        "parcelas": 12
-    }
+    payload = {"opcao": 4, "valor": 440, "parcelas": 12}
 
     response = client.post("/pagamentos/", json=payload)
 

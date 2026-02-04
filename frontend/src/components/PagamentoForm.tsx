@@ -1,22 +1,26 @@
-import { useState, type FormEvent } from 'react'
+import { useState, type FormEvent } from 'react';
 
-export type MetodoPagamento = 'avista' | 'debito' | 'parcelado_sem_juros' | 'cartao_com_juros'
+export type MetodoPagamento =
+  | 'avista'
+  | 'debito'
+  | 'parcelado_sem_juros'
+  | 'cartao_com_juros';
 
 interface PagamentoFormProps {
   onSubmit?: (dados: {
-    valor: number
-    metodo: MetodoPagamento
-    parcelas: number
-  }) => void
+    valor: number;
+    metodo: MetodoPagamento;
+    parcelas: number;
+  }) => void;
   onContinuar?: (dados: {
-    valor: number
-    metodo: MetodoPagamento
-    parcelas: number
-  }) => void
+    valor: number;
+    metodo: MetodoPagamento;
+    parcelas: number;
+  }) => void;
   limitesParcelas?: Record<
     Exclude<MetodoPagamento, 'avista' | 'debito'>,
     { min: number; max: number }
-  >
+  >;
 }
 
 const DEFAULT_LIMITES_PARCELAS: Record<
@@ -25,7 +29,7 @@ const DEFAULT_LIMITES_PARCELAS: Record<
 > = {
   parcelado_sem_juros: { min: 2, max: 6 },
   cartao_com_juros: { min: 2, max: 12 },
-}
+};
 
 // eslint-disable-next-line react-refresh/only-export-components
 export function converterMetodoParaOpcao(metodo: MetodoPagamento): number {
@@ -34,53 +38,63 @@ export function converterMetodoParaOpcao(metodo: MetodoPagamento): number {
     debito: 2,
     parcelado_sem_juros: 3,
     cartao_com_juros: 4,
-  }
-  return mapa[metodo]
+  };
+  return mapa[metodo];
 }
 
-export function PagamentoForm({ onSubmit, onContinuar, limitesParcelas = DEFAULT_LIMITES_PARCELAS }: PagamentoFormProps) {
-  const [valor, setValor] = useState<number | ''>('')
-  const [metodo, setMetodo] = useState<MetodoPagamento>('avista')
-  const [parcelas, setParcelas] = useState<number>(2)
+export function PagamentoForm({
+  onSubmit,
+  onContinuar,
+  limitesParcelas = DEFAULT_LIMITES_PARCELAS,
+}: PagamentoFormProps) {
+  const [valor, setValor] = useState<number | ''>('');
+  const [metodo, setMetodo] = useState<MetodoPagamento>('avista');
+  const [parcelas, setParcelas] = useState<number>(2);
 
   function handleSubmit(e: FormEvent) {
-    e.preventDefault()
+    e.preventDefault();
 
     if (!valor || valor <= 0) {
-      alert('Informe um valor válido')
-      return
+      alert('Informe um valor válido');
+      return;
     }
 
     if (metodo !== 'avista' && metodo !== 'debito') {
-      const { min, max } = limitesParcelas[metodo as Exclude<MetodoPagamento, 'avista' | 'debito'>]
+      const { min, max } =
+        limitesParcelas[
+          metodo as Exclude<MetodoPagamento, 'avista' | 'debito'>
+        ];
       if (parcelas < min || parcelas > max) {
-        alert('Número de parcelas inválido')
-        return
+        alert('Número de parcelas inválido');
+        return;
       }
     }
 
-    const parcelasEnvio = metodo === 'avista' || metodo === 'debito' ? 1 : parcelas
+    const parcelasEnvio =
+      metodo === 'avista' || metodo === 'debito' ? 1 : parcelas;
 
     onSubmit?.({
       valor,
       metodo,
       parcelas: parcelasEnvio,
-    })
+    });
 
     onContinuar?.({
       valor,
       metodo,
       parcelas: parcelasEnvio,
-    })
+    });
   }
 
-  const showParcelas = metodo !== 'avista' && metodo !== 'debito'
+  const showParcelas = metodo !== 'avista' && metodo !== 'debito';
   const limitesAtuais = showParcelas
-    ? (limitesParcelas[metodo as Exclude<MetodoPagamento, 'avista' | 'debito'>] as {
-        min: number
-        max: number
+    ? (limitesParcelas[
+        metodo as Exclude<MetodoPagamento, 'avista' | 'debito'>
+      ] as {
+        min: number;
+        max: number;
       })
-    : null
+    : null;
 
   return (
     <form
@@ -107,7 +121,10 @@ export function PagamentoForm({ onSubmit, onContinuar, limitesParcelas = DEFAULT
 
       {/* Valor */}
       <div>
-        <label htmlFor="valor" className="block text-sm text-zinc-700 dark:text-zinc-300">
+        <label
+          htmlFor="valor"
+          className="block text-sm text-zinc-700 dark:text-zinc-300"
+        >
           Valor da compra
         </label>
         <input
@@ -119,10 +136,12 @@ export function PagamentoForm({ onSubmit, onContinuar, limitesParcelas = DEFAULT
           value={valor || ''}
           onKeyDown={(e) => {
             if (['e', 'E', '+', '-'].includes(e.key)) {
-              e.preventDefault()
+              e.preventDefault();
             }
           }}
-          onChange={e => setValor(e.target.value === '' ? '' : Number(e.target.value))}
+          onChange={(e) =>
+            setValor(e.target.value === '' ? '' : Number(e.target.value))
+          }
           className="w-full rounded-lg border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100"
         />
       </div>
@@ -175,7 +194,9 @@ export function PagamentoForm({ onSubmit, onContinuar, limitesParcelas = DEFAULT
               onChange={() => setMetodo('cartao_com_juros')}
             />
             <span className="font-medium">Cartão com juros</span>
-            <span className="text-xs text-red-500 ml-2">10% de juros · até 12x</span>
+            <span className="text-xs text-red-500 ml-2">
+              10% de juros · até 12x
+            </span>
           </label>
         </div>
       </div>
@@ -183,13 +204,16 @@ export function PagamentoForm({ onSubmit, onContinuar, limitesParcelas = DEFAULT
       {/* Parcelas */}
       {showParcelas && (
         <div>
-          <label htmlFor="parcelas" className="block text-sm text-zinc-700 dark:text-zinc-300">
+          <label
+            htmlFor="parcelas"
+            className="block text-sm text-zinc-700 dark:text-zinc-300"
+          >
             Parcelas
           </label>
           <select
             id="parcelas"
             value={parcelas}
-            onChange={e => setParcelas(Number(e.target.value))}
+            onChange={(e) => setParcelas(Number(e.target.value))}
             className="w-full rounded-lg border p-2 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100"
           >
             {Array.from(
@@ -197,13 +221,13 @@ export function PagamentoForm({ onSubmit, onContinuar, limitesParcelas = DEFAULT
                 length: limitesAtuais!.max - limitesAtuais!.min + 1,
               },
               (_, i) => {
-                const valorParcela = limitesAtuais!.min + i
+                const valorParcela = limitesAtuais!.min + i;
                 return (
                   <option key={valorParcela} value={valorParcela}>
                     {valorParcela}x
                   </option>
-                )
-              }
+                );
+              },
             )}
           </select>
 
@@ -220,5 +244,5 @@ export function PagamentoForm({ onSubmit, onContinuar, limitesParcelas = DEFAULT
         Continuar →
       </button>
     </form>
-  )
+  );
 }

@@ -1,8 +1,8 @@
-import type { Pagamento } from '../types/api'
+import type { Pagamento } from '../types/api';
 
 interface ReciboProps {
-  pagamento: Pagamento
-  onNovoPagamento?: () => void
+  pagamento: Pagamento;
+  onNovoPagamento?: () => void;
 }
 
 export function Recibo({ pagamento, onNovoPagamento }: ReciboProps) {
@@ -13,7 +13,7 @@ export function Recibo({ pagamento, onNovoPagamento }: ReciboProps) {
     year: 'numeric',
     hour: '2-digit',
     minute: '2-digit',
-  })
+  });
 
   return (
     <div className="mx-auto max-w-md space-y-6 rounded-lg bg-white p-6 shadow dark:bg-zinc-900 animate-fade-in">
@@ -55,7 +55,7 @@ export function Recibo({ pagamento, onNovoPagamento }: ReciboProps) {
             {dataFormatada}
           </span>
         </div>
-        
+
         <div className="my-2 border-t border-zinc-200 dark:border-zinc-700"></div>
 
         <div className="flex justify-between text-base font-bold">
@@ -97,5 +97,5 @@ export function Recibo({ pagamento, onNovoPagamento }: ReciboProps) {
         </button>
       )}
     </div>
-  )
+  );
 }

@@ -1,6 +1,6 @@
-from backend.domain.calculadora import Calculadora
-from backend.domain.recibo import Recibo
-from backend.domain.recibo_repository import ReciboRepository
+from domain.calculadora import Calculadora
+from domain.recibo import Recibo
+from domain.recibo_repository import ReciboRepository
 
 
 def _enrich_with_flags(recibo: Recibo, taxas: dict) -> Recibo:
@@ -21,6 +21,7 @@ def _enrich_with_flags(recibo: Recibo, taxas: dict) -> Recibo:
         recibo.taxa = 5.0
         recibo.tipo_taxa = "desconto_debito"
     return recibo
+
 
 class ProcessarPagamentoUseCase:
     def __init__(
@@ -67,7 +68,7 @@ class ListarPagamentosUseCase:
     def execute(self):
         if not self.repository:
             return []
-            
+
         recibos = (
             self.repository.listar_todos()
             if hasattr(self.repository, "listar_todos")
@@ -86,6 +87,7 @@ class PagamentoService:
     Fachada que orquestra os casos de uso.
     Mantém a compatibilidade com o resto do sistema (deps.py, main.py).
     """
+
     def __init__(
         self,
         repository: ReciboRepository | None = None,
@@ -96,14 +98,12 @@ class PagamentoService:
         # Injeção de dependências com valores padrão (padrão Composition Root)
         self.calculadora = calculadora or Calculadora()
         self.taxas = taxas or {"desconto_vista": 10.0, "juros_parcelamento": 10.0}
-        
+
         # Inicializar Casos de Uso
         self.processar_pagamento_uc = ProcessarPagamentoUseCase(
             self.calculadora, self.repository, self.taxas
         )
-        self.listar_pagamentos_uc = ListarPagamentosUseCase(
-            self.repository, self.taxas
-        )
+        self.listar_pagamentos_uc = ListarPagamentosUseCase(self.repository, self.taxas)
 
     def criar_pagamento(
         self,

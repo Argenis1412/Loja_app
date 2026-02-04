@@ -1,18 +1,18 @@
-import type { CriarPagamentoRequest } from '../types/api'
+import type { CriarPagamentoRequest } from '../types/api';
 
 export interface PagamentoSimulacao {
-  total: number
-  valor_parcela: number
-  taxa: number
-  tipo_taxa: string
+  total: number;
+  valor_parcela: number;
+  taxa: number;
+  tipo_taxa: string;
 }
 
 interface ConfirmacaoPagamentoProps {
-  dados: CriarPagamentoRequest
-  simulacao?: PagamentoSimulacao
-  onConfirmar: () => void
-  onVoltar: () => void
-  loading?: boolean
+  dados: CriarPagamentoRequest;
+  simulacao?: PagamentoSimulacao;
+  onConfirmar: () => void;
+  onVoltar: () => void;
+  loading?: boolean;
 }
 
 export function ConfirmacaoPagamento({
@@ -22,58 +22,61 @@ export function ConfirmacaoPagamento({
   onVoltar,
   loading,
 }: ConfirmacaoPagamentoProps) {
-
-  const parcelas = dados.parcelas ?? 1
+  const parcelas = dados.parcelas ?? 1;
 
   // Fallback de taxas para exibição imediata (caso a simulação ainda não tenha carregado)
   const taxasPadrao = {
     descontoVista: 10,
     jurosParcelamento: 10,
     descontoDebito: 5,
-  }
+  };
 
   // Usar valores simulados se existirem, ou fallback para cálculo local
   // Corrigimos o total usando o valor da parcela para garantir que o desconto/juros esteja aplicado
-  let totalPreview = simulacao ? simulacao.valor_parcela * parcelas : undefined
-  let valorParcelaPreview = simulacao?.valor_parcela
-  let informacaoPreview: string | null = null
+  let totalPreview = simulacao ? simulacao.valor_parcela * parcelas : undefined;
+  let valorParcelaPreview = simulacao?.valor_parcela;
+  let informacaoPreview: string | null = null;
 
   if (totalPreview === undefined) {
     if (dados.metodo === 'avista') {
-      totalPreview = dados.valor * (1 - taxasPadrao.descontoVista / 100)
+      totalPreview = dados.valor * (1 - taxasPadrao.descontoVista / 100);
     } else if (dados.metodo === 'debito') {
-      totalPreview = dados.valor * (1 - taxasPadrao.descontoDebito / 100)
+      totalPreview = dados.valor * (1 - taxasPadrao.descontoDebito / 100);
     } else if (dados.metodo === 'cartao_com_juros') {
-      totalPreview = dados.valor * (1 + taxasPadrao.jurosParcelamento / 100)
+      totalPreview = dados.valor * (1 + taxasPadrao.jurosParcelamento / 100);
     } else {
-      totalPreview = dados.valor
+      totalPreview = dados.valor;
     }
   }
   if (valorParcelaPreview === undefined) {
-    valorParcelaPreview = totalPreview / parcelas
+    valorParcelaPreview = totalPreview / parcelas;
   }
 
   if (simulacao) {
     switch (simulacao.tipo_taxa) {
       case 'desconto_vista':
-        informacaoPreview = `${simulacao.taxa}% de desconto à vista`
-        break
+        informacaoPreview = `${simulacao.taxa}% de desconto à vista`;
+        break;
       case 'juros_cartao':
-        informacaoPreview = `${simulacao.taxa}% de juros`
-        break
+        informacaoPreview = `${simulacao.taxa}% de juros`;
+        break;
       case 'sem_juros':
-        informacaoPreview = `Parcelado em ${parcelas}x sem juros`
-        break
+        informacaoPreview = `Parcelado em ${parcelas}x sem juros`;
+        break;
       case 'desconto_debito':
-        informacaoPreview = `${simulacao.taxa}% de desconto no débito`
-        break
+        informacaoPreview = `${simulacao.taxa}% de desconto no débito`;
+        break;
     }
   } else {
     // Fallback de texto
-    if (dados.metodo === 'avista') informacaoPreview = `${taxasPadrao.descontoVista}% de desconto à vista`
-    if (dados.metodo === 'debito') informacaoPreview = `${taxasPadrao.descontoDebito}% de desconto no débito`
-    if (dados.metodo === 'cartao_com_juros') informacaoPreview = `${taxasPadrao.jurosParcelamento}% de juros`
-    if (dados.metodo === 'parcelado_sem_juros') informacaoPreview = `Parcelado em ${parcelas}x sem juros`
+    if (dados.metodo === 'avista')
+      informacaoPreview = `${taxasPadrao.descontoVista}% de desconto à vista`;
+    if (dados.metodo === 'debito')
+      informacaoPreview = `${taxasPadrao.descontoDebito}% de desconto no débito`;
+    if (dados.metodo === 'cartao_com_juros')
+      informacaoPreview = `${taxasPadrao.jurosParcelamento}% de juros`;
+    if (dados.metodo === 'parcelado_sem_juros')
+      informacaoPreview = `Parcelado em ${parcelas}x sem juros`;
   }
   return (
     <div className="mx-auto max-w-md space-y-6 rounded-lg bg-white p-6 shadow dark:bg-zinc-900">
@@ -87,8 +90,12 @@ export function ConfirmacaoPagamento({
       </header>
 
       <div className="mb-4 rounded-xl border p-4 bg-zinc-50 dark:bg-zinc-900">
-        <h3 className="font-semibold text-zinc-700 dark:text-zinc-200">Compra simulada</h3>
-        <p className="text-sm text-zinc-500">Resumo rápido do pedido para validação</p>
+        <h3 className="font-semibold text-zinc-700 dark:text-zinc-200">
+          Compra simulada
+        </h3>
+        <p className="text-sm text-zinc-500">
+          Resumo rápido do pedido para validação
+        </p>
       </div>
 
       <div className="space-y-2 text-sm text-zinc-700 dark:text-zinc-300">
@@ -103,14 +110,20 @@ export function ConfirmacaoPagamento({
         </div>
 
         <div className="flex justify-between">
-          <span className="font-bold text-zinc-900 dark:text-zinc-100">Total a pagar</span>
-          <span className="font-bold text-zinc-900 dark:text-zinc-100">R$ {totalPreview.toFixed(2)}</span>
+          <span className="font-bold text-zinc-900 dark:text-zinc-100">
+            Total a pagar
+          </span>
+          <span className="font-bold text-zinc-900 dark:text-zinc-100">
+            R$ {totalPreview.toFixed(2)}
+          </span>
         </div>
 
         {parcelas > 1 && (
           <div className="flex justify-between">
             <span className="font-medium">Parcelas</span>
-            <span>{parcelas}x • R$ {valorParcelaPreview.toFixed(2)}</span>
+            <span>
+              {parcelas}x • R$ {valorParcelaPreview.toFixed(2)}
+            </span>
           </div>
         )}
 
@@ -136,20 +149,20 @@ export function ConfirmacaoPagamento({
         </button>
       </div>
     </div>
-  )
+  );
 }
 
 function formatarMetodo(metodo: string) {
   switch (metodo) {
     case 'avista':
-      return 'À vista (dinheiro)'
+      return 'À vista (dinheiro)';
     case 'debito':
-      return 'À vista (débito)'
+      return 'À vista (débito)';
     case 'parcelado_sem_juros':
-      return 'Parcelado sem juros'
+      return 'Parcelado sem juros';
     case 'cartao_com_juros':
-      return 'Cartão com juros'
+      return 'Cartão com juros';
     default:
-      return metodo
+      return metodo;
   }
 }

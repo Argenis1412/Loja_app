@@ -1,5 +1,5 @@
-from backend.domain.exceptions import RegraPagamentoInvalida
-from backend.domain.recibo import Recibo
+from domain.exceptions import RegraPagamentoInvalida
+from domain.recibo import Recibo
 
 
 class Calculadora:
@@ -59,6 +59,7 @@ class Calculadora:
         # Armazena valor original para uso na API
         recibo._original_valor = valor
         return recibo
+
 
 # Alias para compatibilidade com código antigo/testes
 CalculadoraPagamentos = Calculadora

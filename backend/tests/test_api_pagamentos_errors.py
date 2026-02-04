@@ -1,9 +1,5 @@
 def test_opcao_3_parcelas_invalidas(client):
-    payload = {
-        "opcao": 3,
-        "valor": 100,
-        "parcelas": 10
-    }
+    payload = {"opcao": 3, "valor": 100, "parcelas": 10}
 
     response = client.post("/pagamentos/", json=payload)
 

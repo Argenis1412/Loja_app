@@ -1,12 +1,13 @@
 from __future__ import annotations
 
-
 import sys
 from logging.config import fileConfig
 from pathlib import Path
+
 from sqlalchemy import create_engine, pool
+
 from alembic import context
-from backend.config.settings import settings
+from config.settings import settings
 
 # --------------------------------------------------
 # Path fix (required)

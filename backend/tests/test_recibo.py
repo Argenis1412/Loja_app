@@ -1,6 +1,6 @@
 import pytest
 
-from backend.domain.recibo import Recibo
+from domain.recibo import Recibo
 
 
 @pytest.mark.parametrize(
