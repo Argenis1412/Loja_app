@@ -29,5 +29,4 @@ app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"])
 def verificar_saude():
     return {"status": "operacional"}
 
-
 app.include_router(pagamentos_router)
