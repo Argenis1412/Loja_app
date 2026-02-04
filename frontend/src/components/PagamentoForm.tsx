@@ -27,6 +27,7 @@ const DEFAULT_LIMITES_PARCELAS: Record<
   cartao_com_juros: { min: 2, max: 12 },
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function converterMetodoParaOpcao(metodo: MetodoPagamento): number {
   const mapa: Record<MetodoPagamento, number> = {
     avista: 1,

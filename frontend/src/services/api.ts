@@ -39,7 +39,7 @@ export async function criarPagamento(dados: CriarPagamentoRequest) {
     let parsed = bodyText
     try {
       parsed = JSON.parse(bodyText)
-    } catch (_e) {
+    } catch {
       // manter bodyText como está
     }
     throw new Error(
@@ -49,7 +49,7 @@ export async function criarPagamento(dados: CriarPagamentoRequest) {
 
   try {
     return JSON.parse(bodyText)
-  } catch (_e) {
+  } catch {
     return bodyText
   }
 }
