@@ -1,7 +1,6 @@
 from domain.exceptions import RegraPagamentoInvalida
 from domain.recibo import Recibo
 
-
 class Calculadora:
     def calcular(
         self,

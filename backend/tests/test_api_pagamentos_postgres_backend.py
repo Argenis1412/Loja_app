@@ -12,7 +12,6 @@ from infrastructure.db.models.recibo_models import (  # ensure model is imported
     ReciboModel,
 )
 
-
 def test_deve_persistir_e_recuperar_lista_de_pagamentos_usando_repositorio_postgres():
     # Força o backend como 'postgres' para o fluxo de seleção
     os.environ["STORAGE_BACKEND"] = "postgres"
