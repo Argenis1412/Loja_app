@@ -77,10 +77,17 @@ The system simulates multiple payment modes with **explicit, testable rules**:
 
 | Payment Mode | Condition | Applied Rule |
 |---------------------|---------------------|---------------------|
-| Cash (upfront) | Immediate payment | **10% discount** |
+| Cash (immediate payment) | Immediate payment | **10% discount** |
 | Debit card | Immediate payment | **5% discount** |
 | Short installments | 2x to 6x | **0% interest** |
 | Long installments | 2x to 12x | **Fixed 10% increase** |
+
+### Rule Interpretation
+
+Installment categories are conceptual and may overlap.
+The actual business logic evaluates numeric ranges and applies explicit rule precedence defined in the domain layer.
+This overlap is intentional and used as a learning exercise in domain rule resolution.
+
 
 ### ⚠️ Important Constraints
 
@@ -171,6 +178,7 @@ Full setup details and migration instructions are in the **backend README**.
 - ✅ The **frontend does not know business rules** — it only displays and collects data
 - ✅ The **backend does not depend on the frontend** — it's API-first
 - ✅ The **domain layer is pure** — no framework dependencies
+- ✅ **Infrastructure depends on the domain, never the opposite**
 
 ---
 
@@ -193,6 +201,8 @@ These topics are acknowledged but excluded to preserve **focus and learning dept
 | Area | Status |
 |-------------------------------|-----------------|
 | Backend (rules + API) | ✅ Stable |
+| Domain Layer | ✅ Fully unit-tested |
+| API Contract | ✅ Stable |
 | Persistence (Postgres + Alembic) | ✅ Stable |
 | Automated tests | ✅ Stable |
 | Frontend (React flow) | ✅ Functional |

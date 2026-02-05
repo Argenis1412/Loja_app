@@ -1,278 +1,351 @@
-# 🛍️ Loja App — Backend (Payments API)
+# Loja App — Backend (Payments API)
 
-![CI](https://github.com/argenis972/Loja_app/actions/workflows/tests.yml/badge.svg)
+![CI](https://github.com/argenis972/Loja_app/actions/workflows/backend-ci.yml/badge.svg)
 ![Python](https://img.shields.io/badge/Python-3.11+-blue?style=flat&logo=python&logoColor=white)
-![FastAPI](https://img.shields.io/badge/FastAPI-API%20REST-009688?style=flat&logo=fastapi&logoColor=white)
+![FastAPI](https://img.shields.io/badge/FastAPI-009688?style=flat&logo=fastapi&logoColor=white)
 ![Pytest](https://img.shields.io/badge/Pytest-Automated%20Tests-brightgreen?style=flat)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-DB-336791?style=flat&logo=postgresql&logoColor=white)
 ![License](https://img.shields.io/badge/License-MIT-green)
 
-> **Scope note:** This is a learning / lab project focused on backend architecture, financial logic, and testing.
+This is the backend component of Loja App, a learning laboratory focused on backend architecture, payment logic, and testing.
 
-## 🧠 Architecture & Purpose
+---
 
-This backend is an API-first payment system built as a learning laboratory. Its goal is not to maximize features but to maximize clarity, correctness, and architectural reasoning.
+## Architecture and Purpose
+
+This backend is an API-first payment system built as a learning laboratory. The goal is to maximize clarity, correctness, and architectural reasoning.
 
 The backend is responsible for:
 
 - Enforcing all business rules
 - Validating user input and edge cases
 - Calculating payment totals and installments
-- Persisting transactions reliably
-- Exposing a clean, documented REST API
-- Being testable, explainable, and evolvable
+- Persisting transactions
+- Exposing a documented REST API
 
+The domain layer contains no framework dependencies and can be executed in isolation.
+Application services orchestrate use cases without embedding business rules.
 The frontend is treated as a consumer, never as a source of truth.
-
-<!-- Author and License are declared in the repository root README -->
-
-Each layer has one responsibility and no shortcuts.
 
 ---
 
-## 🧮 Domain & Business Rules
+## Domain and Business Rules
 
-All payment rules live exclusively in the domain layer. They are framework-agnostic, deterministic, and unit-tested.
+All payment rules live exclusively in the `Calculadora` class (`domain/calculadora.py`). They are framework-agnostic and unit-tested.
 
-### Supported Payment Modes
+### Payment Options
 
-| Mode         | Condition           | Rule Applied      |
-|--------------|---------------------|-------------------|
-| Cash (upfront)   | Immediate payment    | 10% discount      |
-| Debit card (upfront) | Immediate payment    | 5% discount       |
-| Short installments  | 2x – 6x              | No interest       |
-| Card with interest  | 2x – 12x             | Fixed 10% increase|
-
-> **Note:** "Debit card" and "credit card" are treated as distinct options. "Card" is never ambiguous in the API contract. This distinction avoids implicit assumptions common in simplified payment examples.
+| opcao | Mode | Condition | Rule Applied |
+|:-----:|------|-----------|--------------|
+| 1 | Cash (A vista) | Immediate payment | 10% discount (configurable via `desconto_vista`) |
+| 2 | Debit card (Debito a vista) | Immediate payment | 5% discount (fixed) |
+| 3 | Installments without interest (Parcelado sem juros) | 2 to 6 installments | No interest |
+| 4 | Card with interest (Cartao com juros) | 2 to 12 installments | 10% increase (configurable via `juros_parcelamento`) |
 
 ### Validation Rules
 
-- Installments > 12 are invalid (for any method)
-- Invalid business inputs raise domain exceptions (not HTTP errors)
-- No rule is duplicated outside the domain
-
-This guarantees consistency across API, tests, and future interfaces.
+| Condition | Exception Raised |
+|-----------|------------------|
+| `valor <= 0` | Domain exceptions (derived from `DomainError`) or validation errors raised by domain entities. |
+| `opcao` not in [1, 2, 3, 4] | Domain exceptions (derived from `DomainError`) or validation errors raised by domain entities. |
+| `opcao=3` with `parcelas < 2` or `parcelas > 6` | Domain exceptions (derived from `DomainError`) or validation errors raised by domain entities. |
+| `opcao=4` with `parcelas < 2` or `parcelas > 12` | Domain exceptions (derived from `DomainError`) or validation errors raised by domain entities. |
 
 ---
 
-## 🌐 API Layer (FastAPI)
+## Domain Exceptions
 
-The API layer is intentionally thin. Responsibilities:
+Defined in `domain/exceptions.py`:
 
-- Parse and validate HTTP requests
-- Map DTOs to domain inputs
-- Translate domain errors into HTTP responses
-- Return clean, explicit responses
+| Exception | Description |
+|-----------|-------------|
+| `DomainError` | Base class for all domain errors |
+| `OpcaoInvalidaError` | Invalid payment option |
+| `ValorInvalidoError` | Invalid value or installments |
+| `RegraPagamentoInvalida` | Invalid payment rule (used by Calculadora) |
 
-### Why FastAPI?
+The `Calculadora` class uses domain exceptions for all validation errors.
 
-- Native async support
-- Excellent request validation
-- Automatic OpenAPI / Swagger docs
-- Minimal boilerplate
+---
 
-### Example Endpoint
+## API Layer
 
-**POST /pagamentos/**
+### Endpoints
 
-Request:
-```json
-{
-  "opcao": 3,
-  "valor": 100.00,
-  "parcelas": 6
-}
+Defined in `api/main.py` and `api/pagamentos_api.py`:
+
+| Method | Path | Description | Status Code |
+|--------|------|-------------|-------------|
+| POST | `/pagamentos/` | Create and persist a payment | 201 |
+| POST | `/pagamentos/simular` | Simulate payment without persistence | 200 |
+| GET | `/pagamentos/` | List all persisted payments | 200 |
+| GET | `/saude` | Health check | 200 |
+
+### Request DTO
+
+`PagamentoRequest` (from `api/dtos/pagamento_request.py`):
+
+| Field | Type | Required |
+|-------|------|----------|
+| `opcao` | int | Yes |
+| `valor` | float | Yes |
+| `parcelas` | int or None | No (defaults to 1 if None) |
+
+### Response DTO
+
+`PagamentoResponse` (from `api/dtos/pagamento_response.py`):
+
+| Field | Type |
+|-------|------|
+| `id` | int or None |
+| `metodo` | str |
+| `total` | float |
+| `parcelas` | int |
+| `valor_parcela` | float |
+| `informacoes_adicionais` | str or None |
+| `taxa` | float (default 0.0) |
+| `tipo_taxa` | str or None |
+| `created_at` | datetime or None |
+
+### Error Handling
+
+`DomainError` exceptions are caught by a global handler in `api/main.py` and return HTTP 400:
+
+```python
+@app.exception_handler(DomainError)
+async def domain_exception_handler(request: Request, exc: Exception):
+    return JSONResponse(
+        status_code=status.HTTP_400_BAD_REQUEST,
+        content={"detail": str(exc)},
+    )
 ```
 
-Response:
-```json
-{
-  "total": 100.00,
-  "valor_parcela": 16.67,
-  "parcelas": 6,
-  "taxas": "0% (Sem juros)",
-  "status": "aprovado"
-}
-```
+---
 
-### `opcao` mapping
+## Service Layer
 
-The API accepts an internal `opcao` integer that identifies the payment mode. The frontend maps user-friendly payment methods to these IDs.
+Defined in `services/pagamento_service.py`:
 
-| `opcao` | Meaning |
-|--------:|---------|
-| 1 | À vista (cash) — 10% discount |
-| 2 | Débito (debit card) — 5% discount |
-| 3 | Parcelado sem juros (short installments, 2–6x) — no interest |
-| 4 | Cartão com juros (installments, 2–12x) — fixed increase |
+### Classes
 
-> **Note:** "Debit card" (opcao 2) is not "credit card". Credit and debit are always separated in the contract.
+| Class | Description |
+|-------|-------------|
+| `ProcessarPagamentoUseCase` | Calculates payment and optionally persists via repository |
+| `ListarPagamentosUseCase` | Lists all payments from repository |
+| `PagamentoService` | Facade that orchestrates use cases |
 
-### Notes
+### PagamentoService
 
-- `opcao` is an internal domain mapping (payment option identifier), not a user-facing concept. The UI translates user selections into the appropriate `opcao` value before calling the API.
-- API contract: The API contract is intentionally explicit and treated as stable. Breaking changes are considered architectural decisions and should be versioned and communicated.
+The service is initialized with:
+- `repository`: Optional `ReciboRepository` for persistence
+- `calculadora`: Optional `Calculadora` instance (defaults to new instance)
+- `taxas`: Optional dict with `desconto_vista` and `juros_parcelamento` (defaults to 10.0 each)
+
+Methods:
+- `criar_pagamento(opcao, valor, parcelas)` - Creates and persists a payment
+- `listar_pagamentos()` - Returns all persisted payments
+
+The service enriches receipts with `taxa` and `tipo_taxa` fields for frontend consumption.
 
 ---
 
-## 🗄️ Persistence Layer (PostgreSQL)
+## Persistence Layer
 
-PostgreSQL is used as a realistic persistence layer for integration tests and architectural validation, not as a full production schema.
+### Configuration
 
-Persistence is implemented using:
+Defined in `config/settings.py` using Pydantic Settings:
 
-- PostgreSQL — realistic production-grade database
-- SQLAlchemy — ORM and transaction handling
-- Alembic — schema migrations
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `DB_USER` | `loja_user` | Database user |
+| `DB_PASSWORD` | `loja_password` | Database password |
+| `DB_HOST` | `localhost` | Database host |
+| `DB_PORT` | `5432` | Database port |
+| `DB_NAME` | `loja_db` | Database name |
+| `DATABASE_URL` | None | Override full connection string |
 
-### Why PostgreSQL (even for a lab)?
+If `DATABASE_URL` is set, it takes precedence. Otherwise, the URL is built from individual components as `postgresql+psycopg://...`.
 
-- Forces realistic data modeling
-- Avoids misleading in-memory shortcuts
-- Enables real integration tests
-- Mirrors production constraints
+### Database Model
 
-### Databases Used
+`ReciboModel` (from `infrastructure/db/models/recibo_models.py`):
 
-- `loja_db` → development
-- `loja_test_db` → automated tests (isolated)
+| Column | Type | Nullable |
+|--------|------|----------|
+| `id` | Integer (PK) | No |
+| `total` | Float | No |
+| `metodo` | String(50) | No |
+| `parcelas` | Integer | No |
+| `valor_parcela` | Float | No |
+| `informacoes_adicionais` | String | Yes |
+| `created_at` | DateTime | No (server default) |
 
-Migrations ensure schema evolution is explicit and reproducible.
+### Repository
+
+`PostgresReciboRepository` (from `infrastructure/repositories/postgres_recibo_repository.py`) implements `ReciboRepository`:
+
+- `salvar(recibo: Recibo) -> Recibo` - Persists a Recibo and returns it with ID
+- `listar() -> List[Recibo]` - Returns all receipts ordered by ID descending
+
+### Session Management
+
+`get_db()` in `infrastructure/database.py` provides a session per request with automatic commit on success and rollback on error.
+
+Tables are created on application startup via `create_db_and_tables()`.
 
 ---
 
-## 📁 Project Structure (backend)
-
-A short, developer-focused view of the `backend/` layout and responsibilities.
+## Project Structure
 
 ```
 backend/
-├── api/                     # FastAPI entrypoints, routes and DTOs
-│   ├── main.py              # app factory and server entry
-│   ├── pagamentos_api.py    # pagamentos HTTP handlers
-│   ├── deps.py              # request dependencies and DI helpers
-│   └── dtos/                # request/response DTOs (pydantic)
-├── config/                  # runtime config and static tax tables
-│   └── settings.py
-├── domain/                  # business logic (pure, testable)
-│   ├── calculadora.py       # payment calculation rules
-│   ├── recibo.py            # domain model for receipts
-│   └── exceptions.py        # domain-specific exceptions
-├── infrastructure/          # adapters and infra concerns
-│   ├── database.py          # engine / session setup           
-│   ├── db/                  # DB-specific modules (models, mappers)
-│   │   ├── base.py
-│   │   ├── models/
-│   │   └── mappers/
-│   └── repositories/        # repository implementations (Postgres)
-├── services/                # application services / use-cases
-│   └── pagamento_service.py
-├── alembic/                 # migrations (managed by Alembic)
-├── tests/                   # unit and integration tests
+├── api/
+│   ├── main.py                 # FastAPI app, exception handler, health endpoint
+│   ├── pagamentos_api.py       # Payment endpoints
+│   ├── deps.py                 # Dependency injection
+│   └── dtos/
+│       ├── pagamento_request.py
+│       └── pagamento_response.py
+│
+├── config/
+│   └── settings.py             # Pydantic Settings configuration
+│
+├── domain/
+│   ├── calculadora.py          # Payment calculation rules
+│   ├── recibo.py               # Receipt domain entity
+│   ├── recibo_repository.py    # Abstract repository interface
+│   └── exceptions.py           # Domain exceptions
+│
+├── infrastructure/
+│   ├── database.py             # Engine, SessionLocal, get_db()
+│   ├── db/
+│   │   ├── base.py             # SQLAlchemy Base
+│   │   └── models/
+│   │       └── recibo_models.py
+│   └── repositories/
+│       └── postgres_recibo_repository.py
+│
+├── services/
+│   └── pagamento_service.py    # Use cases and service facade
+│
+├── tests/
 │   ├── conftest.py
-│   ├── services/
-│   |── unit/   # domain-level unit tests (e.g. test_calculadora.py)
-│   └── ...
-├── Makefile                 # Command runner (install, test, run, lint)
-├── pyproject.toml           # Project dependencies and tool config
+│   ├── unit/
+│   │   └── test_calculadora.py
+|   ├── services/
+│   │   └── test_pagamento_service.py
+│   ├── test_recibo.py
+│   ├── test_pagamento_service.py
+│   ├── test_api_pagamentos.py
+│   ├── test_api_pagamentos_errors.py
+│   ├─  test_postgres_repository.py
+│   ├── test_integration_postgres.py
+│   └── test_health.py
+│
+├── pyproject.toml
+├── requirements.txt
 └── README.md
 ```
 
-**Notes:**
+---
 
-- Keep business rules inside `domain/` — that folder is the source of truth.
-- `api/dtos` must match `frontend/src/types` when the public API contract changes.
-- Integration tests use `loja_test_db` and run migrations via `alembic`.
+## Testing Strategy
+
+Tests are configured in `pyproject.toml`:
+
+```toml
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = ["-v", "--cov=.", "--cov-report=term-missing", "--cov-report=html"]
+```
+
+### Test Files
+
+| File | Type | Description |
+|------|------|-------------|
+| `unit/test_calculadora.py` | Unit | Domain calculation rules |
+| `test_recibo.py` | Unit | Receipt entity validation |
+| `test_pagamento_service.py` | Unit | Service with injected rates |
+| `test_api_pagamentos.py` | Integration | API endpoint tests |
+| `test_api_pagamentos_errors.py` | Integration | Error handling tests |
+| `test_postgres_repository.py` | Integration | Repository tests |
+| `test_integration_postgres.py` | Integration | Repository integration tests |
+| `test_health.py` | Integration | Health endpoint test |
+
+Integration tests use SQLite in-memory databases to avoid requiring a running PostgreSQL instance.
+
+### Running Tests
+
+```bash
+cd backend
+pytest
+```
 
 ---
 
-## ⚠️ Error Handling Strategy
-
-This project makes a clear distinction between domain errors (business rule violations) and API/transport errors (validation, parsing).
-
-- **Domain Errors:** invalid installments, unsupported payment options — raised as custom domain exceptions
-- **API Errors:** invalid JSON, missing fields, wrong data types — handled by FastAPI validation
-
-This separation avoids mixing business logic with transport concerns.
-
----
-
-## 🧪 Testing Strategy
-
-**Unit tests** target domain services and rules — no DB, no HTTP (fast and deterministic).
-
-**Integration tests** use the `loja_test_db`, run migrations via Alembic, and exercise real API endpoints.
-
-This combination provides high confidence without over-mocking.
-
----
-
-## 🧠 Configuration & CI Considerations
-
-The backend validates `DATABASE_URL` at import time. In CI environments this variable may be missing.
-
-**Mitigation strategy:**
-
-- Detect CI/test context and use a safe default test URL where appropriate. CI detection is done via environment variables (e.g. `CI=true`) to avoid implicit configuration.
-- Keep explicit runtime failure when real configuration is missing
-
-This behavior is intentional to surface configuration errors early.
-
----
-
-## 🚀 Running the Backend
+## Running the Backend
 
 ### Requirements
 
 - Python 3.11+
-- PostgreSQL 14+
+- Primary database: PostgreSQL
+- Tests and development may use SQLite
 
-### Install & Run
+### Install and Run
 
 ```bash
 cd backend
+
+# Create virtual environment
 python -m venv venv
 
-# Windows
+# Activate (Windows)
 .\venv\Scripts\activate
 
-# Linux / Mac
+# Activate (Linux / Mac)
 source venv/bin/activate
 
+# Install dependencies
 pip install -r requirements.txt
-alembic upgrade head
+
+# Start server
 uvicorn api.main:app --reload
 ```
 
-Swagger UI: http://127.0.0.1:8000/docs
+### Available URLs
+
+| URL | Description |
+|-----|-------------|
+| `http://127.0.0.1:8000/docs` | Swagger UI |
+| `http://127.0.0.1:8000/redoc` | ReDoc |
+| `http://127.0.0.1:8000/saude` | Health check |
 
 ---
 
-## 🔮 What Would Change in Production?
+## Production Considerations
 
-In production you would typically add:
+This is a learning project. In production, you would typically add:
 
-- Authentication & authorization
-- Idempotency keys
-- Message queues for async payments
-- Observability (logs, metrics, tracing)
+- Authentication and authorization
 - Rate limiting
-- Background workers
+- Structured logging
+- Migrations
+- Observability
 
-The architecture supports these changes without refactoring the domain.
+The architecture supports these additions without refactoring the domain layer.
 
 ---
 
-## 🎯 Summary
+## Summary
 
-- Clean Architecture in practice
-- Explicit business rules
-- Real persistence
-- Meaningful tests
-- Clear error boundaries
-- API-first thinking
-
-**Designed to be read, reasoned about, and defended.**
+| Aspect | Implementation |
+|--------|----------------|
+| Architecture | Layered with domain isolation |
+| Business rules | Centralized in `domain/calculadora.py` |
+| Persistence | SQLAlchemy with repository pattern |
+| Testing | Unit and integration tests with SQLite in-memory |
+| Error handling | Domain exceptions mapped to HTTP 400 |
+| API design | REST with Pydantic DTOs |
 
 ---
 
