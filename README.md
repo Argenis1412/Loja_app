@@ -1,328 +1,269 @@
-﻿﻿# 🏦 Loja App — Sistem of pagaments
+﻿﻿# Loja App — Payment System
 
-[![Backend CI](https://github.com/argenis972/Loja_app/actions/workflows/backend-ci.yml/badge.svg?branch=CI/CD_automatizado)](https://github.com/argenis972/Loja_app/actions/workflows/backend-ci.yml)
-[![Frontend CI](https://github.com/argenis972/Loja_app/actions/workflows/frontend-ci.yml/badge.svg?branch=CI/CD_automatizado)](https://github.com/argenis972/Loja_app/actions/workflows/frontend-ci.yml)
+[![Backend CI](https://github.com/argenis972/Loja_app/actions/workflows/backend-ci.yml/badge.svg)](https://github.com/argenis972/Loja_app/actions/workflows/backend-ci.yml)
+[![Frontend CI](https://github.com/argenis972/Loja_app/actions/workflows/frontend-ci.yml/badge.svg)](https://github.com/argenis972/Loja_app/actions/workflows/frontend-ci.yml)
 [![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
 [![TypeScript](https://img.shields.io/badge/typescript-5.0+-blue.svg)](https://www.typescriptlang.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE.txt)
 
 ---
 
-## 📌 Overview
+## Project Overview
 
-**Loja App** is a technical learning laboratory focused on designing and evolving a realistic payment system. Built with clear separation between backend and frontend, it follows clean architecture principles, explicit business rules, and an incremental user experience.
+**Loja App** is a learning laboratory for backend-first architecture and payment logic. The project demonstrates how to design a payment system with explicit business rules, clear separation of concerns, and a frontend that acts purely as an API consumer.
 
-**This project is not a full e-commerce platform.** Its purpose is to serve as a controlled environment to:
+### Educational Goals
 
-- Model real-world payment rules
-- Practice clean architecture and separation of concerns
-- Integrate a frontend with an API-first backend
-- Explore validation, error handling, and receipts
-- Support technical discussions and interviews
+- Understand how to isolate business rules from frameworks
+- Practice layered architecture with domain, service, and infrastructure separation
+- Integrate a React frontend with a FastAPI backend via REST
+- Handle validation, error propagation, and receipts explicitly
+- Write testable domain logic independent of persistence
 
-**This repository prioritizes learning clarity over completeness.**
+### Backend-First Philosophy
 
----
-
-## 🎯 Learning Goals
-
-- Design an API-first payment system
-- Isolate business rules from frameworks
-- Work with PostgreSQL and schema migrations
-- Integrate React + TypeScript with a real backend
-- Handle validation, errors, and confirmations explicitly
+The backend is the source of truth. All calculations, validations, and business decisions happen in the backend domain layer. The frontend collects input and displays results. It does not calculate totals, apply discounts, or validate payment rules.
 
 ---
 
-## 🧱 Repository Structure
+## What This Project Is NOT
 
-
-```
-Loja_app/
-├── backend/        # REST API (FastAPI + Clean Architecture)
-│   ├── api/
-│   ├── config/
-│   ├── domain/
-│   ├── infrastructure/
-│   ├── tests/
-│   └── README.md
-│
-├── frontend/       # Web app (React + Vite + TypeScript)
-│   ├── src/
-│   ├── public/
-│   └── README.md
-│
-├── Makefile
-├── README.md       # Project overview (this file)
-├── requirements.txt
-├── run_backend.ps1
-├── run_frontend.ps1
-├── run_tests.ps1
-└── setup.ps1
-```
-
-
-Each main folder contains its own **README**, explaining:
-
-- Internal structure and organization
-- Design decisions and architectural patterns
-- Component responsibilities
-- Trade-offs and rationale
+- **Not a SaaS product** — This is a learning exercise, not a deployable service.
+- **Not production-ready** — No authentication, rate limiting, or security hardening.
+- **Not an enterprise architecture** — No microservices, no message queues, no complex infrastructure.
+- **Not feature-complete** — Intentionally minimal to preserve focus.
+- **Not a UX showcase** — The frontend is functional, not polished.
 
 ---
 
-## 🧮 Business Rules (Domain)
+## Technology Rationale
 
-The system simulates multiple payment modes with **explicit, testable rules**:
+### Backend
 
-| Payment Mode | Condition | Applied Rule |
-|---------------------|---------------------|---------------------|
-| Cash (immediate payment) | Immediate payment | **10% discount** |
-| Debit card | Immediate payment | **5% discount** |
-| Short installments | 2x to 6x | **0% interest** |
-| Long installments | 2x to 12x | **Fixed 10% increase** |
+| Technology | Purpose |
+|------------|---------|
+| **FastAPI** | Lightweight Python framework with automatic OpenAPI documentation and Pydantic integration. |
+| **PostgreSQL** | Relational database for realistic persistence. Integration tests use SQLite in-memory databases to avoid requiring a running PostgreSQL instance. |
+| **SQLAlchemy** | ORM with repository pattern for domain-infrastructure separation. |
+| **Pydantic** | Request/response validation and settings management. |
+| **Pytest** | Unit and integration testing with coverage reporting. |
 
-### Rule Interpretation
+### Frontend
 
-Installment categories are conceptual and may overlap.
-The actual business logic evaluates numeric ranges and applies explicit rule precedence defined in the domain layer.
-This overlap is intentional and used as a learning exercise in domain rule resolution.
-
-
-### ⚠️ Important Constraints
-
-- Installment counts **outside allowed ranges** (e.g., 1x, 13x, 25x) must raise a **domain validation error**, not a technical error
-- All business logic is centralized in the domain layer
-- Rules are framework-agnostic and fully unit-tested
+| Technology | Purpose |
+|------------|---------|
+| **React** | Component-based UI for building the payment flow screens. |
+| **TypeScript** | Static typing to catch errors early and document API contracts. |
+| **Vite** | Fast development server with native ESM support. |
+| **Tailwind CSS** | Utility-first styling without custom CSS files. |
+| **Vitest** | Test runner with native Vite integration. |
 
 ---
 
-## 🧠 Project Philosophy
-
-This repository intentionally prioritizes:
-
-✅ **Readable code** over clever code  
-✅ **Explicit business rules** over implicit behavior  
-✅ **Minimal dependencies** to reduce complexity  
-✅ **Clear error handling** with meaningful messages  
-✅ **Strict separation of concerns** (domain, application, infrastructure)  
-✅ **Practical, explainable learning** over theoretical abstraction
-
-### Why This Approach?
-
-Everything here is designed so you can **confidently answer** questions like:
-
-- *"Why did you design it this way?"*
-- *"Where are the business rules defined?"*
-- *"What would change for a production system?"*
-- *"How do you handle errors and edge cases?"*
-- *"What is intentionally out of scope?"*
-
----
-
-## 🗄️ Persistence (PostgreSQL)
-
-The backend uses **PostgreSQL** with **Alembic migrations** to:
-
-- Simulate a real production environment
-- Track schema evolution over time
-- Support reliable automated tests
-- Avoid unrealistic in-memory mocks
-
-### Database Setup
-
-Two databases are used:
-
-- **loja_db** → Development environment
-- **loja_test_db** → Automated testing (isolated)
-
-Full setup details and migration instructions are in the **backend README**.
-
----
-
-## 🌐 High-Level Architecture
+## High-Level Architecture
 
 ```
 ┌─────────────────────────┐
 │  Frontend (React + TS)  │
-│  - User Interface       │
-│  - API Integration      │
+│  - Collects user input  │
+│  - Displays API results │
+│  - No business logic    │
 └───────────┬─────────────┘
             │
             │ HTTP / JSON
             ▼
 ┌─────────────────────────┐
 │   REST API (FastAPI)    │
-│  - Route Handlers       │
-│  - Request Validation   │
+│  - Route handlers       │
+│  - Request validation   │
+│  - Exception handling   │
 └───────────┬─────────────┘
             │
             ▼
 ┌─────────────────────────┐
-│ Domain & Business Rules │
-│  - Payment Calculation  │
-│  - Validation Logic     │
+│   Service Layer         │
+│  - Use case orchestration│
+│  - Delegates business   │
+│    rules to domain layer│
+└───────────┬─────────────┘
+            │
+            ▼
+┌─────────────────────────┐
+│   Domain Layer          │
+│  - Calculadora class    │
+│  - Payment rules        │
+│  - Domain exceptions    │
 └───────────┬─────────────┘
             │
             ▼
 ┌─────────────────────────┐
 │   PostgreSQL Database   │
-│  - Transactions         │
-│  - Persistence          │
+│  - Receipt persistence  │
 └─────────────────────────┘
 ```
 
+### Backend Responsibilities
 
-### Key Principles
+- **Business rules**: All payment calculations live in `domain/calculadora.py`.
+- **Validation**: Domain exceptions enforce constraints (value > 0, valid option, installment ranges).
+- **Calculations**: Discounts, interest, and installment amounts are computed server-side.
+- **Persistence**: Receipts are stored via the repository pattern.
+- **REST API**: Endpoints for creating, simulating, and listing payments.
 
-- ✅ The **frontend does not know business rules** — it only displays and collects data
-- ✅ The **backend does not depend on the frontend** — it's API-first
-- ✅ The **domain layer is pure** — no framework dependencies
-- ✅ **Infrastructure depends on the domain, never the opposite**
+### Frontend Responsibilities
 
----
-
-## 🚫 Non-Goals (Explicitly Out of Scope)
-
-This project intentionally **does not** aim to be:
-
-❌ A production payment gateway  
-❌ A complete e-commerce system  
-❌ A security-hardened financial product  
-❌ A UX/UI showcase  
-❌ A microservices architecture
-
-These topics are acknowledged but excluded to preserve **focus and learning depth**.
+- **API consumption**: Calls backend endpoints using native `fetch`.
+- **Form flow**: Three screens — form, confirmation, receipt.
+- **Display logic**: Renders backend responses without transformation.
+- **No business rules**: Does not calculate totals or validate payment constraints.
 
 ---
 
-## 🚧 Current Project Status
+## Business Domain Summary
 
-| Area | Status |
-|-------------------------------|-----------------|
-| Backend (rules + API) | ✅ Stable |
-| Domain Layer | ✅ Fully unit-tested |
-| API Contract | ✅ Stable |
-| Persistence (Postgres + Alembic) | ✅ Stable |
-| Automated tests | ✅ Stable |
-| Frontend (React flow) | ✅ Functional |
-| UX improvements | 🔄 Ongoing |
+The system models four payment options with explicit rules:
+
+| Option | Mode | Rule |
+|--------|------|------|
+| 1 | Cash | 10% discount |
+| 2 | Debit card | 5% discount |
+| 3 | Installments (2-6x) | No interest |
+| 4 | Installments (2-12x) | 10% interest |
+
+Validation errors (invalid option, value ≤ 0, installments outside range) raise domain exceptions that the API converts to HTTP 400 responses.
+
+For detailed business rules, see the [backend README](backend/README.md).
 
 ---
 
-## 🚀 Getting Started
+## Repository Structure
+
+```
+Loja_app/
+├── backend/              # FastAPI REST API
+│   ├── api/              # Endpoints and DTOs
+│   ├── config/           # Pydantic settings
+│   ├── domain/           # Business rules and entities
+│   ├── infrastructure/   # Database and repositories
+│   ├── services/         # Use cases
+│   ├── tests/            # Unit and integration tests
+│   └── README.md
+│
+├── frontend/             # React + TypeScript UI
+│   ├── src/
+│   │   ├── components/   # UI components
+│   │   ├── services/     # API functions
+│   │   ├── types/        # TypeScript interfaces
+│   │   └── tests/        # Component tests
+│   └── README.md
+│
+├── Makefile
+├── README.md             # This file
+├── run_backend.ps1
+├── run_frontend.ps1
+└── run_tests.ps1
+```
+
+---
+
+## Getting Started
 
 ### Prerequisites
 
-- **Python 3.11+** — backend dependencies are listed in `requirements.txt`
-- **Node.js 18+** (and npm >= 9) — frontend engines are declared in `frontend/package.json`
-- **PostgreSQL 14+**
-- Docker (optional, for containerized setup)
+- Python 3.11+
+- Node.js 18+ (npm >= 9)
+- PostgreSQL (optional for development; tests use SQLite)
 
-### Quick Start
-
-1. **Clone the repository**
-
-```bash
-git clone https://github.com/argenis972/Loja_app.git 
-cd Loja_app
-```
-
-2. **Backend setup**
+### Backend
 
 ```bash
 cd backend
-# Follow instructions in backend/README.md
+
+# Create and activate virtual environment
+python -m venv venv
+source venv/bin/activate  # Linux/Mac
+# or .\venv\Scripts\activate  # Windows
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Run the server
+uvicorn api.main:app --reload
 ```
 
-3. **Frontend setup**
+API documentation available at `http://127.0.0.1:8000/docs`.
+
+### Frontend
 
 ```bash
 cd frontend
-# Follow instructions in frontend/README.md
+
+# Install dependencies
+npm install
+
+# Start development server
+npm run dev
 ```
+
+Application runs at `http://localhost:5173`.
 
 ---
 
-## 🧪 Running Tests
+## Documentation Links
 
-### Automated (Recommended)
-
-**Windows:**
-```powershell
-.\run_tests.ps1
-```
-
-**Linux / WSL:**
-```bash
-./run_tests.sh
-```
-
-### Manual
-
-```bash
-# Backend tests
-cd backend
-pytest
-```
+- **[Backend README](backend/README.md)** — API endpoints, domain rules, persistence layer, testing strategy.
+- **[Frontend README](frontend/README.md)** — Component structure, API integration, intentional simplifications.
 
 ---
 
-## 📚 Documentation
+## Project Philosophy
 
-- **[Backend README](backend/README.md)** — API design, domain model, database setup
-- **[Frontend README](frontend/README.md)** — Component structure, state management, API integration
+### Clarity Over Complexity
+
+Code is written to be read and understood. Clever abstractions are avoided in favor of explicit implementations.
+
+### Backend as Source of Truth
+
+The frontend never calculates business values. It sends input to the backend and displays the response.
+
+### Intentional Minimal Frontend
+
+No routing library, no state management library, no HTTP client library. These omissions are deliberate to demonstrate fundamentals.
+
+### Testable Domain Logic
+
+Domain layer contains no framework dependencies. Business rules are isolated in plain Python classes. They can be tested without spinning up a server or database.
 
 ---
 
-## 🤝 Contributing
+## Current Status
 
-This is a learning project, but contributions are welcome! Please:
+This is an evolving learning laboratory. The current implementation covers:
 
-1. Fork the repository
-2. Create a feature branch
-3. Follow the existing code style
-4. Add tests for new features
-5. Submit a pull request
+- Backend API with four payment options
+- Domain layer with unit-tested business rules
+- Service layer with use case orchestration
+- Repository pattern for persistence
+- Frontend with form, confirmation, and receipt screens
+- Component and integration tests
+
+The project is stable for learning purposes but not intended for production deployment.
 
 ---
 
-## 👤 Author
+## Author
 
 **Argenis López**
 
-- 💼 [LinkedIn](https://www.linkedin.com/in/argenis972/)
-- 💻 [GitHub](https://github.com/argenis972)
-- 📧 [Email](mailto:argenislopez28708256@gmail.com)
+- [LinkedIn](https://www.linkedin.com/in/argenis972/)
+- [GitHub](https://github.com/argenis972)
+- [Email](mailto:argenislopez28708256@gmail.com)
 
 ---
 
-## 📜 License
+## License
 
-**MIT License** — Feel free to study, adapt, and evolve this project for your own learning.
-
----
-
-## 🙏 Acknowledgments
-
-This project was built as a practical exercise in:
-
-- Clean Architecture (Robert C. Martin)
-- Domain-Driven Design principles
-- API-first development
-- Test-Driven Development
-
----
-
-## 📝 Final Note
-
-**This repository is best evaluated as a thinking exercise:**
-
-- How responsibilities are separated
-- How rules are modeled
-- How interfaces are respected
-
-**Not by feature count or visual polish.**
+MIT License — See [LICENSE.txt](LICENSE.txt)
 
 ---
 
