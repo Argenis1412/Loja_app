@@ -11,6 +11,7 @@ from infrastructure.repositories.postgres_recibo_repository import (
     PostgresReciboRepository,
 )
 
+
 # Teste de integração para PostgresReciboRepository
 def test_integration_postgres_repository_with_env_var():
 

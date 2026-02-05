@@ -1,5 +1,6 @@
 from services.pagamento_service import PagamentoService
 
+
 def test_servico_utiliza_taxas_injetadas():
     # testes não fazem I/O: passamos valores diretamente
     taxas_mock = {"desconto_vista": 5.0, "juros_parcelamento": 1.5}

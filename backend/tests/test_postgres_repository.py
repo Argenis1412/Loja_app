@@ -10,6 +10,7 @@ from infrastructure.repositories.postgres_recibo_repository import (
     PostgresReciboRepository,
 )
 
+
 # Teste unitário para PostgresReciboRepository
 def test_postgres_repository_salvar_com_sqlite():
     engine = create_engine("sqlite:///:memory:")
