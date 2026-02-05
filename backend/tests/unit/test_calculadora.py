@@ -1,4 +1,5 @@
 import pytest
+
 from domain.calculadora import Calculadora
 from domain.exceptions import RegraPagamentoInvalida
 

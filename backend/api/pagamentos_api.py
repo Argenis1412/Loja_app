@@ -1,11 +1,12 @@
-from fastapi import APIRouter, Depends, status
 from typing import List
+
+from fastapi import APIRouter, Depends, status
 
 from api.deps import get_pagamento_service
 from api.dtos.pagamento_request import PagamentoRequest
 from api.dtos.pagamento_response import PagamentoResponse
-from services.pagamento_service import PagamentoService
 from domain.calculadora import Calculadora
+from services.pagamento_service import PagamentoService
 
 router = APIRouter(prefix="/pagamentos", tags=["Pagamentos"])
 

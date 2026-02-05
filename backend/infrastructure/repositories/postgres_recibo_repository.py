@@ -1,5 +1,6 @@
-from sqlalchemy.orm import Session
 from typing import List
+
+from sqlalchemy.orm import Session
 
 from domain.recibo import Recibo
 from domain.recibo_repository import ReciboRepository
