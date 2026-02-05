@@ -1,5 +1,6 @@
 from datetime import datetime, timezone
 
+
 class Recibo:
     def __init__(
         self,

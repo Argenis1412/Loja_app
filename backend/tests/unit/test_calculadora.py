@@ -2,6 +2,7 @@ import pytest
 from domain.calculadora import Calculadora
 from domain.exceptions import RegraPagamentoInvalida
 
+
 class TestCalculadora:
     def setup_method(self):
         self.calculadora = Calculadora()
