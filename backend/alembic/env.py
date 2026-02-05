@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 import sys
 from logging.config import fileConfig
 from pathlib import Path
@@ -7,7 +8,6 @@ from pathlib import Path
 from sqlalchemy import create_engine, pool
 
 from alembic import context
-from config.settings import settings
 
 # --------------------------------------------------
 # Path fix (required)
@@ -15,6 +15,8 @@ from config.settings import settings
 
 BASE_DIR = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(BASE_DIR))
+
+from config.settings import settings
 
 # --------------------------------------------------
 

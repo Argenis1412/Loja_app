@@ -1,10 +1,10 @@
 from fastapi import FastAPI, Request, status
-from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 
 from api.pagamentos_api import router as pagamentos_router
-from infrastructure.database import create_db_and_tables
 from domain.exceptions import DomainError
+from infrastructure.database import create_db_and_tables
 
 # Garante que as tabelas sejam criadas ao iniciar
 create_db_and_tables()
@@ -22,6 +22,7 @@ async def domain_exception_handler(request: Request, exc: Exception):
 
 
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"])
+
 
 # Endpoint de verificação de saúde da API
 @app.get("/saude", status_code=status.HTTP_200_OK)

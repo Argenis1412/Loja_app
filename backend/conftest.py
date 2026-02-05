@@ -9,8 +9,8 @@ os.environ["DATABASE_URL"] = "sqlite:///:memory:"
 
 import pytest
 from sqlalchemy import create_engine
-from sqlalchemy.pool import StaticPool
 from sqlalchemy.orm import sessionmaker
+from sqlalchemy.pool import StaticPool
 
 import infrastructure.database
 from infrastructure.db.base import Base
@@ -30,6 +30,7 @@ infrastructure.database.engine = test_engine
 infrastructure.database.SessionLocal = sessionmaker(
     autocommit=False, autoflush=False, bind=test_engine
 )
+
 
 @pytest.fixture(scope="session", autouse=True)
 def setup_database():
