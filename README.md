@@ -162,6 +162,7 @@ Loja_app/
 ├── run_backend.ps1
 ├── run_frontend.ps1
 └── run_tests.ps1
+
 ```
 ---
 
