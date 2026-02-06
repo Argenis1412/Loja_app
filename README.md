@@ -1,4 +1,4 @@
-﻿﻿# Loja App — Payment System
+﻿# Loja App — Payment System
 
 [![Backend CI](https://github.com/argenis972/Loja_app/actions/workflows/backend-ci.yml/badge.svg)](https://github.com/argenis972/Loja_app/actions/workflows/backend-ci.yml)
 [![Frontend CI](https://github.com/argenis972/Loja_app/actions/workflows/frontend-ci.yml/badge.svg)](https://github.com/argenis972/Loja_app/actions/workflows/frontend-ci.yml)
