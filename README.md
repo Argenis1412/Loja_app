@@ -163,7 +163,6 @@ Loja_app/
 ├── run_frontend.ps1
 └── run_tests.ps1
 ```
-
 ---
 
 ## Getting Started
