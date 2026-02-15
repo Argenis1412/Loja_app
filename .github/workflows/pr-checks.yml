@@ -8,7 +8,7 @@ on:
 jobs:
   validate-pr:
     name: Validar Pull Request
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest    
     
     steps:
       - name: Checkout código
@@ -75,11 +75,31 @@ jobs:
                 'para facilitar organização'
               );
             }
+  
+  lint:
+    name: Verificar Formato (Black)
+    runs-on: ubuntu-latest
+    needs: [validate-pr]
+    
+    steps:
+      - name: Checkout código
+        uses: actions/checkout@v4
+        
+      - name: Configurar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Instalar Black
+        run: pip install black
+        
+      - name: Executar Black (check)
+        run: black --check .
 
   summary:
     name: Resumo das Verificações
     runs-on: ubuntu-latest
-    needs: [validate-pr]
+    needs: [validate-pr, lint]
     if: always()
     
     steps:
