@@ -38,7 +38,9 @@ class Calculadora:
 
         elif opcao == 4:
             if parcelas < 12 or parcelas > 24:
-                raise RegraPagamentoInvalida("Opção 4 suporta apenas de 12 a 24 parcelas")
+                raise RegraPagamentoInvalida(
+                    "Opção 4 suporta apenas de 12 a 24 parcelas"
+                )
             total = valor * (1 + juros_parcelamento / 100)
             metodo = "Cartão com juros"
             info = f"Juros de {int(juros_parcelamento)}%"

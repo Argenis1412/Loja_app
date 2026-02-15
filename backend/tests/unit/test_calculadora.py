@@ -67,7 +67,7 @@ class TestCalculadora:
         # Teste com parcelas abaixo do mínimo
         with pytest.raises(RegraPagamentoInvalida):
             self.calculadora.calcular(opcao=4, valor=100, parcelas=11)
-        
+
         # Teste com parcelas acima do máximo
         with pytest.raises(RegraPagamentoInvalida):
             self.calculadora.calcular(opcao=4, valor=100, parcelas=25)
