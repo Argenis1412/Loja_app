@@ -37,8 +37,8 @@ class Calculadora:
             info = None
 
         elif opcao == 4:
-            if parcelas < 2 or parcelas > 12:
-                raise RegraPagamentoInvalida("Parcelas inválidas")
+            if parcelas < 12 or parcelas > 24:
+                raise RegraPagamentoInvalida("Opção 4 suporta apenas de 12 a 24 parcelas")
             total = valor * (1 + juros_parcelamento / 100)
             metodo = "Cartão com juros"
             info = f"Juros de {int(juros_parcelamento)}%"
@@ -47,13 +47,13 @@ class Calculadora:
             raise RegraPagamentoInvalida("Opção inválida")
 
         total = round(total, 2)
-        valor_parcela = round(total / parcelas, 2)
 
+        # Deixa que a classe Recibo calcule automaticamente valor_parcela
+        # e valor_ultima_parcela para garantir total exato
         recibo = Recibo(
             metodo=metodo,
             total=total,
             parcelas=parcelas,
-            valor_parcela=valor_parcela,
             informacoes_adicionais=info,
         )
         # Armazena valor original para uso na API

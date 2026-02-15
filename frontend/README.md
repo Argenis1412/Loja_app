@@ -47,6 +47,38 @@ This is not a scalable enterprise frontend architecture. It is intentionally min
 
 ---
 
+### Project Structure
+
+```
+frontend/
+├── public/               # Static assets
+│   └── vite.svg          # Vite logo
+├── src/
+│   ├── assets/           # Images and resources
+│   ├── components/       # React components
+│   │   ├── PagamentoForm.tsx          # Payment form
+│   │   ├── ConfirmacaoPagamento.tsx   # Confirmation screen
+│   │   └── Recibo.tsx                 # Receipt display
+│   ├── services/         # API integration
+│   │   └── pagamentoService.ts        # Backend API calls
+│   ├── types/            # TypeScript interfaces
+│   │   └── api.ts                     # API type definitions
+│   ├── tests/            # Component tests
+│   │   └── components/   # Component test files
+│   ├── App.tsx           # Main application component
+│   ├── App.css           # App styles
+│   ├── main.tsx          # Application entry point
+│   └── index.css         # Global styles
+├── eslint.config.js      # ESLint configuration
+├── package.json          # Node.js dependencies
+├── postcss.config.js     # PostCSS configuration
+├── tailwind.config.js    # Tailwind CSS configuration
+├── tsconfig.json         # TypeScript configuration
+├── tsconfig.app.json     # TypeScript app config
+├── tsconfig.node.json    # TypeScript node config
+└── vite.config.ts        # Vite configuration
+```
+
 ## Architecture Overview
 
 The frontend uses a simple component-based architecture with no external state management library. No client-side caching or data synchronization layer is implemented. State is managed via React `useState` hooks in `App.tsx`.
@@ -94,14 +126,29 @@ The backend URL is hardcoded in two locations:
 
 The frontend maps user-friendly method names to backend `opcao` integers:
 
-| Frontend Method | Backend `opcao` |
-|-----------------|-----------------|
-| `avista` | 1 |
-| `debito` | 2 |
-| `parcelado_sem_juros` | 3 |
-| `cartao_com_juros` | 4 |
+| Frontend Method | Backend `opcao` | Installments | Interest |
+|-----------------|-----------------|--------------|----------|
+| `avista` | 1 | 1x | 10% discount |
+| `debito` | 2 | 1x | 5% discount |
+| `parcelado_sem_juros` | 3 | 2-6x | No interest |
+| `cartao_com_juros` | 4 | 12-24x | 10% interest |
+
+**Note:** Options 3 and 4 have non-overlapping installment ranges to clearly separate no-interest (short-term) from interest-bearing (long-term) payment plans.
 
 This mapping is implemented in `converterMetodoParaOpcao()` in `PagamentoForm.tsx` and `metodoParaOpcao()` in `services/api.ts`.
+
+### Exact Total Display
+
+When a payment is split into installments, the UI intelligently displays:
+
+- **Equal installments**: Shows a simple message (e.g., "R$ 25.00 cada parcela")
+- **Adjusted last installment**: Shows detailed breakdown:
+  ```
+  • 5x de R$ 16.67
+  • 1x de (última) R$ 16.65
+  ```
+
+This ensures users see exactly how their payment is distributed and that the total is always exact (no rounding errors).
 
 ### DTO Synchronization
 
@@ -117,28 +164,39 @@ Errors from the API are caught and displayed via the `ErrorBanner` component. Th
 
 ### Payment Form
 
-- Value input with validation
-- Payment method selection (radio buttons)
-- Dynamic installment selector (appears for installment methods)
-- Configurable installment limits per method
+- Value input with validation (minimum R$ 0.01)
+- Payment method selection (4 radio button options)
+- Dynamic installment selector (appears only for installment methods)
+- Configurable installment limits per method:
+  - **Option 3**: 2-6 installments (no interest)
+  - **Option 4**: 12-24 installments (with interest)
+- Automatic adjustment of installment value when switching methods
 
 ### Payment Simulation
 
 - Calls `/pagamentos/simular` before confirmation
 - Displays calculated total, installments, and rate information
-- Shows rate type (discount/interest) based on backend response
+- Shows rate type (desconto_vista, desconto_debito, sem_juros, juros_cartao) based on backend response
+- Previews exact installment breakdown including adjusted last installment
 
 ### Payment Confirmation
 
-- Shows payment summary with simulation data
-- Loading state during API calls
+- Shows detailed payment summary with simulation data
+- Displays adjusted last installment when different from regular installments
+- Loading state during API calls with spinner animation
 - Back button to return to form
+- Responsive design with gradient backgrounds and icons
 
 ### Receipt Display
 
 - Shows transaction ID, date, total, method, and installments
-- Formatted date display
+- Detailed installment breakdown showing:
+  - Regular installment value
+  - Adjusted last installment (if different)
+- Formatted date display (DD/MM/YYYY HH:MM)
+- Success animation and visual feedback
 - Button to start a new payment
+- Colored badges for payment method types
 
 ### Dark Mode Support
 
@@ -273,7 +331,7 @@ npm run preview
 
 ## Testing
 
-Tests are written with Vitest and Testing Library.
+Tests are written with Vitest and Testing Library to ensure component behavior and API integration work correctly.
 
 ### Test Configuration
 
@@ -281,20 +339,46 @@ Configured in `vite.config.ts`:
 - Environment: jsdom
 - Setup file: `./src/tests/setup.ts`
 - Global test timeout: 60000ms
+- Coverage provider: v8
 
 ### Test Files
 
-| File | Description |
-|------|-------------|
-| `App.test.tsx` | Integration test for full payment flow |
-| `PagamentoForm.test.tsx` | Unit tests for form component |
-| `Recibo.test.tsx` | Unit tests for receipt component |
+| File | Description | Test Coverage |
+|------|-------------|---------------|
+| `App.test.tsx` | Integration test for full payment flow | Main application workflow |
+| `PagamentoForm.test.tsx` | Unit tests for form component | Form validation, installment limits (2-6 for option 3, 12-24 for option 4), method selection |
+| `Recibo.test.tsx` | Unit tests for receipt component | Receipt display, installment breakdown, adjusted last installment |
+| `ConfirmacaoPagamento.test.tsx` | Unit tests for confirmation component | Confirmation screen, simulation display, adjusted installments |
+
+### Test Coverage
+
+**Key test scenarios:**
+
+- ✅ Form validation (invalid values, missing required fields)
+- ✅ Payment method selection and installment limits
+- ✅ Option 3: 2-6 installments (no interest)
+- ✅ Option 4: 12-24 installments (with interest)
+- ✅ Exact total calculation with adjusted last installment
+- ✅ Receipt display with installment breakdown
+- ✅ Confirmation screen with simulation data
+- ✅ Loading states and error handling
 
 ### Running Tests
 
 ```bash
+# Run all tests
 npm run test
+
+# Run tests with UI (interactive mode)
+npm run test:ui
+
+# Run tests with coverage report
+npm run test:coverage
 ```
+
+### Coverage Reports
+
+Coverage reports are generated in the `coverage/` directory. Open `coverage/index.html` in a browser to view detailed coverage information.
 
 ---
 

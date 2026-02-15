@@ -123,12 +123,17 @@ The backend is the source of truth. All calculations, validations, and business 
 
 The system models four payment options with explicit rules:
 
-| Option | Mode | Rule |
-|--------|------|------|
-| 1 | Cash | 10% discount |
-| 2 | Debit card | 5% discount |
-| 3 | Installments (2-6x) | No interest |
-| 4 | Installments (2-12x) | 10% interest |
+| Option | Mode | Installments | Rule |
+|--------|------|--------------|------|
+| 1 | Cash | 1x | 10% discount |
+| 2 | Debit card | 1x | 5% discount |
+| 3 | Credit card | 2-6x | No interest |
+| 4 | Credit card | 12-24x | 10% interest |
+
+**Key Features:**
+- **Exact Total Calculation**: When payments are split into installments, the system automatically adjusts the last installment to ensure the total is exact (no rounding errors).
+- **Smart Validation**: Domain exceptions ensure valid values (> 0) and proper installment ranges.
+- **Backend-First**: All calculations happen server-side; frontend displays results.
 
 Validation errors (invalid option, value ≤ 0, installments outside range) raise domain exceptions that the API converts to HTTP 400 responses.
 
@@ -141,28 +146,67 @@ For detailed business rules, see the [backend README](backend/README.md).
 ```
 Loja_app/
 ├── backend/              # FastAPI REST API
+│   ├── alembic/          # Database migrations
 │   ├── api/              # Endpoints and DTOs
+│   │   ├── dtos/         # Request/Response models
+│   │   ├── deps.py       # Dependency injection
+│   │   ├── main.py       # FastAPI app
+│   │   └── pagamentos_api.py  # Payment routes
 │   ├── config/           # Pydantic settings
+│   │   ├── settings.py   # App configuration
+│   │   └── taxas.json    # Tax rates config
 │   ├── domain/           # Business rules and entities
+│   │   ├── calculadora.py      # Payment calculator
+│   │   ├── exceptions.py       # Domain exceptions
+│   │   ├── recibo.py           # Receipt entity
+│   │   └── recibo_repository.py # Repository interface
 │   ├── infrastructure/   # Database and repositories
+│   │   ├── db/           # Database models and mappers
+│   │   ├── repositories/ # Repository implementations
+│   │   └── database.py   # Database connection
 │   ├── services/         # Use cases
+│   │   └── pagamento_service.py
 │   ├── tests/            # Unit and integration tests
-│   └── README.md
+│   │   ├── unit/         # Unit tests
+│   │   └── services/     # Service tests
+│   ├── requirements.txt  # Python dependencies
+│   ├── pyproject.toml    # Python project config
+│   └── README.md         # Backend documentation
 │
 ├── frontend/             # React + TypeScript UI
+│   ├── public/           # Static assets
 │   ├── src/
+│   │   ├── assets/       # Images and resources
 │   │   ├── components/   # UI components
+│   │   │   ├── PagamentoForm.tsx
+│   │   │   ├── ConfirmacaoPagamento.tsx
+│   │   │   └── Recibo.tsx
 │   │   ├── services/     # API functions
+│   │   │   └── pagamentoService.ts
 │   │   ├── types/        # TypeScript interfaces
-│   │   └── tests/        # Component tests
-│   └── README.md
+│   │   │   └── api.ts
+│   │   ├── tests/        # Component tests
+│   │   ├── App.tsx       # Main app component
+│   │   └── main.tsx      # App entry point
+│   ├── package.json      # Node dependencies
+│   ├── vite.config.ts    # Vite configuration
+│   ├── tailwind.config.js # Tailwind CSS config
+│   └── README.md         # Frontend documentation
 │
-├── Makefile
+├── .github/              # GitHub Actions CI/CD
+│   └── workflows/
+│       ├── backend-ci.yml
+│       └── frontend-ci.yml
+├── CHANGELOG.md          # Version history
+├── CONTRIBUTING.md       # Contribution guidelines
+├── LICENSE.txt           # MIT License
+├── Makefile              # Build automation
 ├── README.md             # This file
-├── run_backend.ps1
-├── run_frontend.ps1
-└── run_tests.ps1
-
+├── run_backend.ps1       # Start backend (Windows)
+├── run_frontend.ps1      # Start frontend (Windows)
+├── run_tests.ps1         # Run all tests (Windows)
+├── setup.ps1             # Initial setup (Windows)
+└── verificar_backend.ps1 # Backend verification script
 ```
 ---
 
@@ -170,30 +214,61 @@ Loja_app/
 
 ### Prerequisites
 
-- Python 3.11+
-- Node.js 18+ (npm >= 9)
-- PostgreSQL (optional for development; tests use SQLite)
+- **Python 3.11+** (for backend)
+- **Node.js 18+** with npm 9+ (for frontend)
+- **PostgreSQL** (optional; tests use SQLite in-memory database)
 
-### Backend
+### Quick Start (Windows)
+
+The project includes PowerShell scripts for easy setup:
+
+```powershell
+# 1. Setup environment (creates venv, installs dependencies)
+.\setup.ps1
+
+# 2. Run backend (starts FastAPI server)
+.\run_backend.ps1
+
+# 3. Run frontend (in a new terminal)
+.\run_frontend.ps1
+
+# 4. Run all tests (backend + frontend)
+.\run_tests.ps1
+```
+
+### Manual Setup
+
+#### Backend
 
 ```bash
 cd backend
 
 # Create and activate virtual environment
 python -m venv venv
-source venv/bin/activate  # Linux/Mac
-# or .\venv\Scripts\activate  # Windows
+
+# Activate (Windows)
+.\venv\Scripts\activate
+
+# Activate (Linux/Mac)
+source venv/bin/activate
 
 # Install dependencies
 pip install -r requirements.txt
 
-# Run the server
+# Run database migrations
+alembic upgrade head
+
+# Run tests
+pytest -v --cov=. --cov-report=html
+
+# Start the server
 uvicorn api.main:app --reload
 ```
 
-API documentation available at `http://127.0.0.1:8000/docs`.
+✅ API documentation available at `http://127.0.0.1:8000/docs`  
+✅ Interactive API testing at `http://127.0.0.1:8000/redoc`
 
-### Frontend
+#### Frontend
 
 ```bash
 cd frontend
@@ -201,11 +276,49 @@ cd frontend
 # Install dependencies
 npm install
 
+# Run tests
+npm test
+
 # Start development server
 npm run dev
 ```
 
-Application runs at `http://localhost:5173`.
+✅ Application runs at `http://localhost:5173`
+
+### Testing
+
+**Backend:**
+```bash
+cd backend
+pytest -v                    # Run all tests
+pytest --cov=.               # With coverage
+pytest --cov-report=html     # Generate HTML coverage report
+```
+
+**Frontend:**
+```bash
+cd frontend
+npm test                     # Run tests with Vitest
+npm run test:ui              # Interactive test UI
+npm run test:coverage        # Generate coverage report
+```
+
+### Database Migrations
+
+When you make changes to database models:
+
+```bash
+cd backend
+
+# Create a new migration
+alembic revision --autogenerate -m "description of change"
+
+# Apply migrations
+alembic upgrade head
+
+# Rollback last migration
+alembic downgrade -1
+```
 
 ---
 
@@ -240,12 +353,32 @@ Domain layer contains no framework dependencies. Business rules are isolated in 
 
 This is an evolving learning laboratory. The current implementation covers:
 
-- Backend API with four payment options
-- Domain layer with unit-tested business rules
-- Service layer with use case orchestration
-- Repository pattern for persistence
-- Frontend with form, confirmation, and receipt screens
-- Component and integration tests
+- ✅ Backend API with four payment options
+- ✅ Domain layer with unit-tested business rules
+- ✅ Service layer with use case orchestration
+- ✅ Repository pattern for persistence with PostgreSQL
+- ✅ Frontend with form, confirmation, and receipt screens
+- ✅ Component and integration tests with coverage reporting
+- ✅ Database migrations with Alembic
+- ✅ Exact total calculation with adjusted last installment
+- ✅ Modern UI with Tailwind CSS and dark mode support
+- ✅ Comprehensive error handling and validation
+
+### Recent Updates (February 2026)
+
+**Backend:**
+- Updated Option 4 to support 12-24 installments (previously 2-12)
+- Implemented exact total calculation by adjusting the last installment
+- Added `valor_ultima_parcela` field to database model and DTOs
+- Fixed pytest asyncio configuration warnings
+- Enhanced validation messages for payment options
+
+**Frontend:**
+- Updated installment selector for Option 4 (12-24 installments)
+- Added visual display for adjusted last installment
+- Improved confirmation screen with detailed installment breakdown
+- Added comprehensive tests for new features
+- Enhanced UI with better visual feedback and animations
 
 The project is stable for learning purposes but not intended for production deployment.
 

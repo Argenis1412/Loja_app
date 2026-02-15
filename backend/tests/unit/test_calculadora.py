@@ -54,14 +54,20 @@ class TestCalculadora:
     def test_cartao_com_juros_deve_aplicar_taxa(self):
         # Opção 4: Juros simples de 10% (padrão)
         # Valor 100 + 10% = 110
+        # Usando 12 parcelas (mínimo para opção 4)
         recibo = self.calculadora.calcular(
-            opcao=4, valor=100.0, parcelas=10, juros_parcelamento=10.0
+            opcao=4, valor=100.0, parcelas=12, juros_parcelamento=10.0
         )
 
         assert recibo.total == 110.0
-        assert recibo.valor_parcela == 11.0  # 110 / 10
+        assert recibo.valor_parcela == 9.17  # 110 / 12 arredondado
         assert recibo.metodo == "Cartão com juros"
 
-        # Testar limites (2 a 12 parcelas)
+        # Testar limites (12 a 24 parcelas)
+        # Teste com parcelas abaixo do mínimo
         with pytest.raises(RegraPagamentoInvalida):
-            self.calculadora.calcular(opcao=4, valor=100, parcelas=13)
+            self.calculadora.calcular(opcao=4, valor=100, parcelas=11)
+        
+        # Teste com parcelas acima do máximo
+        with pytest.raises(RegraPagamentoInvalida):
+            self.calculadora.calcular(opcao=4, valor=100, parcelas=25)

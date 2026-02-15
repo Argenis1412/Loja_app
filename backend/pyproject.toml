@@ -24,6 +24,7 @@ python_files = ["test_*.py"]
 python_classes = ["Test*"]
 python_functions = ["test_*"]
 addopts = ["-v", "--cov=.", "--cov-report=term-missing", "--cov-report=html"]
+asyncio_default_fixture_loop_scope = "function"
 markers = [
     "unit: testes unitários",
     "integration: testes de integração",

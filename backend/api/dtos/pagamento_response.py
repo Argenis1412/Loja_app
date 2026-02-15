@@ -12,6 +12,7 @@ class PagamentoResponse(BaseModel):
     total: float
     parcelas: int
     valor_parcela: float
+    valor_ultima_parcela: Optional[float] = None
     informacoes_adicionais: Optional[str] = None
     taxa: float = 0.0
     tipo_taxa: Optional[str] = None
@@ -26,6 +27,7 @@ class PagamentoResponse(BaseModel):
             total=getattr(recibo, "total", None),
             parcelas=getattr(recibo, "parcelas", None),
             valor_parcela=getattr(recibo, "valor_parcela", None),
+            valor_ultima_parcela=getattr(recibo, "valor_ultima_parcela", None),
             informacoes_adicionais=getattr(recibo, "informacoes_adicionais", None),
             taxa=getattr(recibo, "taxa", 0.0),
             tipo_taxa=getattr(recibo, "tipo_taxa", None),

@@ -19,13 +19,48 @@ The backend is responsible for:
 
 - Enforcing all business rules
 - Validating user input and edge cases
-- Calculating payment totals and installments
-- Persisting transactions
+- Calculating payment totals and installments with exact precision
+- Persisting transactions to database
 - Exposing a documented REST API
 
 The domain layer contains no framework dependencies and can be executed in isolation.
 Application services orchestrate use cases without embedding business rules.
 The frontend is treated as a consumer, never as a source of truth.
+
+### Project Structure
+
+```
+backend/
+├── alembic/              # Database migrations
+│   ├── versions/         # Migration scripts
+│   └── env.py            # Alembic configuration
+├── api/                  # REST API layer
+│   ├── dtos/             # Request/Response models
+│   ├── deps.py           # Dependency injection
+│   ├── main.py           # FastAPI application
+│   └── pagamentos_api.py # Payment endpoints
+├── config/               # Configuration
+│   ├── settings.py       # Application settings
+│   └── taxas.json        # Tax rates configuration
+├── domain/               # Business logic (framework-agnostic)
+│   ├── calculadora.py    # Payment calculator
+│   ├── exceptions.py     # Domain exceptions
+│   ├── recibo.py         # Receipt entity
+│   └── recibo_repository.py # Repository interface
+├── infrastructure/       # External dependencies
+│   ├── db/               # Database models and mappers
+│   ├── repositories/     # Repository implementations
+│   └── database.py       # Database connection
+├── services/             # Application services
+│   └── pagamento_service.py # Payment use cases
+├── tests/                # Test suite
+│   ├── unit/             # Unit tests
+│   ├── services/         # Service tests
+│   └── conftest.py       # Pytest fixtures
+├── requirements.txt      # Python dependencies
+├── pyproject.toml        # Python project configuration
+└── alembic.ini           # Alembic configuration
+```
 
 ---
 
@@ -37,10 +72,21 @@ All payment rules live exclusively in the `Calculadora` class (`domain/calculado
 
 | opcao | Mode | Condition | Rule Applied |
 |:-----:|------|-----------|--------------|
-| 1 | Cash (A vista) | Immediate payment | 10% discount (configurable via `desconto_vista`) |
-| 2 | Debit card (Debito a vista) | Immediate payment | 5% discount (fixed) |
-| 3 | Installments without interest (Parcelado sem juros) | 2 to 6 installments | No interest |
-| 4 | Card with interest (Cartao com juros) | 2 to 12 installments | 10% increase (configurable via `juros_parcelamento`) |
+| 1 | Cash (À vista) | Immediate payment | 10% discount (configurable via `desconto_vista`) |
+| 2 | Debit card (Débito à vista) | Immediate payment | 5% fixed discount |
+| 3 | Installments without interest (Parcelado sem juros) | 2 to 6 installments | No interest, exact total |
+| 4 | Card with interest (Cartão com juros) | 12 to 24 installments | 10% interest (configurable via `juros_parcelamento`) |
+
+**Note:** Options 3 and 4 have non-overlapping installment ranges (2-6 vs 12-24) to maintain clear separation between no-interest and interest-bearing installment plans.
+
+### Exact Total Calculation
+
+When payments are split into installments, the system automatically calculates the last installment value to ensure the total is exact:
+
+- **Example**: R$ 100.00 in 6 installments
+  - 5 installments of R$ 16.67
+  - 1 last installment of R$ 16.65
+  - **Total**: R$ 100.00 (exactly)
 
 ### Validation Rules
 
@@ -49,7 +95,7 @@ All payment rules live exclusively in the `Calculadora` class (`domain/calculado
 | `valor <= 0` | Domain exceptions (derived from `DomainError`) or validation errors raised by domain entities. |
 | `opcao` not in [1, 2, 3, 4] | Domain exceptions (derived from `DomainError`) or validation errors raised by domain entities. |
 | `opcao=3` with `parcelas < 2` or `parcelas > 6` | Domain exceptions (derived from `DomainError`) or validation errors raised by domain entities. |
-| `opcao=4` with `parcelas < 2` or `parcelas > 12` | Domain exceptions (derived from `DomainError`) or validation errors raised by domain entities. |
+| `opcao=4` with `parcelas < 12` or `parcelas > 24` | Domain exceptions (derived from `DomainError`) or validation errors raised by domain entities. |
 
 ---
 

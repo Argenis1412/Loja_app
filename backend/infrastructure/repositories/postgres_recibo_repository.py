@@ -24,6 +24,7 @@ class PostgresReciboRepository(ReciboRepository):
             metodo=recibo.metodo,
             informacoes_adicionais=recibo.informacoes_adicionais,
             valor_parcela=recibo.valor_parcela,
+            valor_ultima_parcela=getattr(recibo, 'valor_ultima_parcela', None),
             created_at=recibo.data_hora,
         )
         self.db.add(recibo_db)
@@ -39,7 +40,7 @@ class PostgresReciboRepository(ReciboRepository):
         return [self._to_domain(recibo) for recibo in recibos_db]
 
     def _to_domain(self, recibo_db: ReciboModel) -> Recibo:
-        return Recibo(
+        recibo = Recibo(
             id=recibo_db.id,
             total=recibo_db.total,
             parcelas=recibo_db.parcelas,
@@ -48,3 +49,7 @@ class PostgresReciboRepository(ReciboRepository):
             valor_parcela=recibo_db.valor_parcela,
             data_hora=recibo_db.created_at,
         )
+        # Agregar valor_ultima_parcela si existe en la BD
+        if hasattr(recibo_db, 'valor_ultima_parcela') and recibo_db.valor_ultima_parcela:
+            recibo.valor_ultima_parcela = recibo_db.valor_ultima_parcela
+        return recibo

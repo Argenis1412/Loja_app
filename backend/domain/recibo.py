@@ -24,11 +24,19 @@ class Recibo:
         self.id = id
         self.data_hora = data_hora or datetime.now(timezone.utc)
         # Se valor_parcela não for passado, calcula automaticamente
-        self.valor_parcela = (
-            round(self.total / self.parcelas, 2)
-            if valor_parcela is None
-            else valor_parcela
-        )
+        # Ajustamos para garantir que o total seja sempre exato
+        if valor_parcela is None:
+            # Calcula a parcela base
+            self.valor_parcela = round(self.total / self.parcelas, 2)
+            # Calcula a última parcela para compensar erro de arredondamento
+            if self.parcelas > 1:
+                soma_parcelas_normais = self.valor_parcela * (self.parcelas - 1)
+                self.valor_ultima_parcela = round(self.total - soma_parcelas_normais, 2)
+            else:
+                self.valor_ultima_parcela = self.valor_parcela
+        else:
+            self.valor_parcela = valor_parcela
+            self.valor_ultima_parcela = valor_parcela
 
     @property
     def valor_da_parcela(self) -> float:

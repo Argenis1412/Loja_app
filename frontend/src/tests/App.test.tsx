@@ -30,23 +30,24 @@ describe('Fluxo Completo de Pagamento (Integração)', () => {
     const radioCartao = screen.getByLabelText(/Cartão com juros/i);
     fireEvent.click(radioCartao);
 
-    // Parcelas: 2x (o select aparece após selecionar cartão)
-    const selectParcelas = screen.getByLabelText('Parcelas');
-    fireEvent.change(selectParcelas, { target: { value: '2' } });
+    // Parcelas: 12x (o select aparece após selecionar cartão - mínimo para opção 4)
+    const selectParcelas = screen.getByLabelText('📊 Número de parcelas');
+    fireEvent.change(selectParcelas, { target: { value: '12' } });
 
     // Mock da resposta da API de Simulação (backend/pagamentos/simular)
     fetchMock.mockResolvedValueOnce({
       ok: true,
       json: async () => ({
         total: 110.0,
-        valor_parcela: 55.0,
+        valor_parcela: 9.17,
+        valor_ultima_parcela: 9.13,
         taxa: 10,
         tipo_taxa: 'juros_cartao',
       }),
     });
 
     // 3. Submeter formulário (Simular)
-    const btnContinuar = screen.getByText('Continuar →');
+    const btnContinuar = screen.getByText('Continuar para pagamento →');
     fireEvent.click(btnContinuar);
 
     // Verificar chamada da API de simulação
@@ -58,7 +59,7 @@ describe('Fluxo Completo de Pagamento (Integração)', () => {
           body: JSON.stringify({
             opcao: 4, // 4 = Cartão com juros
             valor: 100,
-            parcelas: 2,
+            parcelas: 12,
           }),
         }),
       );
@@ -69,7 +70,7 @@ describe('Fluxo Completo de Pagamento (Integração)', () => {
       await screen.findByText('Confirmação de pagamento'),
     ).toBeInTheDocument();
     expect(screen.getByText('R$ 110.00')).toBeInTheDocument(); // Total simulado
-    expect(screen.getByText('2x • R$ 55.00')).toBeInTheDocument(); // Parcelas simuladas
+    expect(screen.getByText('12x parcelas')).toBeInTheDocument(); // Parcelas simuladas
 
     // Mock da resposta da API de Criação (backend/pagamentos/)
     fetchMock.mockResolvedValueOnce({
@@ -78,15 +79,18 @@ describe('Fluxo Completo de Pagamento (Integração)', () => {
         id: 12345,
         metodo: 'Cartão com juros',
         total: 110.0,
-        parcelas: 2,
-        valor_parcela: 55.0,
+        parcelas: 12,
+        valor_parcela: 9.17,
+        valor_ultima_parcela: 9.13,
         informacoes_adicionais: 'Juros de 10%',
+        taxa: 10,
+        tipo_taxa: 'juros_cartao',
         created_at: new Date().toISOString(),
       }),
     });
 
     // 5. Confirmar Pagamento
-    const btnConfirmar = screen.getByText('Confirmar pagamento');
+    const btnConfirmar = screen.getByText(/Confirmar pagamento/i);
     fireEvent.click(btnConfirmar);
 
     // Verificar chamada da API de criação
@@ -98,7 +102,7 @@ describe('Fluxo Completo de Pagamento (Integração)', () => {
           body: JSON.stringify({
             opcao: 4,
             valor: 100,
-            parcelas: 2,
+            parcelas: 12,
           }),
         }),
       );
@@ -106,12 +110,12 @@ describe('Fluxo Completo de Pagamento (Integração)', () => {
 
     // 6. Verificar Tela de Recibo
     expect(
-      await screen.findByText('Pagamento confirmado!'),
+      await screen.findByText(/Pagamento confirmado!/i),
     ).toBeInTheDocument();
     expect(screen.getByText('#12345')).toBeInTheDocument(); // ID do recibo
 
     // 7. Reiniciar fluxo (Novo Pagamento)
-    const btnNovo = screen.getByText('Fazer novo pagamento');
+    const btnNovo = screen.getByText(/Fazer novo pagamento/i);
     fireEvent.click(btnNovo);
 
     // Verificar se voltou para o formulário limpo
