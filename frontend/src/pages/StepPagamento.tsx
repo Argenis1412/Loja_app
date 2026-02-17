@@ -10,7 +10,6 @@ export function StepPagamento() {
     parcelas: number;
   }) {
     console.log('Pagamento enviado:', dados);
-    // próximo passo: chamar API
   }
 
   return (
