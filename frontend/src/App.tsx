@@ -56,7 +56,6 @@ export default function App() {
         const data = await response.json();
         setSimulacao(data);
       } else {
-        // Intentar obtener mensaje del backend o usar genérico
         try {
           const errData = await response.json();
           setErro(errData.detail || 'Erro ao simular pagamento');

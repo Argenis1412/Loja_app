@@ -57,6 +57,7 @@ class ProcessarPagamentoUseCase:
 
 
 class ListarPagamentosUseCase:
+    """Listar todos os recibos do banco de dados."""
     def __init__(
         self,
         repository: ReciboRepository | None,
