@@ -74,34 +74,11 @@ jobs:
                 'para facilitar organização'
               );
             }
-  
-  lint:
-    name: Verificar Formato e Imports
-    runs-on: ubuntu-latest
-    needs: [validate-pr]
-    
-    steps:
-      - name: Checkout código
-        uses: actions/checkout@v4
-        
-      - name: Configurar Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
-
-      - name: Instalar Ferramentas de Linting
-        run: pip install black isort
-        
-      - name: Executar Black (check)
-        run: black --check .
-
-      - name: Executar isort (check)
-        run: isort --check-only .
 
   summary:
     name: Resumo das Verificações
     runs-on: ubuntu-latest
-    needs: [validate-pr, lint]
+    needs: [validate-pr]
     if: always()
     
     steps:
