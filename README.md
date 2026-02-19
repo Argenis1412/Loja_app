@@ -212,6 +212,15 @@ Loja_app/
 
 ## Getting Started
 
+### Clone the Repository
+
+First, clone the repository to your local machine:
+
+```bash
+git clone https://github.com/argenis972/Loja_app.git
+cd Loja_app
+```
+
 ### Prerequisites
 
 - **Python 3.11+** (for backend)
