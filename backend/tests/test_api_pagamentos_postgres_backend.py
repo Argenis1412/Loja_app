@@ -8,7 +8,7 @@ from sqlalchemy.pool import StaticPool
 
 import infrastructure.database as database
 from infrastructure.database import Base
-from infrastructure.db.models.recibo_models import (  # ensure model is imported into Base metadata
+from infrastructure.db.models.recibo_models import (  # garantir que o modelo seja importado no Base metadata
     ReciboModel,
 )
 

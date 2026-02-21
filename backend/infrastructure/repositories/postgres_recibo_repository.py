@@ -49,7 +49,7 @@ class PostgresReciboRepository(ReciboRepository):
             valor_parcela=recibo_db.valor_parcela,
             data_hora=recibo_db.created_at,
         )
-        # Agregar valor_ultima_parcela si existe en la BD
+        # Adicionar valor_ultima_parcela se existir no BD
         if (
             hasattr(recibo_db, "valor_ultima_parcela")
             and recibo_db.valor_ultima_parcela

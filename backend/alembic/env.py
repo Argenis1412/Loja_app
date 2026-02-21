@@ -10,7 +10,7 @@ from sqlalchemy import create_engine, pool
 from alembic import context
 
 # --------------------------------------------------
-# Path fix (required)
+# Correção de path (necessário)
 # --------------------------------------------------
 
 BASE_DIR = Path(__file__).resolve().parents[1]
@@ -23,10 +23,10 @@ from config.settings import settings
 # DATABASE_URL centralizada
 DATABASE_URL = settings.database_url
 if not DATABASE_URL:
-    raise RuntimeError("DATABASE_URL must be set for Alembic migrations")
+    raise RuntimeError("DATABASE_URL deve ser definida para migrações do Alembic")
 
 # --------------------------------------------------
-# Alembic config
+# Configuração do Alembic
 # --------------------------------------------------
 
 config = context.config
@@ -36,7 +36,7 @@ if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
 # --------------------------------------------------
-# Metadata
+# Metadados
 # --------------------------------------------------
 
 from infrastructure.db.base import Base  # noqa: E402
@@ -45,7 +45,7 @@ from infrastructure.db.models import recibo_models  # noqa: E402
 target_metadata = Base.metadata
 
 # --------------------------------------------------
-# Offline migrations
+# Migrações offline
 # --------------------------------------------------
 
 
@@ -62,7 +62,7 @@ def run_migrations_offline() -> None:
 
 
 # --------------------------------------------------
-# Online migrations (psycopg3)
+# Migrações online (psycopg3)
 # --------------------------------------------------
 
 

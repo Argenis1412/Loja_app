@@ -331,6 +331,77 @@ alembic downgrade -1
 
 ---
 
+## Deployment on Render
+
+The project is configured for easy deployment on Render with PostgreSQL.
+
+### Quick Backend Deployment
+
+#### Prerequisites
+- Account on [Render](https://render.com)
+- Project repository on GitHub
+
+#### Steps
+
+1. **Create PostgreSQL Database on Render:**
+   - Dashboard → New + → PostgreSQL
+   - Name: `loja-db`
+   - Region: choose closest region
+   - Plan: Free or Starter
+   - Copy the **Internal Database URL**
+
+2. **Create Web Service on Render:**
+   - Dashboard → New + → Web Service
+   - Connect GitHub repository
+   - Configuration:
+     - **Root Directory**: `backend`
+     - **Build Command**: `./build.sh`
+     - **Start Command**: `gunicorn -w 4 -k uvicorn.workers.UvicornWorker api.main:app --bind 0.0.0.0:$PORT`
+
+3. **Environment Variables:**
+   ```
+   DATABASE_URL=<Internal Database URL from step 1>
+   ENVIRONMENT=production
+   API_HOST=0.0.0.0
+   ```
+
+4. **Deploy:**
+   - Click "Create Web Service"
+   - Wait 2-5 minutes
+   - Your API will be at: `https://your-service.onrender.com`
+
+5. **Verify:**
+   - Health: `https://your-service.onrender.com/saude`
+   - Docs: `https://your-service.onrender.com/docs`
+
+### Frontend Deployment
+
+For the frontend (React + Vite):
+
+**Option 1: Static Site on Render**
+1. New + → Static Site
+2. Build Command: `cd frontend && npm install && npm run build`
+3. Publish Directory: `frontend/dist`
+4. Environment variable:
+   ```
+   VITE_API_URL=https://your-backend.onrender.com
+   ```
+
+**Option 2: Vercel or Netlify**
+- Deploy frontend on Vercel/Netlify
+- Configure `VITE_API_URL` pointing to backend on Render
+
+### Auto-Deployment
+
+Render automatically redeploys when you push to the main branch:
+```bash
+git push origin main
+```
+
+📖 **Full documentation**: See [Backend README - Deployment Section](backend/README.md#deployment-on-render)
+
+---
+
 ## Documentation Links
 
 - **[Backend README](backend/README.md)** — API endpoints, domain rules, persistence layer, testing strategy.

@@ -368,6 +368,124 @@ uvicorn api.main:app --reload
 
 ---
 
+## Deployment on Render
+
+This backend is prepared for easy deployment on Render with PostgreSQL.
+
+### Prerequisites
+
+1. Account on [Render](https://render.com)
+2. Project repository on GitHub (current one)
+
+### Deployment Steps
+
+#### 1. Create PostgreSQL Database on Render
+
+1. Go to Render dashboard
+2. Click **New +** → **PostgreSQL**
+3. Configure:
+   - **Name**: `loja-db` (or your preferred name)
+   - **Database**: `loja_db`
+   - **User**: automatically generated
+   - **Region**: choose closest region
+   - **Plan**: Free (for development) or Starter (for production)
+4. Click **Create Database**
+5. Wait for database creation (1-2 minutes)
+6. **Important**: Copy the **Internal Database URL** (starts with `postgresql://`)
+
+#### 2. Create Web Service on Render
+
+1. In Render dashboard, click **New +** → **Web Service**
+2. Connect your GitHub repository
+3. Configure the service:
+   - **Name**: `loja-api` (or your preferred name)
+   - **Region**: same as database
+   - **Branch**: `main` (or your branch)
+   - **Root Directory**: `backend`
+   - **Runtime**: `Python 3`
+   - **Build Command**: `./build.sh`
+   - **Start Command**: `gunicorn -w 4 -k uvicorn.workers.UvicornWorker api.main:app --bind 0.0.0.0:$PORT`
+   - **Plan**: Free (for development) or Starter (for production)
+
+#### 3. Configure Environment Variables
+
+In the **Environment** section of the Web Service, add:
+
+```
+DATABASE_URL=<paste Internal Database URL copied from step 1>
+ENVIRONMENT=production
+API_HOST=0.0.0.0
+```
+
+**Important note**: Render automatically provides the `PORT` variable, no need to define `API_PORT`.
+
+#### 4. Deploy
+
+1. Click **Create Web Service**
+2. Render automatically:
+   - Clones the repository
+   - Executes `build.sh` (installs dependencies and runs migrations)
+   - Starts the application with gunicorn
+3. Deploy takes 2-5 minutes
+4. Once completed, you'll see status as **Live**
+
+#### 5. Verify Deployment
+
+Your API will be available at: `https://loja-api.onrender.com` (or your chosen name)
+
+Endpoints to verify:
+- Health check: `https://loja-api.onrender.com/saude`
+- API docs: `https://loja-api.onrender.com/docs`
+
+### Deployment Files
+
+The project includes the following files configured for Render:
+
+- **`build.sh`**: Script executed during build (installs dependencies and runs migrations)
+- **`requirements.txt`**: Includes gunicorn to serve the application in production
+- **`runtime.txt`**: Specifies Python version (3.11.9)
+- **`.env.example`**: Template with comments about required environment variables
+
+### Redeploy Changes
+
+Render automatically redeploys when you push to the configured branch (main):
+
+```bash
+git add .
+git commit -m "Update API"
+git push origin main
+```
+
+Render will detect the push and start a new deploy automatically.
+
+### Troubleshooting
+
+**Migration errors:**
+- Verify that `DATABASE_URL` is correctly configured
+- Check logs in Render dashboard
+- Alembic migrations run automatically in `build.sh`
+
+**502 Bad Gateway error:**
+- Verify that start command is correct
+- Ensure port is configured as `$PORT` (variable provided by Render)
+
+**Environment variables not found:**
+- Verify all variables are defined in Render dashboard
+- Restart service after adding new variables
+
+### Production Considerations
+
+For a real production environment, consider:
+- Use PostgreSQL plan with automatic backups
+- Configure custom health checks
+- Implement authentication and authorization
+- Add rate limiting
+- Configure CORS specifically for your frontend domain
+- Use secret variables for sensitive credentials
+- Monitor logs and metrics
+
+---
+
 ## Production Considerations
 
 This is a learning project. In production, you would typically add:
