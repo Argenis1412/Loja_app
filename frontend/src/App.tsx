@@ -14,6 +14,7 @@ import type {
   Pagamento,
   MetodoPagamento,
 } from './types/api';
+import { API_ENDPOINTS } from './config/api';
 
 type Tela = 'form' | 'confirmacao' | 'recibo';
 
@@ -34,15 +35,15 @@ export default function App() {
     parcelas: number;
   }) => {
     setLoading(true);
-    setErro(null); // Limpiar errores previos
+    setErro(null); // Limpar erros anteriores
     setDadosPagamento(dados);
-    setTela('confirmacao'); // Navegación optimista
+    setTela('confirmacao'); // Navegação otimista
 
     try {
       // Usa a função auxiliar importada para converter string -> int
       const opcao = converterMetodoParaOpcao(dados.metodo);
 
-      const response = await fetch('http://localhost:8000/pagamentos/simular', {
+      const response = await fetch(API_ENDPOINTS.simular, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -64,7 +65,7 @@ export default function App() {
         }
       }
     } catch (error) {
-      console.error('Error de red', error);
+      console.error('Erro de rede', error);
       setErro('Não foi possível conectar ao servidor. Verifique sua conexão.');
     } finally {
       setLoading(false);
@@ -80,7 +81,7 @@ export default function App() {
       // Usa a função auxiliar importada para converter string -> int
       const opcao = converterMetodoParaOpcao(dadosPagamento.metodo);
 
-      const response = await fetch('http://localhost:8000/pagamentos/', {
+      const response = await fetch(API_ENDPOINTS.pagamentos, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

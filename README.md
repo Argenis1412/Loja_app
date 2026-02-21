@@ -117,6 +117,33 @@ The backend is the source of truth. All calculations, validations, and business 
 - **Display logic**: Renders backend responses without transformation.
 - **No business rules**: Does not calculate totals or validate payment constraints.
 
+### API Configuration
+
+The frontend uses **environment-based configuration** for backend URLs:
+
+**Production (Default):**
+- URL: `https://loja-app.onrender.com`
+- Used when deployed to Vercel or when no `.env.local` exists
+
+**Local Development:**
+- Create `frontend/.env.local`:
+  ```bash
+  VITE_API_URL=http://localhost:8000
+  ```
+- Frontend connects to local backend
+
+**Testing:**
+- Tests automatically use `http://localhost:8000`
+- Configured in `vite.config.ts` test environment
+
+**How it works:**
+1. `frontend/src/config/api.ts` exports centralized endpoints
+2. All API calls import from this config file
+3. Vite reads `VITE_API_URL` from environment
+4. Falls back to production URL if not set
+
+This eliminates hardcoded URLs and enables seamless switching between local and cloud backends.
+
 ---
 
 ## Business Domain Summary
@@ -181,16 +208,22 @@ Loja_app/
 │   │   │   ├── PagamentoForm.tsx
 │   │   │   ├── ConfirmacaoPagamento.tsx
 │   │   │   └── Recibo.tsx
+│   │   ├── config/       # Configuration
+│   │   │   └── api.ts    # Centralized API endpoints
 │   │   ├── services/     # API functions
-│   │   │   └── pagamentoService.ts
+│   │   │   └── api.ts    # Payment service
 │   │   ├── types/        # TypeScript interfaces
 │   │   │   └── api.ts
 │   │   ├── tests/        # Component tests
 │   │   ├── App.tsx       # Main app component
 │   │   └── main.tsx      # App entry point
+│   ├── .env.example      # Environment template
+│   ├── .env.production   # Production config
+│   ├── .env.test         # Test environment config
 │   ├── package.json      # Node dependencies
 │   ├── vite.config.ts    # Vite configuration
 │   ├── tailwind.config.js # Tailwind CSS config
+│   ├── vercel.json       # Vercel deployment config
 │   └── README.md         # Frontend documentation
 │
 ├── .github/              # GitHub Actions CI/CD
@@ -331,11 +364,18 @@ alembic downgrade -1
 
 ---
 
-## Deployment on Render
+## Deployment
 
-The project is configured for easy deployment on Render with PostgreSQL.
+### Live Deployment
 
-### Quick Backend Deployment
+**Backend:** [https://loja-app.onrender.com](https://loja-app.onrender.com/docs)  
+**Frontend:** Deploy to Vercel (see instructions below)
+
+The project is configured for deployment on cloud platforms:
+- **Backend**: Render with PostgreSQL
+- **Frontend**: Vercel (recommended) or Netlify
+
+### Backend Deployment on Render
 
 #### Prerequisites
 - Account on [Render](https://render.com)
@@ -374,31 +414,78 @@ The project is configured for easy deployment on Render with PostgreSQL.
    - Health: `https://your-service.onrender.com/saude`
    - Docs: `https://your-service.onrender.com/docs`
 
-### Frontend Deployment
+### Frontend Deployment on Vercel
 
-For the frontend (React + Vite):
+#### Prerequisites
+- Account on [Vercel](https://vercel.com)
+- Backend already deployed on Render
 
-**Option 1: Static Site on Render**
-1. New + → Static Site
-2. Build Command: `cd frontend && npm install && npm run build`
-3. Publish Directory: `frontend/dist`
-4. Environment variable:
-   ```
-   VITE_API_URL=https://your-backend.onrender.com
-   ```
+#### Quick Deploy
 
-**Option 2: Vercel or Netlify**
-- Deploy frontend on Vercel/Netlify
-- Configure `VITE_API_URL` pointing to backend on Render
+1. **Via Vercel Dashboard:**
+   - Go to [vercel.com](https://vercel.com)
+   - Click "Import Project" → Import from GitHub
+   - Framework Preset: **Vite**
+   - Root Directory: `frontend`
+   - Build Command: `npm run build`
+   - Output Directory: `dist`
+   
+2. **Environment Variables (Optional):**
+   - By default, frontend uses `https://loja-app.onrender.com`
+   - To override, set in Vercel dashboard:
+     ```
+     VITE_API_URL=https://your-backend.onrender.com
+     ```
+
+3. **Deploy:**
+   - Click "Deploy"
+   - Your app will be at: `https://your-app.vercel.app`
+
+#### Via Vercel CLI
+
+```bash
+# Install Vercel CLI
+npm install -g vercel
+
+# Deploy from frontend directory
+cd frontend
+vercel --prod
+```
+
+### Local Development with Cloud Backend
+
+To test frontend locally against production backend:
+
+```powershell
+# Create frontend/.env.local
+VITE_API_URL=https://loja-app.onrender.com
+
+# Run frontend
+.\run_frontend.ps1
+```
+
+### Production Architecture
+
+```
+User Browser
+    ↓
+Vercel (Frontend: React + TypeScript)
+    ↓ HTTPS/JSON
+Render (Backend: FastAPI + Python)
+    ↓ SQL
+PostgreSQL Database (Render)
+```
 
 ### Auto-Deployment
 
-Render automatically redeploys when you push to the main branch:
+Both platforms auto-deploy when you push to main branch:
 ```bash
 git push origin main
 ```
 
-📖 **Full documentation**: See [Backend README - Deployment Section](backend/README.md#deployment-on-render)
+📖 **Full documentation**: 
+- [Backend README - Deployment](backend/README.md#deployment-on-render)
+- [Frontend README - Deployment](frontend/README.md#deployment)
 
 ---
 

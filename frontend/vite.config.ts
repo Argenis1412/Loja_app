@@ -13,5 +13,9 @@ export default defineConfig({
     fileParallelism: false,
     testTimeout: 60000,
     hookTimeout: 60000,
+    env: {
+      // Define URL do backend para testes (localhost)
+      VITE_API_URL: 'http://localhost:8000',
+    },
   },
 })

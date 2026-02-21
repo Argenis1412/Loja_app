@@ -1,6 +1,7 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import App from '../App';
+import { API_ENDPOINTS } from '../config/api';
 
 // Mock global do fetch para interceptar as chamadas de API
 const fetchMock = vi.fn();
@@ -53,7 +54,7 @@ describe('Fluxo Completo de Pagamento (Integração)', () => {
     // Verificar chamada da API de simulação
     await waitFor(() => {
       expect(fetchMock).toHaveBeenCalledWith(
-        'http://localhost:8000/pagamentos/simular',
+        API_ENDPOINTS.simular,
         expect.objectContaining({
           method: 'POST',
           body: JSON.stringify({
@@ -96,7 +97,7 @@ describe('Fluxo Completo de Pagamento (Integração)', () => {
     // Verificar chamada da API de criação
     await waitFor(() => {
       expect(fetchMock).toHaveBeenCalledWith(
-        'http://localhost:8000/pagamentos/',
+        API_ENDPOINTS.pagamentos,
         expect.objectContaining({
           method: 'POST',
           body: JSON.stringify({

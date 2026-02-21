@@ -1,4 +1,5 @@
 import type { CriarPagamentoRequest } from '../types/api';
+import { API_ENDPOINTS } from '../config/api';
 
 function metodoParaOpcao(metodo: CriarPagamentoRequest['metodo']) {
   switch (metodo) {
@@ -24,7 +25,7 @@ export async function criarPagamento(dados: CriarPagamentoRequest) {
   // Debug log do payload antes de enviar a requisição
   console.log('criarPagamento payload:', payload);
 
-  const response = await fetch('http://127.0.0.1:8000/pagamentos/', {
+  const response = await fetch(API_ENDPOINTS.pagamentos, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -55,7 +56,7 @@ export async function criarPagamento(dados: CriarPagamentoRequest) {
 }
 
 export async function listarPagamentos() {
-  const response = await fetch('http://127.0.0.1:8000/pagamentos/');
+  const response = await fetch(API_ENDPOINTS.pagamentos);
 
   if (!response.ok) {
     throw new Error('Erro ao buscar pagamentos');

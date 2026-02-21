@@ -107,12 +107,21 @@ API calls are made directly using `fetch()` in `App.tsx` and in `services/api.ts
 
 ### API Base URL
 
-The backend URL is hardcoded in two locations:
+### API Configuration
 
-- `App.tsx`: `http://localhost:8000/pagamentos/`
-- `services/api.ts`: `http://127.0.0.1:8000/pagamentos/`
+The backend URL is centralized in `src/config/api.ts` and uses environment variables:
 
-> **Note:** API URLs are intentionally hardcoded for learning simplicity. In production scenarios, environment variables should be used.
+**Default (Production):** `https://loja-app.onrender.com`
+
+**Local Development:** Create `.env.local` with:
+```
+VITE_API_URL=http://localhost:8000
+```
+
+The configuration automatically uses:
+- Production URL (Render) by default
+- `VITE_API_URL` from environment if set
+- Falls back to Render if no env var is defined
 
 ### Endpoints Consumed
 
@@ -310,6 +319,44 @@ Output is generated in the `dist/` folder.
 ```bash
 npm run preview
 ```
+
+---
+
+## Deployment
+
+### Deploy to Vercel
+
+1. **Install Vercel CLI** (optional):
+```bash
+npm install -g vercel
+```
+
+2. **Deploy from GitHub:**
+   - Go to [vercel.com](https://vercel.com)
+   - Import your repository
+   - Framework Preset: **Vite**
+   - Root Directory: `frontend`
+   - Build Command: `npm run build`
+   - Output Directory: `dist`
+
+3. **Environment Variables** (optional):
+   - By default, uses `https://loja-app.onrender.com`
+   - To override, set `VITE_API_URL` in Vercel dashboard
+
+4. **Deploy via CLI:**
+```bash
+cd frontend
+vercel --prod
+```
+
+**Production Flow:**
+```
+User → Vercel (Frontend) → Render (Backend) → PostgreSQL
+```
+
+**CORS:** Already configured in backend to accept all origins (`allow_origins=["*"]`).
+
+---
 
 ### Available Scripts
 
