@@ -4,12 +4,19 @@ from fastapi.responses import JSONResponse
 
 from api.pagamentos_api import router as pagamentos_router
 from domain.exceptions import DomainError
-from infrastructure.database import create_db_and_tables
-
-# Garante que as tabelas sejam criadas ao iniciar
-create_db_and_tables()
+from infrastructure.database import create_db_and_tables, warmup_db
 
 app = FastAPI(title="Loja Mini App")
+
+
+@app.on_event("startup")
+async def startup_event():
+    """
+    Evento executado na inicialização da aplicação.
+    Cria tabelas e aquece o pool de conexões.
+    """
+    create_db_and_tables()
+    warmup_db()
 
 
 # Manipulador de exceções de domínio para retornar 400 Bad Request
