@@ -1,31 +1,46 @@
 # Screenshots
 
-This folder contains application screenshots for the main README.
+This folder contains application screenshots used in the main README.
 
-## Required Images
+## Current Images
 
-1. **payment-form.png** - Screenshot of the payment selection screen
-2. **confirmation.png** - Screenshot of the payment confirmation screen
-3. **receipt.png** - Screenshot of the payment receipt screen
+✅ **payment-form.png** - Payment selection screen  
+✅ **confirmation.png** - Payment confirmation screen  
+✅ **receipt.png** - Payment receipt screen
 
-## How to Add Images
+These images are referenced in the main [README.md](../../README.md) using relative paths:
 
-### Option 1: Upload via GitHub Web Interface (Recommended)
-1. Go to the main README.md on GitHub
-2. Click "Edit" (pencil icon)
-3. Drag and drop your screenshots directly into the markdown editor
-4. GitHub will automatically upload them and generate URLs
-5. The URLs will look like: `https://github.com/user-attachments/assets/...`
+```markdown
+<p align="center">
+  <img src="docs/images/payment-form.png" width="500" alt="Payment Form">
+</p>
+```
 
-### Option 2: Upload to this folder
-1. Add your images to this folder (docs/images/)
-2. Update the README.md image URLs to use relative paths:
-   ```markdown
-   ![Payment Form](docs/images/payment-form.png)
-   ```
+## Updating Screenshots
+
+To update any screenshot:
+
+1. Replace the corresponding PNG file in this folder
+2. Keep the same filename to avoid breaking references
+3. Commit and push changes
 
 ## Image Guidelines
-- Format: PNG or JPG
-- Recommended width: 800-1000px
-- Mobile screenshots should be cropped to show just the app
-- Use clear, high-quality screenshots
+
+- **Format**: PNG or JPG
+- **Recommended width**: 800-1000px for best clarity
+- **Mobile screenshots**: Crop to show just the app interface
+- **Quality**: Use high-quality, clear screenshots
+- **File size**: Optimize images to keep repository size small
+
+## Adding New Screenshots
+
+If adding new images:
+
+1. Add the PNG/JPG file to this folder
+2. Reference it in the main README using:
+   ```markdown
+   <p align="center">
+     <img src="docs/images/your-image.png" width="500" alt="Description">
+   </p>
+   ```
+
