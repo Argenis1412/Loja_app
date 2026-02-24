@@ -11,7 +11,16 @@ This is the backend component of Loja App, a learning laboratory focused on back
 
 ---
 
-## Architecture and Purpose
+## 🏛 Architecture
+
+**Framework** → FastAPI (Python 3.11+)  
+**Architecture** → Clean Architecture (DDD)  
+**Database** → PostgreSQL (Production) / SQLite (Tests)  
+**ORM** → SQLAlchemy  
+**Testing** → Pytest + Coverage  
+**Migrations** → Alembic
+
+### Design Principles
 
 This backend is an API-first payment system built as a learning laboratory. The goal is to maximize clarity, correctness, and architectural reasoning.
 
@@ -27,7 +36,23 @@ The domain layer contains no framework dependencies and can be executed in isola
 Application services orchestrate use cases without embedding business rules.
 The frontend is treated as a consumer, never as a source of truth.
 
-### Project Structure
+---
+
+## 📁 Project Structure
+
+```
+backend/
+├── domain/              # Business logic (framework-agnostic)
+├── services/            # Application services
+├── api/                 # REST API layer
+├── infrastructure/      # Database & repositories
+├── config/              # Settings & configuration
+├── alembic/             # Database migrations
+└── tests/               # Test suite
+```
+
+<details>
+<summary>📂 Full Project Structure</summary>
 
 ```
 backend/
@@ -61,6 +86,8 @@ backend/
 ├── pyproject.toml        # Python project configuration
 └── alembic.ini           # Alembic configuration
 ```
+
+</details>
 
 ---
 
@@ -238,60 +265,6 @@ If `DATABASE_URL` is set, it takes precedence. Otherwise, the URL is built from 
 `get_db()` in `infrastructure/database.py` provides a session per request with automatic commit on success and rollback on error.
 
 Tables are created on application startup via `create_db_and_tables()`.
-
----
-
-## Project Structure
-
-```
-backend/
-├── api/
-│   ├── main.py                 # FastAPI app, exception handler, health endpoint
-│   ├── pagamentos_api.py       # Payment endpoints
-│   ├── deps.py                 # Dependency injection
-│   └── dtos/
-│       ├── pagamento_request.py
-│       └── pagamento_response.py
-│
-├── config/
-│   └── settings.py             # Pydantic Settings configuration
-│
-├── domain/
-│   ├── calculadora.py          # Payment calculation rules
-│   ├── recibo.py               # Receipt domain entity
-│   ├── recibo_repository.py    # Abstract repository interface
-│   └── exceptions.py           # Domain exceptions
-│
-├── infrastructure/
-│   ├── database.py             # Engine, SessionLocal, get_db()
-│   ├── db/
-│   │   ├── base.py             # SQLAlchemy Base
-│   │   └── models/
-│   │       └── recibo_models.py
-│   └── repositories/
-│       └── postgres_recibo_repository.py
-│
-├── services/
-│   └── pagamento_service.py    # Use cases and service facade
-│
-├── tests/
-│   ├── conftest.py
-│   ├── unit/
-│   │   └── test_calculadora.py
-|   ├── services/
-│   │   └── test_pagamento_service.py
-│   ├── test_recibo.py
-│   ├── test_pagamento_service.py
-│   ├── test_api_pagamentos.py
-│   ├── test_api_pagamentos_errors.py
-│   ├─  test_postgres_repository.py
-│   ├── test_integration_postgres.py
-│   └── test_health.py
-│
-├── pyproject.toml
-├── requirements.txt
-└── README.md
-```
 
 ---
 
@@ -513,4 +486,28 @@ The architecture supports these additions without refactoring the domain layer.
 
 ---
 
-<!-- Author and License are declared in the repository root README -->
+## 👨‍💻 Author
+
+<div align="center">
+
+**Argenis Mauricio López Salazar**
+
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/argenis972/)
+[![GitHub](https://img.shields.io/badge/GitHub-100000?style=for-the-badge&logo=github&logoColor=white)](https://github.com/argenis972)
+[![Email](https://img.shields.io/badge/Email-D14836?style=for-the-badge&logo=gmail&logoColor=white)](mailto:argenislopez28708256@gmail.com)
+
+</div>
+
+---
+
+## 📄 License
+
+This project is licensed under the **MIT License** - see the [LICENSE.txt](../LICENSE.txt) file for details.
+
+---
+
+<div align="center">
+
+Made with ❤️ by [Argenis López](https://github.com/argenis972)
+
+</div>
