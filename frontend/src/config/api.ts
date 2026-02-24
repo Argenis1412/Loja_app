@@ -8,4 +8,5 @@ export const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://loja-app.on
 export const API_ENDPOINTS = {
   pagamentos: `${API_BASE_URL}/pagamentos/`,
   simular: `${API_BASE_URL}/pagamentos/simular`,
+  saude: `${API_BASE_URL}/saude`,
 } as const;

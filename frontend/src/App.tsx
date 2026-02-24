@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
   PagamentoForm,
   converterMetodoParaOpcao,
@@ -28,6 +28,19 @@ export default function App() {
   const [recibo, setRecibo] = useState<Pagamento | null>(null);
   const [loading, setLoading] = useState(false);
   const [erro, setErro] = useState<string | null>(null);
+  const backendReady = useRef(false);
+
+  // Warm-up: despertar o backend do Render (cold start) assim que a app carrega
+  useEffect(() => {
+    fetch(API_ENDPOINTS.saude)
+      .then(() => {
+        backendReady.current = true;
+      })
+      .catch(() => {
+        // Silencioso — a tentativa de warm-up falhou, mas as chamadas reais
+        // mostrarão o erro adequado quando o usuário interagir.
+      });
+  }, []);
 
   const handleContinuar = async (dados: {
     valor: number;
