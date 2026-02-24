@@ -183,7 +183,9 @@ For detailed business rules, see the [backend README](backend/README.md).
 The application follows a three-step payment flow:
 
 ### 1️⃣ Payment Selection
-<img src="docs/images/payment-form.png" width="500" alt="Payment Form">
+<p align="center">
+  <img src="docs/images/payment-form.png" width="500" alt="Payment Form">
+</p>
 
 Users select the payment amount and method:
 - 💵 Cash (10% discount)
@@ -192,7 +194,9 @@ Users select the payment amount and method:
 - 📈 Installments with interest (12-24x, 10% interest)
 
 ### 2️⃣ Payment Confirmation
-<img src="docs/images/confirmation.png" width="500" alt="Payment Confirmation">
+<p align="center">
+  <img src="docs/images/confirmation.png" width="500" alt="Payment Confirmation">
+</p>
 
 Review payment details before confirming:
 - Payment method
@@ -201,7 +205,9 @@ Review payment details before confirming:
 - Installment details (if applicable)
 
 ### 3️⃣ Receipt
-<img src="docs/images/receipt.png" width="500" alt="Payment Receipt">
+<p align="center">
+  <img src="docs/images/receipt.png" width="500" alt="Payment Receipt">
+</p>
 
 Payment confirmation with:
 - Transaction ID
@@ -610,20 +616,30 @@ The project is stable for learning purposes but not intended for production depl
 
 ---
 
-## Author
+## 👨‍💻 Author
 
-**Argenis López**
+<div align="center">
 
-- [LinkedIn](https://www.linkedin.com/in/argenis972/)
-- [GitHub](https://github.com/argenis972)
-- [Email](mailto:argenislopez28708256@gmail.com)
+**Argenis Mauricio López Salazar**
 
----
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/argenis972/)
+[![GitHub](https://img.shields.io/badge/GitHub-100000?style=for-the-badge&logo=github&logoColor=white)](https://github.com/argenis972)
+[![Email](https://img.shields.io/badge/Email-D14836?style=for-the-badge&logo=gmail&logoColor=white)](mailto:argenislopez28708256@gmail.com)
 
-## License
-
-MIT License — See [LICENSE.txt](LICENSE.txt)
+</div>
 
 ---
 
-**⭐ If this project helps your learning journey, consider giving it a star!**
+## 📄 License
+
+This project is licensed under the **MIT License** - see the [LICENSE.txt](LICENSE.txt) file for details.
+
+---
+
+<div align="center">
+
+### ⭐ Star this repository if it helped you!
+
+Made with ❤️ by [Argenis López](https://github.com/argenis972)
+
+</div>
