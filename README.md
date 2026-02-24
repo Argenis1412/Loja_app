@@ -616,28 +616,16 @@ The project is stable for learning purposes but not intended for production depl
 
 ---
 
-## 👨‍💻 Author
-
-<div align="center">
+## Author
 
 **Argenis Mauricio López Salazar**
 
-[![LinkedIn](https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/argenis972/)
-[![GitHub](https://img.shields.io/badge/GitHub-100000?style=for-the-badge&logo=github&logoColor=white)](https://github.com/argenis972)
-[![Email](https://img.shields.io/badge/Email-D14836?style=for-the-badge&logo=gmail&logoColor=white)](mailto:argenislopez28708256@gmail.com)
-
-</div>
+- LinkedIn: [linkedin.com/in/argenis972](https://www.linkedin.com/in/argenis972/)
+- GitHub: [github.com/argenis972](https://github.com/argenis972)
+- Email: argenislopez28708256@gmail.com
 
 ---
 
-## 📄 License
+## License
 
 This project is licensed under the **MIT License** - see the [LICENSE.txt](LICENSE.txt) file for details.
-
----
-
-<div align="center">
-
-### ⭐ Star this repository if it helped you!
-
-</div>
