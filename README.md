@@ -183,7 +183,7 @@ For detailed business rules, see the [backend README](backend/README.md).
 The application follows a three-step payment flow:
 
 ### 1️⃣ Payment Selection
-![Payment Form](https://via.placeholder.com/400x600/f0f0f0/333333?text=Payment+Form)
+<img src="docs/images/payment-form.png" width="500" alt="Payment Form">
 
 Users select the payment amount and method:
 - 💵 Cash (10% discount)
@@ -192,7 +192,7 @@ Users select the payment amount and method:
 - 📈 Installments with interest (12-24x, 10% interest)
 
 ### 2️⃣ Payment Confirmation
-![Payment Confirmation](https://via.placeholder.com/400x600/f0f0f0/333333?text=Confirmation)
+<img src="docs/images/confirmation.png" width="500" alt="Payment Confirmation">
 
 Review payment details before confirming:
 - Payment method
@@ -201,7 +201,7 @@ Review payment details before confirming:
 - Installment details (if applicable)
 
 ### 3️⃣ Receipt
-![Payment Receipt](https://via.placeholder.com/400x600/f0f0f0/333333?text=Receipt)
+<img src="docs/images/receipt.png" width="500" alt="Payment Receipt">
 
 Payment confirmation with:
 - Transaction ID
