@@ -168,7 +168,63 @@ For detailed business rules, see the [backend README](backend/README.md).
 
 ---
 
-## Repository Structure
+## 🏗 Architecture
+
+**Backend** → FastAPI + Clean Architecture (Domain-Driven Design)  
+**Frontend** → React + TypeScript (Vite)  
+**Database** → PostgreSQL (Production) / SQLite (Tests)  
+**CI/CD** → GitHub Actions  
+**Deploy** → Render (API) + Vercel (UI)
+
+---
+
+## 🎨 Application Flow
+
+The application follows a three-step payment flow:
+
+### 1️⃣ Payment Selection
+![Payment Form](https://via.placeholder.com/400x600/f0f0f0/333333?text=Payment+Form)
+
+Users select the payment amount and method:
+- 💵 Cash (10% discount)
+- 💳 Debit card (5% discount)
+- 📊 Installments without interest (2-6x)
+- 📈 Installments with interest (12-24x, 10% interest)
+
+### 2️⃣ Payment Confirmation
+![Payment Confirmation](https://via.placeholder.com/400x600/f0f0f0/333333?text=Confirmation)
+
+Review payment details before confirming:
+- Payment method
+- Base amount
+- Total amount with discounts/interest applied
+- Installment details (if applicable)
+
+### 3️⃣ Receipt
+![Payment Receipt](https://via.placeholder.com/400x600/f0f0f0/333333?text=Receipt)
+
+Payment confirmation with:
+- Transaction ID
+- Payment date and time
+- Payment method
+- Total amount paid
+- Applied discounts/interest
+
+---
+
+## 📁 Project Structure
+
+```
+Loja_app/
+├── backend/              # FastAPI API (Clean Architecture)
+├── frontend/             # React + TypeScript (Vite)
+├── .github/              # CI/CD pipelines
+├── Makefile              # Build automation
+└── README.md
+```
+
+<details>
+<summary>📂 Full Project Structure</summary>
 
 ```
 Loja_app/
@@ -241,6 +297,9 @@ Loja_app/
 ├── setup.ps1             # Initial setup (Windows)
 └── verificar_backend.ps1 # Backend verification script
 ```
+
+</details>
+
 ---
 
 ## Getting Started
