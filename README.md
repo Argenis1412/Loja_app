@@ -640,6 +640,4 @@ This project is licensed under the **MIT License** - see the [LICENSE.txt](LICEN
 
 ### ⭐ Star this repository if it helped you!
 
-Made with ❤️ by [Argenis López](https://github.com/argenis972)
-
 </div>
