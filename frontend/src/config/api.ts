@@ -2,6 +2,8 @@
  * Configuração centralizada da API
  * Por padrão usa a URL do backend no Render (produção)
  * Para desenvolvimento local, criar .env.local com VITE_API_URL=http://localhost:8000
+ * 
+ * @see https://vitejs.dev/guide/env-and-mode.html for environment variables
  */
 export const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://loja-app.onrender.com';
 
