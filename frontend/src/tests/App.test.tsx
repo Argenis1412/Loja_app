@@ -9,7 +9,9 @@ vi.stubGlobal('fetch', fetchMock);
 
 describe('Fluxo Completo de Pagamento (Integração)', () => {
   beforeEach(() => {
-    fetchMock.mockClear();
+    fetchMock.mockReset();
+    // Default: resposta genérica para chamadas inesperadas (ex: warm-up/saude)
+    fetchMock.mockResolvedValue({ ok: true, json: async () => ({}) });
   });
 
   afterEach(() => {
