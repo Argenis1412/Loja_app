@@ -8,7 +8,7 @@ Set-Location backend
 python -m venv venv
 .\venv\Scripts\activate
 pip install --upgrade pip
-pip install -r requirements.txt
+pip install --trusted-host pypi.org --trusted-host files.pythonhosted.org -r requirements.txt
 deactivate
 Set-Location ..
 
