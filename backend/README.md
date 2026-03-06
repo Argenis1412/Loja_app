@@ -1,7 +1,7 @@
 # Loja App — Backend (Payments API)
 
 ![CI](https://github.com/argenis972/Loja_app/actions/workflows/backend-ci.yml/badge.svg)
-![Python](https://img.shields.io/badge/Python-3.11+-blue?style=flat&logo=python&logoColor=white)
+![Python](https://img.shields.io/badge/Python-3.12-blue?style=flat&logo=python&logoColor=white)
 ![FastAPI](https://img.shields.io/badge/FastAPI-009688?style=flat&logo=fastapi&logoColor=white)
 ![Pytest](https://img.shields.io/badge/Pytest-Automated%20Tests-brightgreen?style=flat)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-DB-336791?style=flat&logo=postgresql&logoColor=white)
@@ -13,7 +13,7 @@ This is the backend component of Loja App, a learning laboratory focused on back
 
 ## 🏛 Architecture
 
-**Framework** → FastAPI (Python 3.11+)  
+**Framework** → FastAPI (Python 3.12)  
 **Architecture** → Clean Architecture (DDD)  
 **Database** → PostgreSQL (Production) / SQLite (Tests)  
 **ORM** → SQLAlchemy  
@@ -306,28 +306,43 @@ pytest
 
 ### Requirements
 
-- Python 3.11+
+- **Python 3.12** (required — `pydantic-core` does not have pre-built wheels for Python 3.13/3.14 yet)
 - Primary database: PostgreSQL
 - Tests and development may use SQLite
 
+> ⚠️ **Windows users:** `python` may not be on PATH. Use the **Python Launcher** (`py`) instead.  
+> Check available versions with: `py --list`
+
 ### Install and Run
 
-```bash
+**Windows (PowerShell):**
+
+```powershell
 cd backend
 
-# Create virtual environment
-python -m venv venv
+# Allow script execution if needed (once per machine)
+Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
 
-# Activate (Windows)
-.\venv\Scripts\activate
+# Create virtual environment with Python 3.12
+py -3.12 -m venv venv
 
-# Activate (Linux / Mac)
-source venv/bin/activate
+# Activate
+.\venv\Scripts\Activate.ps1
 
 # Install dependencies
 pip install -r requirements.txt
 
 # Start server
+uvicorn api.main:app --reload
+```
+
+**Linux / macOS:**
+
+```bash
+cd backend
+python3.12 -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
 uvicorn api.main:app --reload
 ```
 
