@@ -2,7 +2,7 @@
 
 [![Backend CI](https://github.com/Argenis1412/Loja_app/actions/workflows/backend-ci.yml/badge.svg)](https://github.com/Argenis1412/Loja_app/actions/workflows/backend-ci.yml)
 [![Frontend CI](https://github.com/Argenis1412/Loja_app/actions/workflows/frontend-ci.yml/badge.svg)](https://github.com/Argenis1412/Loja_app/actions/workflows/frontend-ci.yml)
-[![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
+[![Python 3.12+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
 [![TypeScript](https://img.shields.io/badge/typescript-5.0+-blue.svg)](https://www.typescriptlang.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE.txt)
 
