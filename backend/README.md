@@ -1,6 +1,6 @@
 # Loja App — Backend (Payments API)
 
-![CI](https://github.com/argenis972/Loja_app/actions/workflows/backend-ci.yml/badge.svg)
+![CI](https://github.com/Argenis1412/Loja_app/actions/workflows/backend-ci.yml/badge.svg)
 ![Python](https://img.shields.io/badge/Python-3.12-blue?style=flat&logo=python&logoColor=white)
 ![FastAPI](https://img.shields.io/badge/FastAPI-009688?style=flat&logo=fastapi&logoColor=white)
 ![Pytest](https://img.shields.io/badge/Pytest-Automated%20Tests-brightgreen?style=flat)
@@ -506,7 +506,7 @@ The architecture supports these additions without refactoring the domain layer.
 **Argenis Mauricio López Salazar**
 
 - LinkedIn: [linkedin.com/in/argenis972](https://www.linkedin.com/in/argenis972/)
-- GitHub: [github.com/argenis972](https://github.com/argenis972)
+- GitHub: [github.com/Argenis1412](https://github.com/Argenis1412)
 - Email: argenislopez28708256@gmail.com
 
 ---

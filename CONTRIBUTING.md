@@ -30,7 +30,15 @@ Before you begin, ensure you have the following installed:
 ### Clone the Repository
 
 ```bash
-git clone https://github.com/argenis972/Loja_app.git
+# Using HTTPS
+git clone https://github.com/Argenis1412/Loja_app.git
+
+# Or using SSH
+git clone git@github.com:Argenis1412/Loja_app.git
+
+# Or using GitHub CLI
+gh repo clone Argenis1412/Loja_app
+
 cd Loja_app
 ```
 

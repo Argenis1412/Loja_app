@@ -1,7 +1,7 @@
 ﻿# Loja App — Payment System
 
-[![Backend CI](https://github.com/argenis972/Loja_app/actions/workflows/backend-ci.yml/badge.svg)](https://github.com/argenis972/Loja_app/actions/workflows/backend-ci.yml)
-[![Frontend CI](https://github.com/argenis972/Loja_app/actions/workflows/frontend-ci.yml/badge.svg)](https://github.com/argenis972/Loja_app/actions/workflows/frontend-ci.yml)
+[![Backend CI](https://github.com/Argenis1412/Loja_app/actions/workflows/backend-ci.yml/badge.svg)](https://github.com/Argenis1412/Loja_app/actions/workflows/backend-ci.yml)
+[![Frontend CI](https://github.com/Argenis1412/Loja_app/actions/workflows/frontend-ci.yml/badge.svg)](https://github.com/Argenis1412/Loja_app/actions/workflows/frontend-ci.yml)
 [![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
 [![TypeScript](https://img.shields.io/badge/typescript-5.0+-blue.svg)](https://www.typescriptlang.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE.txt)
@@ -315,7 +315,15 @@ Loja_app/
 First, clone the repository to your local machine:
 
 ```bash
-git clone https://github.com/argenis972/Loja_app.git
+# Using HTTPS
+git clone https://github.com/Argenis1412/Loja_app.git
+
+# Or using SSH
+git clone git@github.com:Argenis1412/Loja_app.git
+
+# Or using GitHub CLI
+gh repo clone Argenis1412/Loja_app
+
 cd Loja_app
 ```
 
@@ -621,7 +629,7 @@ The project is stable for learning purposes but not intended for production depl
 **Argenis Mauricio López Salazar**
 
 - LinkedIn: [linkedin.com/in/argenis972](https://www.linkedin.com/in/argenis972/)
-- GitHub: [github.com/argenis972](https://github.com/argenis972)
+- GitHub: [github.com/Argenis1412](https://github.com/Argenis1412)
 - Email: argenislopez28708256@gmail.com
 
 ---
