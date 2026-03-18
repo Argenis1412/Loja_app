@@ -3,514 +3,77 @@
 ![CI](https://github.com/Argenis1412/Loja_app/actions/workflows/backend-ci.yml/badge.svg)
 ![Python](https://img.shields.io/badge/Python-3.12-blue?style=flat&logo=python&logoColor=white)
 ![FastAPI](https://img.shields.io/badge/FastAPI-009688?style=flat&logo=fastapi&logoColor=white)
-![Pytest](https://img.shields.io/badge/Pytest-Automated%20Tests-brightgreen?style=flat)
-![PostgreSQL](https://img.shields.io/badge/PostgreSQL-DB-336791?style=flat&logo=postgresql&logoColor=white)
-![License](https://img.shields.io/badge/License-MIT-green)
 
-This is the backend component of Loja App, a learning laboratory focused on backend architecture, payment logic, and testing.
+This is the core of the Loja App, implementing the business logic, payment calculations, and transaction persistence using a **Clean Architecture** (DDD) approach.
 
 ---
 
-## 🏛 Architecture
+## 🏛 Architecture & Principles
 
-**Framework** → FastAPI (Python 3.12)  
-**Architecture** → Clean Architecture (DDD)  
-**Database** → PostgreSQL (Production) / SQLite (Tests)  
-**ORM** → SQLAlchemy  
-**Testing** → Pytest + Coverage  
-**Migrations** → Alembic
+- **Framework**: FastAPI (Python 3.12)
+- **Persistence**: PostgreSQL (SQLAlchemy + Alembic)
+- **Design**: Layered architecture (Domain, Service, Infrastructure, API)
+- **Calculations**: Centralized in `domain/calculadora.py`, framework-agnostic.
 
-### Design Principles
-
-This backend is an API-first payment system built as a learning laboratory. The goal is to maximize clarity, correctness, and architectural reasoning.
-
-The backend is responsible for:
-
-- Enforcing all business rules
-- Validating user input and edge cases
-- Calculating payment totals and installments with exact precision
-- Persisting transactions to database
-- Exposing a documented REST API
-
-The domain layer contains no framework dependencies and can be executed in isolation.
-Application services orchestrate use cases without embedding business rules.
-The frontend is treated as a consumer, never as a source of truth.
+### Key Features
+- **Exact Total splitting**: Last installment adjusted to ensure zero rounding errors.
+- **Domain-Driven Validation**: Custom exceptions (e.g., `ValorInvalidoError`) for business rules.
+- **API First**: Automatic documentation via Swagger and ReDoc.
 
 ---
 
-## 📁 Project Structure
-
-```
-backend/
-├── domain/              # Business logic (framework-agnostic)
-├── services/            # Application services
-├── api/                 # REST API layer
-├── infrastructure/      # Database & repositories
-├── config/              # Settings & configuration
-├── alembic/             # Database migrations
-└── tests/               # Test suite
-```
-
-<details>
-<summary>📂 Full Project Structure</summary>
-
-```
-backend/
-├── alembic/              # Database migrations
-│   ├── versions/         # Migration scripts
-│   └── env.py            # Alembic configuration
-├── api/                  # REST API layer
-│   ├── dtos/             # Request/Response models
-│   ├── deps.py           # Dependency injection
-│   ├── main.py           # FastAPI application
-│   └── pagamentos_api.py # Payment endpoints
-├── config/               # Configuration
-│   ├── settings.py       # Application settings
-│   └── taxas.json        # Tax rates configuration
-├── domain/               # Business logic (framework-agnostic)
-│   ├── calculadora.py    # Payment calculator
-│   ├── exceptions.py     # Domain exceptions
-│   ├── recibo.py         # Receipt entity
-│   └── recibo_repository.py # Repository interface
-├── infrastructure/       # External dependencies
-│   ├── db/               # Database models and mappers
-│   ├── repositories/     # Repository implementations
-│   └── database.py       # Database connection
-├── services/             # Application services
-│   └── pagamento_service.py # Payment use cases
-├── tests/                # Test suite
-│   ├── unit/             # Unit tests
-│   ├── services/         # Service tests
-│   └── conftest.py       # Pytest fixtures
-├── requirements.txt      # Python dependencies
-├── pyproject.toml        # Python project configuration
-└── alembic.ini           # Alembic configuration
-```
-
-</details>
-
----
-
-## Domain and Business Rules
-
-All payment rules live exclusively in the `Calculadora` class (`domain/calculadora.py`). They are framework-agnostic and unit-tested.
-
-### Payment Options
-
-| opcao | Mode | Condition | Rule Applied |
-|:-----:|------|-----------|--------------|
-| 1 | Cash (À vista) | Immediate payment | 10% discount (configurable via `desconto_vista`) |
-| 2 | Debit card (Débito à vista) | Immediate payment | 5% fixed discount |
-| 3 | Installments without interest (Parcelado sem juros) | 2 to 6 installments | No interest, exact total |
-| 4 | Card with interest (Cartão com juros) | 12 to 24 installments | 10% interest (configurable via `juros_parcelamento`) |
-
-**Note:** Options 3 and 4 have non-overlapping installment ranges (2-6 vs 12-24) to maintain clear separation between no-interest and interest-bearing installment plans.
-
-### Exact Total Calculation
-
-When payments are split into installments, the system automatically calculates the last installment value to ensure the total is exact:
-
-- **Example**: R$ 100.00 in 6 installments
-  - 5 installments of R$ 16.67
-  - 1 last installment of R$ 16.65
-  - **Total**: R$ 100.00 (exactly)
-
-### Validation Rules
-
-| Condition | Exception Raised |
-|-----------|------------------|
-| `valor <= 0` | Domain exceptions (derived from `DomainError`) or validation errors raised by domain entities. |
-| `opcao` not in [1, 2, 3, 4] | Domain exceptions (derived from `DomainError`) or validation errors raised by domain entities. |
-| `opcao=3` with `parcelas < 2` or `parcelas > 6` | Domain exceptions (derived from `DomainError`) or validation errors raised by domain entities. |
-| `opcao=4` with `parcelas < 12` or `parcelas > 24` | Domain exceptions (derived from `DomainError`) or validation errors raised by domain entities. |
-
----
-
-## Domain Exceptions
-
-Defined in `domain/exceptions.py`:
-
-| Exception | Description |
-|-----------|-------------|
-| `DomainError` | Base class for all domain errors |
-| `OpcaoInvalidaError` | Invalid payment option |
-| `ValorInvalidoError` | Invalid value or installments |
-| `RegraPagamentoInvalida` | Invalid payment rule (used by Calculadora) |
-
-The `Calculadora` class uses domain exceptions for all validation errors.
-
----
-
-## API Layer
-
-### Endpoints
-
-Defined in `api/main.py` and `api/pagamentos_api.py`:
-
-| Method | Path | Description | Status Code |
-|--------|------|-------------|-------------|
-| POST | `/pagamentos/` | Create and persist a payment | 201 |
-| POST | `/pagamentos/simular` | Simulate payment without persistence | 200 |
-| GET | `/pagamentos/` | List all persisted payments | 200 |
-| GET | `/saude` | Health check | 200 |
-
-### Request DTO
-
-`PagamentoRequest` (from `api/dtos/pagamento_request.py`):
-
-| Field | Type | Required |
-|-------|------|----------|
-| `opcao` | int | Yes |
-| `valor` | float | Yes |
-| `parcelas` | int or None | No (defaults to 1 if None) |
-
-### Response DTO
-
-`PagamentoResponse` (from `api/dtos/pagamento_response.py`):
-
-| Field | Type |
-|-------|------|
-| `id` | int or None |
-| `metodo` | str |
-| `total` | float |
-| `parcelas` | int |
-| `valor_parcela` | float |
-| `informacoes_adicionais` | str or None |
-| `taxa` | float (default 0.0) |
-| `tipo_taxa` | str or None |
-| `created_at` | datetime or None |
-
-### Error Handling
-
-`DomainError` exceptions are caught by a global handler in `api/main.py` and return HTTP 400:
-
-```python
-@app.exception_handler(DomainError)
-async def domain_exception_handler(request: Request, exc: Exception):
-    return JSONResponse(
-        status_code=status.HTTP_400_BAD_REQUEST,
-        content={"detail": str(exc)},
-    )
-```
-
----
-
-## Service Layer
-
-Defined in `services/pagamento_service.py`:
-
-### Classes
-
-| Class | Description |
-|-------|-------------|
-| `ProcessarPagamentoUseCase` | Calculates payment and optionally persists via repository |
-| `ListarPagamentosUseCase` | Lists all payments from repository |
-| `PagamentoService` | Facade that orchestrates use cases |
-
-### PagamentoService
-
-The service is initialized with:
-- `repository`: Optional `ReciboRepository` for persistence
-- `calculadora`: Optional `Calculadora` instance (defaults to new instance)
-- `taxas`: Optional dict with `desconto_vista` and `juros_parcelamento` (defaults to 10.0 each)
-
-Methods:
-- `criar_pagamento(opcao, valor, parcelas)` - Creates and persists a payment
-- `listar_pagamentos()` - Returns all persisted payments
-
-The service enriches receipts with `taxa` and `tipo_taxa` fields for frontend consumption.
-
----
-
-## Persistence Layer
-
-### Configuration
-
-Defined in `config/settings.py` using Pydantic Settings:
-
-| Variable | Default | Description |
-|----------|---------|-------------|
-| `DB_USER` | `loja_user` | Database user |
-| `DB_PASSWORD` | `loja_password` | Database password |
-| `DB_HOST` | `localhost` | Database host |
-| `DB_PORT` | `5432` | Database port |
-| `DB_NAME` | `loja_db` | Database name |
-| `DATABASE_URL` | None | Override full connection string |
-
-If `DATABASE_URL` is set, it takes precedence. Otherwise, the URL is built from individual components as `postgresql+psycopg://...`.
-
-### Database Model
-
-`ReciboModel` (from `infrastructure/db/models/recibo_models.py`):
-
-| Column | Type | Nullable |
-|--------|------|----------|
-| `id` | Integer (PK) | No |
-| `total` | Float | No |
-| `metodo` | String(50) | No |
-| `parcelas` | Integer | No |
-| `valor_parcela` | Float | No |
-| `informacoes_adicionais` | String | Yes |
-| `created_at` | DateTime | No (server default) |
-
-### Repository
-
-`PostgresReciboRepository` (from `infrastructure/repositories/postgres_recibo_repository.py`) implements `ReciboRepository`:
-
-- `salvar(recibo: Recibo) -> Recibo` - Persists a Recibo and returns it with ID
-- `listar() -> List[Recibo]` - Returns all receipts ordered by ID descending
-
-### Session Management
-
-`get_db()` in `infrastructure/database.py` provides a session per request with automatic commit on success and rollback on error.
-
-Tables are created on application startup via `create_db_and_tables()`.
-
----
-
-## Testing Strategy
-
-Tests are configured in `pyproject.toml`:
-
-```toml
-[tool.pytest.ini_options]
-testpaths = ["tests"]
-addopts = ["-v", "--cov=.", "--cov-report=term-missing", "--cov-report=html"]
-```
-
-### Test Files
-
-| File | Type | Description |
-|------|------|-------------|
-| `unit/test_calculadora.py` | Unit | Domain calculation rules |
-| `test_recibo.py` | Unit | Receipt entity validation |
-| `test_pagamento_service.py` | Unit | Service with injected rates |
-| `test_api_pagamentos.py` | Integration | API endpoint tests |
-| `test_api_pagamentos_errors.py` | Integration | Error handling tests |
-| `test_postgres_repository.py` | Integration | Repository tests |
-| `test_integration_postgres.py` | Integration | Repository integration tests |
-| `test_health.py` | Integration | Health endpoint test |
-
-Integration tests use SQLite in-memory databases to avoid requiring a running PostgreSQL instance.
-
-### Running Tests
-
-```bash
-cd backend
-pytest
-```
-
----
-
-## Running the Backend
-
-### Requirements
-
-- **Python 3.12** (required — `pydantic-core` does not have pre-built wheels for Python 3.13/3.14 yet)
-- Primary database: PostgreSQL
-- Tests and development may use SQLite
-
-> ⚠️ **Windows users:** `python` may not be on PATH. Use the **Python Launcher** (`py`) instead.  
-> Check available versions with: `py --list`
-
-### Install and Run
-
-**Windows (PowerShell):**
-
-```powershell
-cd backend
-
-# Allow script execution if needed (once per machine)
-Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
-
-# Create virtual environment with Python 3.12
-py -3.12 -m venv venv
-
-# Activate
-.\venv\Scripts\Activate.ps1
-
-# Install dependencies
-pip install -r requirements.txt
-
-# Start server
-uvicorn api.main:app --reload
-```
-
-**Linux / macOS:**
-
-```bash
-cd backend
-python3.12 -m venv venv
-source venv/bin/activate
-pip install -r requirements.txt
-uvicorn api.main:app --reload
-```
-
-### Available URLs
-
-| URL | Description |
-|-----|-------------|
-| `http://127.0.0.1:8000/docs` | Swagger UI |
-| `http://127.0.0.1:8000/redoc` | ReDoc |
-| `http://127.0.0.1:8000/saude` | Health check |
-
----
-
-## Deployment on Render
-
-This backend is prepared for easy deployment on Render with PostgreSQL.
+## 🚀 Getting Started
 
 ### Prerequisites
+- Python 3.12+ (Note: `pydantic-core` requires 3.12 for pre-built wheels)
+- PostgreSQL (or SQLite for local testing)
 
-1. Account on [Render](https://render.com)
-2. Project repository on GitHub (current one)
+### Setup
+1.  **Environment**: `python -m venv venv`
+2.  **Activate**: `.\venv\Scripts\activate` (Windows) or `source venv/bin/activate` (Unix)
+3.  **Install**: `pip install -r requirements.txt`
+4.  **Database**: `alembic upgrade head`
+5.  **Run**: `uvicorn api.main:app --reload`
 
-### Deployment Steps
+---
 
-#### 1. Create PostgreSQL Database on Render
+## 📂 Project Structure
 
-1. Go to Render dashboard
-2. Click **New +** → **PostgreSQL**
-3. Configure:
-   - **Name**: `loja-db` (or your preferred name)
-   - **Database**: `loja_db`
-   - **User**: automatically generated
-   - **Region**: choose closest region
-   - **Plan**: Free (for development) or Starter (for production)
-4. Click **Create Database**
-5. Wait for database creation (1-2 minutes)
-6. **Important**: Copy the **Internal Database URL** (starts with `postgresql://`)
-
-#### 2. Create Web Service on Render
-
-1. In Render dashboard, click **New +** → **Web Service**
-2. Connect your GitHub repository
-3. Configure the service:
-   - **Name**: `loja-api` (or your preferred name)
-   - **Region**: same as database
-   - **Branch**: `main` (or your branch)
-   - **Root Directory**: `backend`
-   - **Runtime**: `Python 3`
-   - **Build Command**: `./build.sh`
-   - **Start Command**: `gunicorn -w 4 -k uvicorn.workers.UvicornWorker api.main:app --bind 0.0.0.0:$PORT`
-   - **Plan**: Free (for development) or Starter (for production)
-
-#### 3. Configure Environment Variables
-
-In the **Environment** section of the Web Service, add:
-
-```
-DATABASE_URL=<paste Internal Database URL copied from step 1>
-ENVIRONMENT=production
-API_HOST=0.0.0.0
+```text
+backend/
+├── api/            # API Layer (FastAPI, DTOs, Routes)
+├── domain/         # Business Logic (Calculadora, Entities, Exceptions)
+├── services/       # Use Cases (PagamentoService)
+├── infrastructure/ # DB Drivers, Repositories, Migrations
+└── tests/          # Pytest suite (Unit & Integration)
 ```
 
-**Important note**: Render automatically provides the `PORT` variable, no need to define `API_PORT`.
+---
 
-#### 4. Deploy
+## 🧪 Testing
 
-1. Click **Create Web Service**
-2. Render automatically:
-   - Clones the repository
-   - Executes `build.sh` (installs dependencies and runs migrations)
-   - Starts the application with gunicorn
-3. Deploy takes 2-5 minutes
-4. Once completed, you'll see status as **Live**
-
-#### 5. Verify Deployment
-
-Your API will be available at: `https://loja-api.onrender.com` (or your chosen name)
-
-Endpoints to verify:
-- Health check: `https://loja-api.onrender.com/saude`
-- API docs: `https://loja-api.onrender.com/docs`
-
-### Deployment Files
-
-The project includes the following files configured for Render:
-
-- **`build.sh`**: Script executed during build (installs dependencies and runs migrations)
-- **`requirements.txt`**: Includes gunicorn to serve the application in production
-- **`runtime.txt`**: Specifies Python version (3.11.9)
-- **`.env.example`**: Template with comments about required environment variables
-
-### Redeploy Changes
-
-Render automatically redeploys when you push to the configured branch (main):
+The backend maintains high test coverage using **Pytest**.
 
 ```bash
-git add .
-git commit -m "Update API"
-git push origin main
+# Run all tests (uses SQLite in-memory for speed)
+pytest
+
+# Run with coverage report
+pytest --cov=. --cov-report=html
 ```
 
-Render will detect the push and start a new deploy automatically.
+---
 
-### Troubleshooting
+## 🔌 API Endpoints Summary
 
-**Migration errors:**
-- Verify that `DATABASE_URL` is correctly configured
-- Check logs in Render dashboard
-- Alembic migrations run automatically in `build.sh`
+- `POST /pagamentos/` — Create and persist a payment.
+- `POST /pagamentos/simular` — Simulate payment without saving.
+- `GET /pagamentos/` — List transaction history.
+- `GET /saude` — Basic health check.
 
-**502 Bad Gateway error:**
-- Verify that start command is correct
-- Ensure port is configured as `$PORT` (variable provided by Render)
-
-**Environment variables not found:**
-- Verify all variables are defined in Render dashboard
-- Restart service after adding new variables
-
-### Production Considerations
-
-For a real production environment, consider:
-- Use PostgreSQL plan with automatic backups
-- Configure custom health checks
-- Implement authentication and authorization
-- Add rate limiting
-- Configure CORS specifically for your frontend domain
-- Use secret variables for sensitive credentials
-- Monitor logs and metrics
+For detailed request/response schemas, refer to the local Swagger UI at `/docs`.
 
 ---
 
-## Production Considerations
-
-This is a learning project. In production, you would typically add:
-
-- Authentication and authorization
-- Rate limiting
-- Structured logging
-- Migrations
-- Observability
-
-The architecture supports these additions without refactoring the domain layer.
-
----
-
-## Summary
-
-| Aspect | Implementation |
-|--------|----------------|
-| Architecture | Layered with domain isolation |
-| Business rules | Centralized in `domain/calculadora.py` |
-| Persistence | SQLAlchemy with repository pattern |
-| Testing | Unit and integration tests with SQLite in-memory |
-| Error handling | Domain exceptions mapped to HTTP 400 |
-| API design | REST with Pydantic DTOs |
-
----
-
-## Author
-
-**Argenis Mauricio López Salazar**
-
-- LinkedIn: [linkedin.com/in/argenis972](https://www.linkedin.com/in/argenis972/)
-- GitHub: [github.com/Argenis1412](https://github.com/Argenis1412)
-- Email: argenislopez28708256@gmail.com
-
----
-
-## License
-
-This project is licensed under the **MIT License** - see the [LICENSE.txt](../LICENSE.txt) file for details.
+## 📄 License
+Licensed under the **MIT License**.
