@@ -3,11 +3,26 @@
 @tailwind utilities;
 
 html {
-  @apply bg-zinc-50 text-zinc-900;
+  @apply bg-zinc-50 text-zinc-900 antialiased;
+  scroll-behavior: smooth;
 }
 
 html.dark {
-  @apply bg-zinc-900 text-zinc-100;
+  @apply bg-zinc-950 text-zinc-50;
+  color-scheme: dark;
+}
+
+/* Scrollbar personalizada para modo escuro */
+.dark ::-webkit-scrollbar {
+  width: 10px;
+}
+
+.dark ::-webkit-scrollbar-track {
+  @apply bg-zinc-900;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  @apply bg-zinc-700 rounded-full border-2 border-zinc-900 hover:bg-zinc-600 transition-colors;
 }
 /* Animaciones personalizadas */
 @keyframes fade-in {
@@ -69,9 +84,14 @@ input[type="radio"] {
   accent-color: #3b82f6;
 }
 
-/* Transiciones suaves */
+/* Transições suaves e globais */
 * {
-  transition-property: background-color, border-color, color, fill, stroke;
-  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-  transition-duration: 150ms;
+  @apply transition-colors duration-200;
+}
+
+/* Utilitário para Glassmorphism */
+@layer utilities {
+  .glass {
+    @apply backdrop-blur-md bg-white/70 dark:bg-zinc-900/60 border border-white/20 dark:border-zinc-800/50 shadow-xl;
+  }
 }

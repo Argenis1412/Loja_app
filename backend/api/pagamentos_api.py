@@ -11,7 +11,12 @@ from services.pagamento_service import PagamentoService
 router = APIRouter(prefix="/pagamentos", tags=["Pagamentos"])
 
 
-@router.post("/", response_model=PagamentoResponse, status_code=status.HTTP_201_CREATED)
+@router.post(
+    "/",
+    response_model=PagamentoResponse,
+    status_code=status.HTTP_201_CREATED,
+    summary="Criar novo pagamento",
+)
 def criar_pagamento(
     dados: PagamentoRequest,
     service: PagamentoService = Depends(get_pagamento_service),
@@ -26,7 +31,10 @@ def criar_pagamento(
 
 
 @router.post(
-    "/simular", response_model=PagamentoResponse, status_code=status.HTTP_200_OK
+    "/simular",
+    response_model=PagamentoResponse,
+    status_code=status.HTTP_200_OK,
+    summary="Simular pagamento",
 )
 def simular_pagamento(dados: PagamentoRequest):
     """
@@ -41,7 +49,11 @@ def simular_pagamento(dados: PagamentoRequest):
     return PagamentoResponse.from_domain(recibo)
 
 
-@router.get("/", response_model=List[PagamentoResponse])
+@router.get(
+    "/",
+    response_model=List[PagamentoResponse],
+    summary="Listar pagamentos",
+)
 def listar_pagamentos(service: PagamentoService = Depends(get_pagamento_service)):
     """
     Lista todos os pagamentos persistidos.

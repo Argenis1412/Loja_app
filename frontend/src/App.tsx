@@ -15,6 +15,7 @@ import type {
   MetodoPagamento,
 } from './types/api';
 import { API_ENDPOINTS } from './config/api';
+import { ThemeToggle } from './components/ThemeToggle';
 
 type Tela = 'form' | 'confirmacao' | 'recibo';
 
@@ -28,7 +29,36 @@ export default function App() {
   const [recibo, setRecibo] = useState<Pagamento | null>(null);
   const [loading, setLoading] = useState(false);
   const [erro, setErro] = useState<string | null>(null);
+  const [isDark, setIsDark] = useState(false);
   const backendReady = useRef(false);
+
+  // Inicialização do tema
+  useEffect(() => {
+    const savedTheme = localStorage.getItem('theme');
+    const systemPrefersDark = window.matchMedia(
+      '(prefers-color-scheme: dark)',
+    ).matches;
+
+    if (savedTheme === 'dark' || (!savedTheme && systemPrefersDark)) {
+      setIsDark(true);
+      document.documentElement.classList.add('dark');
+    } else {
+      setIsDark(false);
+      document.documentElement.classList.remove('dark');
+    }
+  }, []);
+
+  const toggleTheme = () => {
+    const newTheme = !isDark;
+    setIsDark(newTheme);
+    if (newTheme) {
+      document.documentElement.classList.add('dark');
+      localStorage.setItem('theme', 'dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+      localStorage.setItem('theme', 'light');
+    }
+  };
 
   // Warm-up: despertar o backend do Render (cold start) assim que a app carrega
   useEffect(() => {
@@ -133,7 +163,8 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-zinc-50 p-4 text-zinc-900 dark:bg-zinc-950 dark:text-zinc-100">
+    <div className="min-h-screen bg-zinc-50 p-4 text-zinc-900 dark:bg-zinc-950 dark:text-zinc-100 transition-colors duration-300">
+      <ThemeToggle isDark={isDark} toggle={toggleTheme} />
       <div className="mx-auto max-w-2xl py-10">
         {/* Banner de Error Global */}
         {erro && <ErrorBanner message={erro} onClose={() => setErro(null)} />}

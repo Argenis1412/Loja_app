@@ -86,7 +86,7 @@ export function ConfirmacaoPagamento({
       informacaoPreview = `Parcelado em ${parcelas}x sem juros`;
   }
   return (
-    <div className="mx-auto max-w-md space-y-6 rounded-xl bg-white p-8 shadow-xl dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 animate-fade-in">
+    <div className="mx-auto max-w-md space-y-6 rounded-3xl p-8 shadow-2xl glass border-none animate-fade-in transition-all duration-300">
       <header className="text-center pb-4 border-b border-zinc-200 dark:border-zinc-800">
         <div className="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-blue-100 to-blue-200 dark:from-blue-900/30 dark:to-blue-800/30">
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-7 h-7 text-blue-600 dark:text-blue-400">
@@ -101,7 +101,7 @@ export function ConfirmacaoPagamento({
         </p>
       </header>
 
-      <div className="rounded-xl border-2 border-blue-200 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-zinc-800 dark:to-zinc-800 dark:border-zinc-700">
+      <div className="rounded-2xl border border-blue-100 p-4 bg-blue-50/50 dark:bg-blue-900/20 dark:border-blue-800/50">
         <h3 className="font-bold text-blue-900 dark:text-blue-300 flex items-center gap-2 mb-1">
           <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5">
             <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75 2.25 2.25 0 00-.1-.664m-5.8 0A2.251 2.251 0 0113.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25zM6.75 12h.008v.008H6.75V12zm0 3h.008v.008H6.75V15zm0 3h.008v.008H6.75V18z" />
@@ -113,7 +113,7 @@ export function ConfirmacaoPagamento({
         </p>
       </div>
 
-      <div className="space-y-3 rounded-xl bg-zinc-50 dark:bg-zinc-800/50 p-5 border border-zinc-200 dark:border-zinc-700">
+      <div className="space-y-3 rounded-2xl bg-zinc-50/50 dark:bg-zinc-800/30 p-5 border border-zinc-100 dark:border-zinc-800/50 shadow-inner">
         <div className="flex justify-between items-center pb-3 border-b border-zinc-300 dark:border-zinc-600">
           <span className="text-sm font-medium text-zinc-600 dark:text-zinc-400">💳 Forma de Pagamento</span>
           <span className="text-sm font-bold text-zinc-900 dark:text-zinc-100 bg-white dark:bg-zinc-900 px-3 py-1 rounded-md border border-zinc-300 dark:border-zinc-700">
@@ -146,7 +146,7 @@ export function ConfirmacaoPagamento({
               </div>
             </div>
             {valorUltimaParcelaPreview && Math.abs(valorUltimaParcelaPreview - valorParcelaPreview) > 0.01 ? (
-              <div className="text-xs text-zinc-600 dark:text-zinc-400 bg-zinc-100 dark:bg-zinc-900 p-3 rounded-lg border border-zinc-200 dark:border-zinc-700">
+              <div className="text-xs text-zinc-600 dark:text-zinc-400 bg-white/50 dark:bg-zinc-900/40 p-3 rounded-xl border border-zinc-100 dark:border-zinc-800/50">
                 <div className="flex justify-between mb-1">
                   <span>• {parcelas - 1}x de</span>
                   <span className="font-semibold">R$ {valorParcelaPreview.toFixed(2)}</span>
@@ -187,7 +187,7 @@ export function ConfirmacaoPagamento({
         <button
           onClick={onConfirmar}
           disabled={loading}
-          className="flex-1 rounded-lg bg-gradient-to-r from-green-600 to-green-700 py-3 font-bold text-white hover:from-green-700 hover:to-green-800 disabled:opacity-60 disabled:cursor-not-allowed transition-all hover:scale-[1.02] shadow-md hover:shadow-lg flex items-center justify-center gap-2"
+          className="flex-[1.5] rounded-xl bg-gradient-to-r from-green-600 to-green-700 py-4 font-bold text-white hover:from-green-500 hover:to-green-600 disabled:opacity-60 disabled:cursor-not-allowed transition-all hover:scale-[1.01] shadow-lg hover:shadow-green-500/20 flex items-center justify-center gap-2 active:scale-[0.98]"
         >
           {loading ? (
             <>

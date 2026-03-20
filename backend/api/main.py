@@ -6,7 +6,20 @@ from api.pagamentos_api import router as pagamentos_router
 from domain.exceptions import DomainError
 from infrastructure.database import create_db_and_tables, warmup_db
 
-app = FastAPI(title="Loja Mini App")
+description = """
+API para a Loja Mini App, permitindo simulação e processamento de pagamentos.
+Gerencia regras de negócio para diferentes métodos de pagamento e parcelamento.
+"""
+
+app = FastAPI(
+    title="Loja Mini App API",
+    description=description,
+    version="1.0.0",
+    contact={
+        "name": "Suporte Técnico",
+        "url": "https://github.com/Argenis1412/Loja_app",
+    },
+)
 
 
 @app.on_event("startup")
@@ -32,8 +45,17 @@ app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"])
 
 
 # Endpoint de verificação de saúde da API
-@app.get("/saude", status_code=status.HTTP_200_OK)
+@app.get(
+    "/saude",
+    status_code=status.HTTP_200_OK,
+    tags=["Infraestrutura"],
+    summary="Verificar saúde da API",
+)
 def verificar_saude():
+    """
+    Retorna o status operacional da API e seus componentes.
+    Útil para monitoramento e scripts de warm-up.
+    """
     return {"status": "operacional"}
 
 

@@ -108,7 +108,7 @@ export function PagamentoForm({
   return (
     <form
       onSubmit={handleSubmit}
-      className="mx-auto max-w-md space-y-5 rounded-xl bg-white p-6 shadow-md dark:bg-zinc-900"
+      className="mx-auto max-w-md space-y-5 rounded-3xl p-6 shadow-2xl glass transition-all duration-300"
     >
       <header className="mb-4 text-center">
         <h1 className="text-2xl font-bold text-zinc-800 dark:text-zinc-100">
@@ -119,14 +119,14 @@ export function PagamentoForm({
         </p>
       </header>
 
-      <div className="mb-4 rounded-xl border border-blue-200 p-4 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-zinc-800 dark:to-zinc-800 dark:border-zinc-700">
-        <h2 className="font-semibold text-blue-900 dark:text-blue-300 flex items-center gap-2">
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5">
+      <div className="mb-4 rounded-2xl border border-blue-100 p-4 bg-blue-50/50 dark:bg-blue-900/20 dark:border-blue-800/50">
+        <h2 className="font-bold text-blue-800 dark:text-blue-300 flex items-center gap-2">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-5 h-5">
             <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 00-3 3h15.75m-12.75-3h11.218c1.121-2.3 2.1-4.684 2.924-7.138a60.114 60.114 0 00-16.536-1.84M7.5 14.25L5.106 5.272M6 20.25a.75.75 0 11-1.5 0 .75.75 0 011.5 0zm12.75 0a.75.75 0 11-1.5 0 .75.75 0 011.5 0z" />
           </svg>
           Compra simulada
         </h2>
-        <p className="text-sm text-blue-700 dark:text-blue-200 mt-1">
+        <p className="text-xs text-blue-600 dark:text-blue-200/70 mt-1 font-medium">
           Escolha a melhor forma de pagamento para sua compra
         </p>
       </div>
@@ -154,7 +154,7 @@ export function PagamentoForm({
           onChange={(e) =>
             setValor(e.target.value === '' ? '' : Number(e.target.value))
           }
-          className="w-full rounded-lg border px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100"
+          className="w-full rounded-xl border border-zinc-200 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white/50 dark:border-zinc-700 dark:bg-zinc-800/50 dark:text-zinc-50 shadow-sm transition-all"
         />
       </div>
 
@@ -165,64 +165,64 @@ export function PagamentoForm({
         </label>
 
         <div className="space-y-3">
-          <label className="flex items-center gap-3 p-3 rounded-lg border-2 transition-all cursor-pointer hover:bg-green-50 dark:hover:bg-zinc-800 has-[:checked]:border-green-500 has-[:checked]:bg-green-50 dark:has-[:checked]:bg-green-900/20">
+          <label className="flex items-center gap-3 p-4 rounded-xl border border-zinc-200 dark:border-zinc-700 transition-all cursor-pointer hover:bg-green-50/50 dark:hover:bg-zinc-800/50 group has-[:checked]:border-green-500 has-[:checked]:bg-green-50/50 dark:has-[:checked]:bg-green-900/10 dark:has-[:checked]:border-green-500/50 shadow-sm">
             <input
               type="radio"
               name="metodo"
               checked={metodo === 'avista'}
               onChange={() => setMetodo('avista')}
-              className="w-4 h-4 text-green-600 focus:ring-green-500"
+              className="w-5 h-5 text-green-600 focus:ring-green-500 bg-transparent border-zinc-300 dark:border-zinc-600"
             />
             <div className="flex-1">
-              <div className="font-medium text-zinc-800 dark:text-zinc-100">À vista (dinheiro)</div>
+              <div className="font-bold text-zinc-800 dark:text-zinc-100 group-hover:text-green-700 dark:group-hover:text-green-400 transition-colors">À vista (dinheiro)</div>
               <div className="text-xs text-zinc-500 dark:text-zinc-400">Pagamento em espécie</div>
             </div>
-            <span className="text-xs font-semibold px-2 py-1 rounded-full bg-green-100 text-green-700 dark:bg-green-900/50 dark:text-green-300">💰 10% OFF</span>
+            <span className="text-xs font-bold px-2 py-1 rounded-lg bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300 border border-green-200 dark:border-green-800">💰 10% OFF</span>
           </label>
 
-          <label className="flex items-center gap-3 p-3 rounded-lg border-2 transition-all cursor-pointer hover:bg-green-50 dark:hover:bg-zinc-800 has-[:checked]:border-green-500 has-[:checked]:bg-green-50 dark:has-[:checked]:bg-green-900/20">
+          <label className="flex items-center gap-3 p-4 rounded-xl border border-zinc-200 dark:border-zinc-700 transition-all cursor-pointer hover:bg-green-50/50 dark:hover:bg-zinc-800/50 group has-[:checked]:border-green-500 has-[:checked]:bg-green-50/50 dark:has-[:checked]:bg-green-900/10 dark:has-[:checked]:border-green-500/50 shadow-sm">
             <input
               type="radio"
               name="metodo"
               checked={metodo === 'debito'}
               onChange={() => setMetodo('debito')}
-              className="w-4 h-4 text-green-600 focus:ring-green-500"
+              className="w-5 h-5 text-green-600 focus:ring-green-500 bg-transparent border-zinc-300 dark:border-zinc-600"
             />
             <div className="flex-1">
-              <div className="font-medium text-zinc-800 dark:text-zinc-100">À vista (débito)</div>
+              <div className="font-bold text-zinc-800 dark:text-zinc-100 group-hover:text-green-700 dark:group-hover:text-green-400 transition-colors">À vista (débito)</div>
               <div className="text-xs text-zinc-500 dark:text-zinc-400">Cartão de débito</div>
             </div>
-            <span className="text-xs font-semibold px-2 py-1 rounded-full bg-green-100 text-green-700 dark:bg-green-900/50 dark:text-green-300">💳 5% OFF</span>
+            <span className="text-xs font-bold px-2 py-1 rounded-lg bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300 border border-green-200 dark:border-green-800">💳 5% OFF</span>
           </label>
 
-          <label className="flex items-center gap-3 p-3 rounded-lg border-2 transition-all cursor-pointer hover:bg-blue-50 dark:hover:bg-zinc-800 has-[:checked]:border-blue-500 has-[:checked]:bg-blue-50 dark:has-[:checked]:bg-blue-900/20">
+          <label className="flex items-center gap-3 p-4 rounded-xl border border-zinc-200 dark:border-zinc-700 transition-all cursor-pointer hover:bg-blue-50/50 dark:hover:bg-zinc-800/50 group has-[:checked]:border-blue-500 has-[:checked]:bg-blue-50/50 dark:has-[:checked]:bg-blue-900/10 dark:has-[:checked]:border-blue-500/50 shadow-sm">
             <input
               type="radio"
               name="metodo"
               checked={metodo === 'parcelado_sem_juros'}
               onChange={() => setMetodo('parcelado_sem_juros')}
-              className="w-4 h-4 text-blue-600 focus:ring-blue-500"
+              className="w-5 h-5 text-blue-600 focus:ring-blue-500 bg-transparent border-zinc-300 dark:border-zinc-600"
             />
             <div className="flex-1">
-              <div className="font-medium text-zinc-800 dark:text-zinc-100">Parcelado sem juros</div>
+              <div className="font-bold text-zinc-800 dark:text-zinc-100 group-hover:text-blue-700 dark:group-hover:text-blue-400 transition-colors">Parcelado sem juros</div>
               <div className="text-xs text-zinc-500 dark:text-zinc-400">Divide em até 6x sem acréscimo</div>
             </div>
-            <span className="text-xs font-semibold px-2 py-1 rounded-full bg-blue-100 text-blue-700 dark:bg-blue-900/50 dark:text-blue-300">2x a 6x</span>
+            <span className="text-xs font-bold px-2 py-1 rounded-lg bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300 border border-blue-200 dark:border-blue-800">2x a 6x</span>
           </label>
 
-          <label className="flex items-center gap-3 p-3 rounded-lg border-2 transition-all cursor-pointer hover:bg-orange-50 dark:hover:bg-zinc-800 has-[:checked]:border-orange-500 has-[:checked]:bg-orange-50 dark:has-[:checked]:bg-orange-900/20">
+          <label className="flex items-center gap-3 p-4 rounded-xl border border-zinc-200 dark:border-zinc-700 transition-all cursor-pointer hover:bg-orange-50/50 dark:hover:bg-zinc-800/50 group has-[:checked]:border-orange-500 has-[:checked]:bg-orange-50/50 dark:has-[:checked]:bg-orange-900/10 dark:has-[:checked]:border-orange-500/50 shadow-sm">
             <input
               type="radio"
               name="metodo"
               checked={metodo === 'cartao_com_juros'}
               onChange={() => setMetodo('cartao_com_juros')}
-              className="w-4 h-4 text-orange-600 focus:ring-orange-500"
+              className="w-5 h-5 text-orange-600 focus:ring-orange-500 bg-transparent border-zinc-300 dark:border-zinc-600"
             />
             <div className="flex-1">
-              <div className="font-medium text-zinc-800 dark:text-zinc-100">Cartão com juros</div>
+              <div className="font-bold text-zinc-800 dark:text-zinc-100 group-hover:text-orange-700 dark:group-hover:text-orange-400 transition-colors">Cartão com juros</div>
               <div className="text-xs text-zinc-500 dark:text-zinc-400">Parcelas longas com juros</div>
             </div>
-            <span className="text-xs font-semibold px-2 py-1 rounded-full bg-orange-100 text-orange-700 dark:bg-orange-900/50 dark:text-orange-300">📈 10% juros · 12x a 24x</span>
+            <span className="text-xs font-bold px-2 py-1 rounded-lg bg-orange-100 text-orange-700 dark:bg-orange-900/40 dark:text-orange-300 border border-orange-200 dark:border-orange-800">📈 10% juros</span>
           </label>
         </div>
       </div>
@@ -240,7 +240,7 @@ export function PagamentoForm({
             id="parcelas"
             value={parcelas}
             onChange={(e) => setParcelas(Number(e.target.value))}
-            className="w-full rounded-lg border-2 p-3 text-base font-medium dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+            className="w-full rounded-xl border border-zinc-200 p-4 text-base font-bold bg-white/50 dark:border-zinc-700 dark:bg-zinc-800/50 dark:text-zinc-50 focus:ring-2 focus:ring-blue-500 transition-all cursor-pointer appearance-none shadow-sm"
           >
             {Array.from(
               {
@@ -271,7 +271,7 @@ export function PagamentoForm({
 
       <button
         type="submit"
-        className="w-full rounded-lg bg-gradient-to-r from-blue-600 to-indigo-600 py-3 font-semibold text-white transition-all hover:from-blue-700 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-zinc-900 shadow-md hover:shadow-lg transform hover:scale-[1.02]"
+        className="w-full rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 py-4 font-bold text-white transition-all hover:from-blue-500 hover:to-indigo-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-zinc-950 shadow-lg hover:shadow-blue-500/20 transform hover:scale-[1.01] active:scale-[0.98]"
       >
         Continuar para pagamento →
       </button>
