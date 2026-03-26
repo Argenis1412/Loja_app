@@ -23,6 +23,11 @@ interface PagamentoFormProps {
   >;
 }
 
+interface ValidationState {
+  isValid: boolean;
+  message: string;
+}
+
 const DEFAULT_LIMITES_PARCELAS: Record<
   Exclude<MetodoPagamento, 'avista' | 'debito'>,
   { min: number; max: number }
@@ -50,6 +55,8 @@ export function PagamentoForm({
   const [valor, setValor] = useState<number | ''>('');
   const [metodo, setMetodo] = useState<MetodoPagamento>('avista');
   const [parcelas, setParcelas] = useState<number>(2);
+  const [isLoading, setIsLoading] = useState(false);
+  const [valorError, setValorError] = useState<string>('');
 
   // Ajustar parcelas quando o método muda
   useEffect(() => {
@@ -60,39 +67,111 @@ export function PagamentoForm({
     }
   }, [metodo]);
 
-  function handleSubmit(e: FormEvent) {
+  // Funções de validação
+  const validarValor = (valorInput: number | ''): ValidationState => {
+    if (valorInput === '' || valorInput === 0) {
+      return { isValid: false, message: 'O valor é obrigatório' };
+    }
+    
+    if (valorInput < 1) {
+      return { isValid: false, message: 'O valor mínimo é R$ 1,00' };
+    }
+    
+    if (valorInput > 999999) {
+      return { isValid: false, message: 'O valor máximo é R$ 999.999,00' };
+    }
+    
+    // Verificar casas decimais (máximo 2)
+    const valorStr = valorInput.toString();
+    const decimalPart = valorStr.split('.')[1];
+    if (decimalPart && decimalPart.length > 2) {
+      return { isValid: false, message: 'O valor deve ter no máximo 2 casas decimais' };
+    }
+    
+    return { isValid: true, message: '' };
+  };
+
+  const validarParcelas = (metodo: MetodoPagamento, parcelas: number): ValidationState => {
+    if (metodo === 'avista' || metodo === 'debito') {
+      return { isValid: true, message: '' };
+    }
+    
+    const { min, max } = limitesParcelas[
+      metodo as Exclude<MetodoPagamento, 'avista' | 'debito'>
+    ];
+    
+    if (parcelas < min || parcelas > max) {
+      return { 
+        isValid: false, 
+        message: `Número de parcelas deve ser entre ${min} e ${max}` 
+      };
+    }
+    
+    return { isValid: true, message: '' };
+  };
+
+  const handleValorChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    const numericValue = value === '' ? '' : Number(value);
+    
+    setValor(numericValue);
+    
+    // Validar em tempo real
+    if (value !== '') {
+      const validation = validarValor(numericValue);
+      setValorError(validation.message);
+    } else {
+      setValorError('');
+    }
+  };
+
+  const handleValorBlur = () => {
+    if (valor !== '') {
+      const validation = validarValor(valor);
+      setValorError(validation.message);
+    }
+  };
+
+  async function handleSubmit(e: FormEvent) {
     e.preventDefault();
 
-    if (!valor || valor <= 0) {
-      alert('Informe um valor válido');
+    // Validar valor
+    const valorValidation = validarValor(valor);
+    if (!valorValidation.isValid) {
+      setValorError(valorValidation.message);
       return;
     }
+    setValorError('');
 
-    if (metodo !== 'avista' && metodo !== 'debito') {
-      const { min, max } =
-        limitesParcelas[
-          metodo as Exclude<MetodoPagamento, 'avista' | 'debito'>
-        ];
-      if (parcelas < min || parcelas > max) {
-        alert('Número de parcelas inválido');
-        return;
-      }
+    // Validar parcelas
+    const parcelasValidation = validarParcelas(metodo, parcelas);
+    if (!parcelasValidation.isValid) {
+      alert(parcelasValidation.message);
+      return;
     }
 
     const parcelasEnvio =
       metodo === 'avista' || metodo === 'debito' ? 1 : parcelas;
 
-    onSubmit?.({
-      valor,
-      metodo,
-      parcelas: parcelasEnvio,
-    });
+    setIsLoading(true);
 
-    onContinuar?.({
-      valor,
-      metodo,
-      parcelas: parcelasEnvio,
-    });
+    try {
+      onSubmit?.({
+        valor: Number(valor),
+        metodo,
+        parcelas: parcelasEnvio,
+      });
+
+      onContinuar?.({
+        valor: Number(valor),
+        metodo,
+        parcelas: parcelasEnvio,
+      });
+    } catch (error) {
+      console.error('Erro ao processar pagamento:', error);
+    } finally {
+      setIsLoading(false);
+    }
   }
 
   const showParcelas = metodo !== 'avista' && metodo !== 'debito';
@@ -151,11 +230,19 @@ export function PagamentoForm({
               e.preventDefault();
             }
           }}
-          onChange={(e) =>
-            setValor(e.target.value === '' ? '' : Number(e.target.value))
-          }
-          className="w-full rounded-xl border border-zinc-200 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white/50 dark:border-zinc-700 dark:bg-zinc-800/50 dark:text-zinc-50 shadow-sm transition-all"
+          onChange={handleValorChange}
+          onBlur={handleValorBlur}
+          className={`w-full rounded-xl border px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white/50 dark:border-zinc-700 dark:bg-zinc-800/50 dark:text-zinc-50 shadow-sm transition-all ${
+            valorError ? 'border-red-500 focus:ring-red-500' : 'border-zinc-200'
+          }`}
+          aria-invalid={valorError ? 'true' : 'false'}
+          aria-describedby={valorError ? 'valor-error' : undefined}
         />
+        {valorError && (
+          <p id="valor-error" className="mt-1 text-sm text-red-600 dark:text-red-400">
+            {valorError}
+          </p>
+        )}
       </div>
 
       {/* Método - opções de rádio com badges */}
@@ -271,9 +358,21 @@ export function PagamentoForm({
 
       <button
         type="submit"
-        className="w-full rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 py-4 font-bold text-white transition-all hover:from-blue-500 hover:to-indigo-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-zinc-950 shadow-lg hover:shadow-blue-500/20 transform hover:scale-[1.01] active:scale-[0.98]"
+        disabled={isLoading}
+        className={`w-full rounded-xl py-4 font-bold text-white transition-all focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-zinc-950 shadow-lg transform ${
+          isLoading 
+            ? 'bg-gray-500 cursor-not-allowed' 
+            : 'bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 hover:shadow-blue-500/20 hover:scale-[1.01] active:scale-[0.98]'
+        }`}
       >
-        Continuar para pagamento →
+        {isLoading ? (
+          <div className="flex items-center justify-center gap-2">
+            <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+            <span>Processando...</span>
+          </div>
+        ) : (
+          'Continuar para pagamento →'
+        )}
       </button>
     </form>
   );
