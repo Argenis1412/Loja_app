@@ -1,4 +1,5 @@
 from pydantic_settings import BaseSettings, SettingsConfigDict
+import os
 
 
 class Settings(BaseSettings):
@@ -8,12 +9,18 @@ class Settings(BaseSettings):
     DB_PORT: int = 5432
     DB_NAME: str = "loja_db"
     DATABASE_URL: str | None = None
+    ENVIRONMENT: str = "production"
 
     @property
     def database_url(self) -> str:
         # Se a DATABASE_URL for definida no ambiente, use-a (permite usar Postgres em produção)
         if self.DATABASE_URL:
             return self.DATABASE_URL
+        
+        # Em desenvolvimento, usar SQLite
+        if self.ENVIRONMENT == "development":
+            return "sqlite:///./test.db"
+        
         return f"postgresql+psycopg://{self.DB_USER}:{self.DB_PASSWORD}@{self.DB_HOST}:{self.DB_PORT}/{self.DB_NAME}"
 
     model_config = SettingsConfigDict(

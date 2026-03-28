@@ -17,6 +17,8 @@ import type {
 import { API_ENDPOINTS } from './config/api';
 import { ThemeToggle } from './components/ThemeToggle';
 
+import { fetchWithRetry } from './utils/apiUtils';
+
 type Tela = 'form' | 'confirmacao' | 'recibo';
 
 export default function App() {
@@ -62,7 +64,7 @@ export default function App() {
 
   // Warm-up: despertar o backend do Render (cold start) assim que a app carrega
   useEffect(() => {
-    fetch(API_ENDPOINTS.saude)
+    fetchWithRetry(API_ENDPOINTS.saude)
       .then(() => {
         backendReady.current = true;
       })
@@ -86,7 +88,7 @@ export default function App() {
       // Usa a função auxiliar importada para converter string -> int
       const opcao = converterMetodoParaOpcao(dados.metodo);
 
-      const response = await fetch(API_ENDPOINTS.simular, {
+      const response = await fetchWithRetry(API_ENDPOINTS.simular, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -109,7 +111,7 @@ export default function App() {
       }
     } catch (error) {
       console.error('Erro de rede', error);
-      setErro('Não foi possível conectar ao servidor. Verifique sua conexão.');
+      setErro('Não foi possível conectar ao servidor. Verifique sua conexão e tente novamente em instantes.');
     } finally {
       setLoading(false);
     }
@@ -124,7 +126,7 @@ export default function App() {
       // Usa a função auxiliar importada para converter string -> int
       const opcao = converterMetodoParaOpcao(dadosPagamento.metodo);
 
-      const response = await fetch(API_ENDPOINTS.pagamentos, {
+      const response = await fetchWithRetry(API_ENDPOINTS.pagamentos, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -148,9 +150,35 @@ export default function App() {
       }
     } catch (error) {
       console.error(error);
-      setErro('Erro de conexão. Tente novamente mais tarde.');
+      setErro('Erro de conexão. Verifique sua internet e tente novamente.');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleSimular = async (dados: {
+    valor: number;
+    metodo: MetodoPagamento;
+    parcelas: number;
+  }) => {
+    try {
+      const opcao = converterMetodoParaOpcao(dados.metodo);
+      const response = await fetchWithRetry(API_ENDPOINTS.simular, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          opcao,
+          valor: dados.valor,
+          parcelas: dados.parcelas,
+        }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setSimulacao(data);
+      }
+    } catch (error) {
+      console.error('Erro na simulação em background:', error);
     }
   };
 
@@ -169,7 +197,12 @@ export default function App() {
         {/* Banner de Error Global */}
         {erro && <ErrorBanner message={erro} onClose={() => setErro(null)} />}
 
-        {tela === 'form' && <PagamentoForm onContinuar={handleContinuar} />}
+        {tela === 'form' && (
+          <PagamentoForm 
+            onContinuar={handleContinuar} 
+            onSimular={handleSimular}
+          />
+        )}
 
         {tela === 'confirmacao' && dadosPagamento && (
           <ConfirmacaoPagamento

@@ -62,15 +62,14 @@ describe('Componente PagamentoForm', () => {
 
   it('não deve submeter se o valor for inválido', () => {
     const onContinuarMock = vi.fn();
-    // Mock do window.alert pois o componente usa alert()
-    const alertMock = vi.spyOn(window, 'alert').mockImplementation(() => {});
-
+    
     render(<PagamentoForm onContinuar={onContinuarMock} />);
 
     // Tenta submeter sem preencher valor
     fireEvent.click(screen.getByText('Continuar para pagamento →'));
 
-    expect(alertMock).toHaveBeenCalledWith('Informe um valor válido');
+    // Verifica se a mensagem de erro aparece na UI
+    expect(screen.getByText('O valor é obrigatório')).toBeInTheDocument();
     expect(onContinuarMock).not.toHaveBeenCalled();
   });
 
