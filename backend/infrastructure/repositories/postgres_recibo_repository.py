@@ -28,7 +28,7 @@ class PostgresReciboRepository(ReciboRepository):
             created_at=recibo.data_hora,
         )
         self.db.add(recibo_db)
-        self.db.flush()  # Garante que o ID e outros defaults sejam carregados no objeto
+        self.db.flush()  # Garante que o ID e outros defaults sejam carregados no objeto  # noqa: E501
         self.db.refresh(recibo_db)
         return self._to_domain(recibo_db)
 
@@ -36,7 +36,7 @@ class PostgresReciboRepository(ReciboRepository):
         """
         Lista todos os recibos do banco de dados.
         """
-        recibos_db = self.db.query(ReciboModel).order_by(ReciboModel.id.desc()).all()
+        recibos_db = self.db.query(ReciboModel).order_by(ReciboModel.id.desc()).all()  # noqa: E501
         return [self._to_domain(recibo) for recibo in recibos_db]
 
     def _to_domain(self, recibo_db: ReciboModel) -> Recibo:

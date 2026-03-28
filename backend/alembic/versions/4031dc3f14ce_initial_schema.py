@@ -31,7 +31,10 @@ def upgrade() -> None:
         sa.Column("informacoes_adicionais", sa.String(), nullable=True),
         sa.Column("valor_parcela", sa.Float(), nullable=False),
         sa.Column(
-            "created_at", sa.DateTime(), server_default=sa.text("now()"), nullable=False
+            "created_at",
+            sa.DateTime(),
+            server_default=sa.text("now()"),
+            nullable=False,
         ),
         sa.PrimaryKeyConstraint("id"),
     )
