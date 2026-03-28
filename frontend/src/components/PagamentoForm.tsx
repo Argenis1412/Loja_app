@@ -21,6 +21,11 @@ interface PagamentoFormProps {
     Exclude<MetodoPagamento, 'avista' | 'debito'>,
     { min: number; max: number }
   >;
+  onSimular?: (dados: {
+    valor: number;
+    metodo: MetodoPagamento;
+    parcelas: number;
+  }) => void;
 }
 
 interface ValidationState {
@@ -50,6 +55,7 @@ export function converterMetodoParaOpcao(metodo: MetodoPagamento): number {
 export function PagamentoForm({
   onSubmit,
   onContinuar,
+  onSimular,
   limitesParcelas = DEFAULT_LIMITES_PARCELAS,
 }: PagamentoFormProps) {
   const [valor, setValor] = useState<number | ''>('');
@@ -66,6 +72,23 @@ export function PagamentoForm({
       setParcelas(2); // Mínimo para parcelado sem juros (2-6 parcelas)
     }
   }, [metodo]);
+  
+  // Debounce para simulação automática
+  useEffect(() => {
+    // Só simular se o valor for válido
+    const validation = validarValor(valor);
+    if (!validation.isValid) return;
+
+    const handler = setTimeout(() => {
+      onSimular?.({
+        valor: Number(valor),
+        metodo,
+        parcelas: metodo === 'avista' || metodo === 'debito' ? 1 : parcelas,
+      });
+    }, 600); // 600ms de debounce
+
+    return () => clearTimeout(handler);
+  }, [valor, metodo, parcelas, onSimular]);
 
   // Funções de validação
   const validarValor = (valorInput: number | ''): ValidationState => {

@@ -1,3 +1,4 @@
+from functools import lru_cache
 from domain.exceptions import RegraPagamentoInvalida
 from domain.recibo import Recibo
 
@@ -10,6 +11,17 @@ class Calculadora:
         parcelas: int,
         desconto_vista: float = 10.0,
         juros_parcelamento: float = 10.0,
+    ) -> Recibo:
+        return self._calcular_cached(opcao, valor, parcelas, desconto_vista, juros_parcelamento)
+
+    @staticmethod
+    @lru_cache(maxsize=128)
+    def _calcular_cached(
+        opcao: int,
+        valor: float,
+        parcelas: int,
+        desconto_vista: float,
+        juros_parcelamento: float,
     ) -> Recibo:
 
         # Validar que o valor seja positivo e tenha sentido monetário (>= 0.01)

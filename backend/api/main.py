@@ -1,3 +1,5 @@
+import time
+
 from fastapi import FastAPI, Request, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
@@ -20,6 +22,35 @@ app = FastAPI(
         "url": "https://github.com/Argenis1412/Loja_app",
     },
 )
+
+# Armazenamento simples para rate limiting (em memória)
+# Estrutura: { ip: (timestamp_inicio_janela, contador) }
+rate_limit_data = {}
+
+@app.middleware("http")
+async def rate_limit_middleware(request: Request, call_next):
+    # Ignorar rate limit para o endpoint de saúde
+    if request.url.path == "/saude":
+        return await call_next(request)
+
+    client_ip = request.client.host if request.client else "unknown"
+    now = time.time()
+    
+    if client_ip in rate_limit_data:
+        start_time, count = rate_limit_data[client_ip]
+        if now - start_time < 60:
+            if count >= 30:  # Limite de 30 requisições por minuto
+                return JSONResponse(
+                    status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+                    content={"detail": "Limite de requisições excedido. Tente novamente em 1 minuto."},
+                )
+            rate_limit_data[client_ip] = (start_time, count + 1)
+        else:
+            rate_limit_data[client_ip] = (now, 1)
+    else:
+        rate_limit_data[client_ip] = (now, 1)
+
+    return await call_next(request)
 
 
 @app.on_event("startup")
