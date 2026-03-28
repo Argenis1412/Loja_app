@@ -99,13 +99,18 @@ class PagamentoService:
         self.repository = repository
         # Injeção de dependências com valores padrão (padrão Composition Root)
         self.calculadora = calculadora or Calculadora()
-        self.taxas = taxas or {"desconto_vista": 10.0, "juros_parcelamento": 10.0}
+        self.taxas = taxas or {
+            "desconto_vista": 10.0,
+            "juros_parcelamento": 10.0,
+        }
 
         # Inicializar Casos de Uso
         self.processar_pagamento_uc = ProcessarPagamentoUseCase(
             self.calculadora, self.repository, self.taxas
         )
-        self.listar_pagamentos_uc = ListarPagamentosUseCase(self.repository, self.taxas)
+        self.listar_pagamentos_uc = ListarPagamentosUseCase(
+            self.repository, self.taxas
+        )  # noqa: E501
 
     def criar_pagamento(
         self,
@@ -115,7 +120,9 @@ class PagamentoService:
         num_parcelas: int | None = None,
     ) -> Recibo:
         parcelas_finais = parcelas or num_parcelas or 1
-        return self.processar_pagamento_uc.execute(opcao, valor, parcelas_finais)
+        return self.processar_pagamento_uc.execute(
+            opcao, valor, parcelas_finais
+        )
 
     def listar_pagamentos(self):
         return self.listar_pagamentos_uc.execute()

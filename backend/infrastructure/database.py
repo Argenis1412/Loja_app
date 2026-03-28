@@ -15,7 +15,7 @@ engine_args = {
     "pool_recycle": 3600,  # Recicla conexões após 1 hora
 }
 
-# Para SQLite, é necessário permitir o uso em múltiplos threads, como o FastAPI faz.
+# Para SQLite, é necessário permitir o uso em múltiplos threads, como o FastAPI faz.  # noqa: E501
 if settings.database_url.startswith("sqlite"):
     engine_args["connect_args"] = {"check_same_thread": False}
     # SQLite não suporta pool_size/max_overflow da mesma forma
@@ -50,8 +50,8 @@ def warmup_db():
 
 def get_db() -> Generator[Session, None, None]:
     """
-    Dependência do FastAPI para obter uma sessão de banco de dados por requisição.
-    Garante que a transação seja commitada em caso de sucesso ou revertida em caso de erro.
+    Dependência do FastAPI para obter uma sessão de banco de dados por requisição.  # noqa: E501
+    Garante que a transação seja commitada em caso de sucesso ou revertida em caso de erro.  # noqa: E501
     """
     db = SessionLocal()
     try:

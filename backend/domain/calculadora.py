@@ -31,7 +31,7 @@ class Calculadora:
 
         elif opcao == 3:
             if parcelas < 2 or parcelas > 6:
-                raise RegraPagamentoInvalida("Opção 3 suporta apenas de 2 a 6 parcelas")
+                raise RegraPagamentoInvalida("Opção 3 suporta apenas de 2 a 6 parcelas")  # noqa: E501
             total = valor
             metodo = "Parcelado sem juros"
             info = None

@@ -38,7 +38,7 @@ def criar_pagamento(
 )
 def simular_pagamento(dados: PagamentoRequest):
     """
-    Simula um pagamento para exibir os cálculos (juros, parcelas) sem persistir no banco.
+    Simula um pagamento para exibir os cálculos sem persistir no banco.
     """
     calculadora = Calculadora()
     # Se parcelas for None, assume 1 para evitar erro na calculadora
@@ -54,7 +54,9 @@ def simular_pagamento(dados: PagamentoRequest):
     response_model=List[PagamentoResponse],
     summary="Listar pagamentos",
 )
-def listar_pagamentos(service: PagamentoService = Depends(get_pagamento_service)):
+def listar_pagamentos(
+    service: PagamentoService = Depends(get_pagamento_service),
+):
     """
     Lista todos os pagamentos persistidos.
     """

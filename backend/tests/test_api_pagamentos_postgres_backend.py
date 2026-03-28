@@ -6,14 +6,10 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
 
-import infrastructure.database as database
 from infrastructure.database import Base
-from infrastructure.db.models.recibo_models import (  # garantir que o modelo seja importado no Base metadata
-    ReciboModel,
-)
 
 
-def test_deve_persistir_e_recuperar_lista_de_pagamentos_usando_repositorio_postgres():
+def test_deve_persistir_e_recuperar_lista_de_pagamentos_postgres():  # noqa: E501
     # Força o backend como 'postgres' para o fluxo de seleção
     os.environ["STORAGE_BACKEND"] = "postgres"
 
@@ -44,7 +40,7 @@ def test_deve_persistir_e_recuperar_lista_de_pagamentos_usando_repositorio_postg
     taxas = {"desconto_vista": 10.0, "juros_parcelamento": 10.0}
     service = PagamentoService(repo, calculadora, taxas)
 
-    # Recarrega a app principal e sobrescreve a dependência para usar nosso service
+    # Recarrega a app e sobrescreve a dependência
     main = importlib.reload(importlib.import_module("backend.api.main"))
     main.app.dependency_overrides[get_pagamento_service] = lambda: service
 

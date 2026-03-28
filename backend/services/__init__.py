@@ -1,5 +1,6 @@
 # Pacote services: exporta os serviços públicos de forma compatível.
-# Import defensivo para evitar que a importação do pacote quebre durante refatorações.
+# Import defensivo para evitar que a importação do pacote quebre durante
+# refatorações.
 
 __all__ = []
 

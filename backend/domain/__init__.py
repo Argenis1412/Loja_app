@@ -1,10 +1,10 @@
 __all__ = []
 
-# Importa a calculadora e garante o alias para o nome antigo usado em testes/código.
-from .calculadora import Calculadora, CalculadoraPagamentos
+# Alias para compatibilidade com testes e código legado.
+from .calculadora import Calculadora, CalculadoraPagamentos  # noqa: F401
 
 __all__.extend(["Calculadora", "CalculadoraPagamentos"])
 
-from .recibo import Recibo
+from .recibo import Recibo  # noqa: E402, F401
 
 __all__.append("Recibo")

@@ -11,7 +11,7 @@ from services.pagamento_service import PagamentoService
 
 def get_recibo_repository(db: Session = Depends(get_db)) -> ReciboRepository:
     """
-    Dependência para injetar o repositório de recibos com uma sessão de banco de dados.
+    Dependência para injetar o repositório de recibos com uma sessão de banco.
     """
     return PostgresReciboRepository(db=db)
 

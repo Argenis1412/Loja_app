@@ -11,10 +11,17 @@ class Settings(BaseSettings):
 
     @property
     def database_url(self) -> str:
-        # Se a DATABASE_URL for definida no ambiente, use-a (permite usar Postgres em produção)
+        # Se a DATABASE_URL for definida (permite usar Postgres em produção)
         if self.DATABASE_URL:
             return self.DATABASE_URL
-        return f"postgresql+psycopg://{self.DB_USER}:{self.DB_PASSWORD}@{self.DB_HOST}:{self.DB_PORT}/{self.DB_NAME}"
+        user, pwd, host, port, db = (
+            self.DB_USER,
+            self.DB_PASSWORD,
+            self.DB_HOST,
+            self.DB_PORT,
+            self.DB_NAME,
+        )
+        return f"postgresql+psycopg://{user}:{pwd}@{host}:{port}/{db}"
 
     model_config = SettingsConfigDict(
         env_file=".env", env_file_encoding="utf-8", extra="allow"

@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import os
 import sys
 from logging.config import fileConfig
 from pathlib import Path
@@ -16,14 +15,16 @@ from alembic import context
 BASE_DIR = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(BASE_DIR))
 
-from config.settings import settings
+from config.settings import settings  # noqa: E402
 
 # --------------------------------------------------
 
 # DATABASE_URL centralizada
 DATABASE_URL = settings.database_url
 if not DATABASE_URL:
-    raise RuntimeError("DATABASE_URL deve ser definida para migrações do Alembic")
+    raise RuntimeError(
+        "DATABASE_URL deve ser definida para migrações do Alembic"
+    )  # noqa: E501
 
 # --------------------------------------------------
 # Configuração do Alembic
@@ -40,7 +41,7 @@ if config.config_file_name is not None:
 # --------------------------------------------------
 
 from infrastructure.db.base import Base  # noqa: E402
-from infrastructure.db.models import recibo_models  # noqa: E402
+from infrastructure.db.models import recibo_models  # noqa: E402, F401
 
 target_metadata = Base.metadata
 
