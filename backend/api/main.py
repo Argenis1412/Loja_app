@@ -27,6 +27,7 @@ app = FastAPI(
 # Estrutura: { ip: (timestamp_inicio_janela, contador) }
 rate_limit_data = {}
 
+
 @app.middleware("http")
 async def rate_limit_middleware(request: Request, call_next):
     # Ignorar rate limit para o endpoint de saúde
@@ -35,14 +36,16 @@ async def rate_limit_middleware(request: Request, call_next):
 
     client_ip = request.client.host if request.client else "unknown"
     now = time.time()
-    
+
     if client_ip in rate_limit_data:
         start_time, count = rate_limit_data[client_ip]
         if now - start_time < 60:
             if count >= 30:  # Limite de 30 requisições por minuto
                 return JSONResponse(
                     status_code=status.HTTP_429_TOO_MANY_REQUESTS,
-                    content={"detail": "Limite de requisições excedido. Tente novamente em 1 minuto."},
+                    content={
+                        "detail": "Limite de requisições excedido. Tente novamente em 1 minuto."
+                    },
                 )
             rate_limit_data[client_ip] = (start_time, count + 1)
         else:

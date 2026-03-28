@@ -4,7 +4,9 @@ from pydantic import BaseModel, Field, model_validator
 class PagamentoRequest(BaseModel):
     opcao: int = Field(..., ge=1, le=4, description="Opção de pagamento (1-4)")
     valor: float = Field(..., gt=0, le=1000000, description="Valor do pagamento")
-    parcelas: int | None = Field(None, ge=1, le=24, description="Número de parcelas (opcional)")
+    parcelas: int | None = Field(
+        None, ge=1, le=24, description="Número de parcelas (opcional)"
+    )
 
     @model_validator(mode="after")
     def validar_parcelas_por_opcao(self) -> "PagamentoRequest":

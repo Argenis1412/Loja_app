@@ -30,8 +30,12 @@ class Recibo:
             self.valor_parcela = round(self.total / self.parcelas, 2)
             # Calcula a última parcela para compensar erro de arredondamento
             if self.parcelas > 1:
-                soma_parcelas_normais = self.valor_parcela * (self.parcelas - 1)  # noqa: E501
-                self.valor_ultima_parcela = round(self.total - soma_parcelas_normais, 2)  # noqa: E501
+                soma_parcelas_normais = self.valor_parcela * (
+                    self.parcelas - 1
+                )  # noqa: E501
+                self.valor_ultima_parcela = round(
+                    self.total - soma_parcelas_normais, 2
+                )  # noqa: E501
             else:
                 self.valor_ultima_parcela = self.valor_parcela
         else:

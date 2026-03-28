@@ -1,4 +1,5 @@
 from functools import lru_cache
+
 from domain.exceptions import RegraPagamentoInvalida
 from domain.recibo import Recibo
 
@@ -12,7 +13,9 @@ class Calculadora:
         desconto_vista: float = 10.0,
         juros_parcelamento: float = 10.0,
     ) -> Recibo:
-        return self._calcular_cached(opcao, valor, parcelas, desconto_vista, juros_parcelamento)
+        return self._calcular_cached(
+            opcao, valor, parcelas, desconto_vista, juros_parcelamento
+        )
 
     @staticmethod
     @lru_cache(maxsize=128)
@@ -43,7 +46,9 @@ class Calculadora:
 
         elif opcao == 3:
             if parcelas < 2 or parcelas > 6:
-                raise RegraPagamentoInvalida("Opção 3 suporta apenas de 2 a 6 parcelas")  # noqa: E501
+                raise RegraPagamentoInvalida(
+                    "Opção 3 suporta apenas de 2 a 6 parcelas"
+                )  # noqa: E501
             total = valor
             metodo = "Parcelado sem juros"
             info = None

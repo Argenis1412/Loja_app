@@ -120,9 +120,7 @@ class PagamentoService:
         num_parcelas: int | None = None,
     ) -> Recibo:
         parcelas_finais = parcelas or num_parcelas or 1
-        return self.processar_pagamento_uc.execute(
-            opcao, valor, parcelas_finais
-        )
+        return self.processar_pagamento_uc.execute(opcao, valor, parcelas_finais)
 
     def listar_pagamentos(self):
         return self.listar_pagamentos_uc.execute()

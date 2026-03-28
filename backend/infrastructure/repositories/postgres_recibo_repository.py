@@ -36,7 +36,9 @@ class PostgresReciboRepository(ReciboRepository):
         """
         Lista todos os recibos do banco de dados.
         """
-        recibos_db = self.db.query(ReciboModel).order_by(ReciboModel.id.desc()).all()  # noqa: E501
+        recibos_db = (
+            self.db.query(ReciboModel).order_by(ReciboModel.id.desc()).all()
+        )  # noqa: E501
         return [self._to_domain(recibo) for recibo in recibos_db]
 
     def _to_domain(self, recibo_db: ReciboModel) -> Recibo:
