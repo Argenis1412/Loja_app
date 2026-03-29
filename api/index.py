@@ -1,22 +1,19 @@
 import os
 import sys
 
-# Get the absolute path to the backend directory
-# 'api' is at root, 'backend' is at root level too.
-backend_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "backend"))
+# Add the 'backend' folder to sys.path
+# This ensures that when we do 'from api.main import app', 
+# Python can find the 'api' package inside the 'backend' folder.
+backend_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'backend'))
+sys.path.insert(0, backend_path)
 
-# Add backend directory to sys.path to allow imports from api, domain, etc.
-if backend_dir not in sys.path:
-    sys.path.append(backend_dir)
-
-# Import the FastAPI app from backend/api/main.py
+# Import the app and rename it to 'app' for Vercel
 try:
-    from api.main import app
+    from api.main import app as fastapi_app
+    app = fastapi_app
 except ImportError as e:
-    print(f"Error importing app: {e}")
-    print(f"sys.path: {sys.path}")
+    # This helps debug if the path manipulation fails in Vercel
+    print(f"ImportError in api/index.py: {e}")
+    print(f"Current sys.path: {sys.path}")
+    print(f"Backend path expected at: {backend_path}")
     raise e
-
-# Vercel's python runtime will look for an 'app' instance
-# exported as a variable.
-handler = app
