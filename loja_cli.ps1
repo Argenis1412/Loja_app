@@ -47,6 +47,7 @@ switch ($Command) {
         Write-Host "Executando Linters..." -ForegroundColor Green
         cd $BackendDir
         .\venv\Scripts\activate
+        isort .
         black .
         flake8 .
         mypy .

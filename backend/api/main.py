@@ -1,8 +1,9 @@
-import time
 import os
-from fastapi import FastAPI, Request, status, APIRouter
+import time
+
+from fastapi import APIRouter, FastAPI, Request, status
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse, FileResponse
+from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 
 from api.pagamentos_api import router as pagamentos_router
