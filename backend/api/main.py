@@ -64,11 +64,11 @@ async def startup_event():
     """
     create_db_and_tables()
     warmup_db()
-    
+
     # Log das rotas disponíveis para depuração
     print("\n--- Rotas da API disponíveis ---")
     for route in app.routes:
-        if hasattr(route, 'path'):
+        if hasattr(route, "path"):
             print(f"Rote: {route.path}")
     print("--------------------------------\n")
 
@@ -94,6 +94,7 @@ app.add_middleware(
 # Incluir rotas da API diretamente no app com o prefixo /api
 app.include_router(pagamentos_router, prefix="/api")
 
+
 # Rota de saúde diretamente no app para máxima visibilidade
 @app.get(
     "/api/saude",
@@ -102,6 +103,7 @@ app.include_router(pagamentos_router, prefix="/api")
 )
 def verificar_saude():
     return {"status": "operacional"}
+
 
 # Servir arquivos estáticos do frontend (React) em produção
 # O diretório 'static' é criado pelo Dockerfile
