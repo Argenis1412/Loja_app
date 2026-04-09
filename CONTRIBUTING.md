@@ -51,14 +51,13 @@ cd Loja_app
 Use the provided PowerShell script to set up everything automatically:
 
 ```powershell
-.\setup.ps1
+.\loja_cli.ps1 setup
 ```
 
 This script will:
 1. Create Python virtual environment
 2. Install backend dependencies
 3. Install frontend dependencies
-4. Run database migrations
 
 ### Manual Setup
 
@@ -102,10 +101,10 @@ The easiest way to run the project is using the provided scripts:
 
 ```powershell
 # Terminal 1: Start backend
-.\run_backend.ps1
+.\loja_cli.ps1 backend
 
 # Terminal 2: Start frontend
-.\run_frontend.ps1
+.\loja_cli.ps1 frontend
 ```
 
 ### Manual Execution
@@ -145,7 +144,7 @@ npm run dev
 ### All Tests (Backend + Frontend)
 
 ```powershell
-.\run_tests.ps1
+.\loja_cli.ps1 test
 ```
 
 ### Backend Tests
@@ -355,10 +354,7 @@ Loja_app/
 │   │   └── tests/           # Component tests
 │   └── coverage/            # Test coverage reports
 │
-├── run_backend.ps1          # Start backend script
-├── run_frontend.ps1         # Start frontend script
-├── run_tests.ps1            # Run all tests script
-├── setup.ps1                # Setup script
+├── loja_cli.ps1             # Unified management script
 └── CHANGELOG.md             # Version history
 ```
 

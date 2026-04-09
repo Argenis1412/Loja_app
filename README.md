@@ -14,10 +14,11 @@
 
 The easiest way to get started is using the included PowerShell scripts:
 
-1.  **Setup**: `.\setup.ps1` (Creates venv, installs dependencies)
-2.  **Run Backend**: `.\run_backend.ps1` (FastAPI at `localhost:8000`)
-3.  **Run Frontend**: `.\run_frontend.ps1` (React at `localhost:5173`)
-4.  **Tests**: `.\run_tests.ps1` (Runs all backend & frontend tests)
+1.  **Setup**: `.\loja_cli.ps1 setup` (Creates venv, installs dependencies for backend and frontend)
+2.  **Run Backend**: `.\loja_cli.ps1 backend` (FastAPI at `localhost:8000`)
+3.  **Run Frontend**: `.\loja_cli.ps1 frontend` (React at `localhost:5173`)
+4.  **Tests**: `.\loja_cli.ps1 test` (Runs backend tests)
+5.  **Linters**: `.\loja_cli.ps1 lint` (Runs Python and TS linters)
 
 *For manual setup or Linux/macOS instructions, see the [Backend](backend/README.md) and [Frontend](frontend/README.md) documentation.*
 

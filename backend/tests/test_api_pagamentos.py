@@ -1,7 +1,7 @@
 def test_criar_pagamento_com_juros(client):
     payload = {"opcao": 4, "valor": 440, "parcelas": 12}
 
-    response = client.post("/pagamentos/", json=payload)
+    response = client.post("/api/pagamentos/", json=payload)
 
     assert response.status_code == 201
 
@@ -19,7 +19,7 @@ def test_criar_pagamento_com_juros(client):
 
 
 def test_listar_pagamentos(client):
-    response = client.get("/pagamentos/")
+    response = client.get("/api/pagamentos/")
 
     assert response.status_code == 200
 

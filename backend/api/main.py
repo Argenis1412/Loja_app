@@ -1,8 +1,9 @@
 import time
-
-from fastapi import FastAPI, Request, status
+import os
+from fastapi import FastAPI, Request, status, APIRouter
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, FileResponse
+from fastapi.staticfiles import StaticFiles
 
 from api.pagamentos_api import router as pagamentos_router
 from domain.exceptions import DomainError
@@ -31,7 +32,7 @@ rate_limit_data = {}
 @app.middleware("http")
 async def rate_limit_middleware(request: Request, call_next):
     # Ignorar rate limit para o endpoint de saúde
-    if request.url.path == "/saude":
+    if request.url.path == "/api/saude":
         return await call_next(request)
 
     client_ip = request.client.host if request.client else "unknown"
@@ -60,10 +61,16 @@ async def rate_limit_middleware(request: Request, call_next):
 async def startup_event():
     """
     Evento executado na inicialização da aplicação.
-    Cria tabelas e aquece o pool de conexões.
     """
     create_db_and_tables()
     warmup_db()
+    
+    # Log das rotas disponíveis para depuração
+    print("\n--- Rotas da API disponíveis ---")
+    for route in app.routes:
+        if hasattr(route, 'path'):
+            print(f"Rote: {route.path}")
+    print("--------------------------------\n")
 
 
 # Manipulador de exceções de domínio para retornar 400 Bad Request
@@ -75,22 +82,34 @@ async def domain_exception_handler(request: Request, exc: Exception):
     )
 
 
-app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"])
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
-# Endpoint de verificação de saúde da API
+# Incluir rotas da API diretamente no app com o prefixo /api
+app.include_router(pagamentos_router, prefix="/api")
+
+# Rota de saúde diretamente no app para máxima visibilidade
 @app.get(
-    "/saude",
+    "/api/saude",
     status_code=status.HTTP_200_OK,
     tags=["Infraestrutura"],
-    summary="Verificar saúde da API",
 )
 def verificar_saude():
-    """
-    Retorna o status operacional da API e seus componentes.
-    Útil para monitoramento e scripts de warm-up.
-    """
     return {"status": "operacional"}
 
+# Servir arquivos estáticos do frontend (React) em produção
+# O diretório 'static' é criado pelo Dockerfile
+static_path = os.path.join(os.getcwd(), "static")
+if os.path.exists(static_path):
+    app.mount("/", StaticFiles(directory=static_path, html=True), name="static")
 
-app.include_router(pagamentos_router)
+    @app.exception_handler(404)
+    async def not_found_handler(request: Request, exc: Exception):
+        # Para SPA (React), qualquer rota não encontrada deve retornar o index.html
+        return FileResponse(os.path.join(static_path, "index.html"))
