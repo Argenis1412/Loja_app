@@ -42,6 +42,10 @@ switch ($Command) {
         .\venv\Scripts\activate
         $env:PYTHONPATH = $BackendDir
         pytest
+
+        Write-Host "`nExecutando Testes (Frontend)..." -ForegroundColor Green
+        cd $FrontendDir
+        npm run test -- --run
     }
     "lint" {
         Write-Host "Executando Linters..." -ForegroundColor Green
