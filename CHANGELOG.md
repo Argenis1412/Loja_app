@@ -45,7 +45,12 @@ Existing external clients (if any) using the unversioned `/api/` path will remai
 - **Structured Error Schema**: All API errors now return a standard `{ error: { code, message, trace_id } }` object.
 
 #### Fixed
-- **Versioned API Sync**: Fixed 404 errors by aligning frontend `API_BASE_URL` with backend `/api/v1/` prefix.
+- **INC-001: Redundant API Prefix (404 Error)**: 
+  - **Symptom**: Requests were being sent to `/api/api/v1/` instead of `/api/v1/`.
+  - **Root Cause**: Legacy configuration in `.env.local` (`VITE_API_URL=.../api`) clashed with a naive URL resilience logic that appended `/api/v1` blindly.
+  - **Fix**: Implemented `getBaseApiUrl` normalization in `frontend/src/config/api.ts` that intelligently detects existing prefixes (`/api`, `/api/v1`) before appending, making the frontend resilient to environment variable variations.
+- **Missing Database Column**: Applied missing Alembic migration to add `idempotency_key` to local SQLite database.
+- **PowerShell Syntax**: Fixed `make.ps1` encoding and path resolution issues using `$PSScriptRoot`.
 - **Frontend Error Parsing**: Updated UI to gracefully display structured error messages from the backend.
 
 ---

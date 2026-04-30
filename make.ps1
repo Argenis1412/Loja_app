@@ -3,36 +3,50 @@ param (
     [string]$Task = "help"
 )
 
+$Root = $PSScriptRoot
+
 switch ($Task) {
     "dev" {
         Write-Host "Starting full environment (2 windows)..." -ForegroundColor Cyan
-        Start-Process powershell -ArgumentList "-NoExit", "-Command", "cd backend; ./venv/Scripts/python -m uvicorn api.main:app --reload"
+        Start-Process powershell -ArgumentList "-NoExit", "-Command", "cd $Root/backend; ./venv/Scripts/python -m uvicorn api.main:app --reload"
         Write-Host "Starting Frontend in current window..." -ForegroundColor Yellow
-        cd frontend; npm run dev
+        Set-Location $Root/frontend
+        npm run dev
     }
     "back" {
         Write-Host "Starting Backend..." -ForegroundColor Cyan
-        cd backend; ./venv/Scripts/python -m uvicorn api.main:app --reload
+        Set-Location $Root/backend
+        ./venv/Scripts/python -m uvicorn api.main:app --reload
     }
     "front" {
         Write-Host "Starting Frontend..." -ForegroundColor Cyan
-        cd frontend; npm run dev
+        Set-Location $Root/frontend
+        npm run dev
     }
     "test" {
         Write-Host "Running all tests..." -ForegroundColor Cyan
-        cd backend; ./venv/Scripts/python -m pytest
-        cd frontend; npm test -- --run
+        Write-Host "--- Backend Tests ---" -ForegroundColor Blue
+        Set-Location $Root/backend
+        ./venv/Scripts/python -m pytest
+        Write-Host "--- Frontend Tests ---" -ForegroundColor Blue
+        Set-Location $Root/frontend
+        npm test -- --run
+        Set-Location $Root
     }
     "test-back" {
-        cd backend; ./venv/Scripts/python -m pytest
+        Set-Location $Root/backend
+        ./venv/Scripts/python -m pytest
     }
     "test-front" {
-        cd frontend; npm test -- --run
+        Set-Location $Root/frontend
+        npm test -- --run
     }
     "lint" {
         Write-Host "Running linters..." -ForegroundColor Cyan
-        cd backend; ./venv/Scripts/python -m ruff check .
-        cd frontend; npm run lint
+        Set-Location $Root/backend
+        ./venv/Scripts/python -m ruff check .
+        Set-Location $Root/frontend
+        npm run lint
     }
     default {
         Write-Host "Available commands:" -ForegroundColor Green
