@@ -16,3 +16,4 @@ class ReciboModel(Base):
     )  # Para garantir total exato  # noqa: E501
     informacoes_adicionais = Column(String)
     created_at = Column(DateTime, nullable=False, server_default=func.now())
+    deleted_at = Column(DateTime, nullable=True, default=None)
