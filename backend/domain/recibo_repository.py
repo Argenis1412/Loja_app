@@ -9,5 +9,9 @@ class ReciboRepository(ABC):
         ...
 
     @abstractmethod
-    def listar(self) -> list[Recibo]:
+    def listar(self, limit: int = 20, offset: int = 0) -> list[Recibo]:
+        ...
+
+    @abstractmethod
+    def buscar_por_idempotency_key(self, key: str) -> Recibo | None:
         ...

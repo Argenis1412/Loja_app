@@ -1,130 +1,70 @@
-# Changelog
+# 📊 CHANGELOG
 
-All notable changes to this project will be documented in this file.
+All notable changes to this project are documented here.
+Format based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) with semantic versioning.
 
-The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
-and this project adheres to semantic versioning principles.
-
----
-
-## [Unreleased]
-
-### Added
-- Comprehensive tests for ConfirmacaoPagamento component
-- Visual display of adjusted last installment in UI
-- Detailed installment breakdown in receipt and confirmation screens
-- Coverage reports for frontend tests
-- Database migration for `valor_ultima_parcela` column
-- Documentation updates in all README files
-
-### Changed
-- **BREAKING**: Option 4 now requires 12-24 installments (previously 2-12)
-  - This maintains clear separation between short-term (option 3: 2-6) and long-term (option 4: 12-24) installment plans
-- Exact total calculation algorithm to adjust last installment
-- Enhanced validation error messages for payment options
-- Improved UI animations and visual feedback
-- Updated tests to reflect new installment ranges
-
-### Fixed
-- Pytest asyncio configuration warning
-- Rounding errors in installment calculations
-- Total amount discrepancies when splitting into installments
-- Uvicorn module path issue when running from backend directory
+This changelog separates three categories:
+- 🔥 **Production Incidents** — events that affected system behavior or availability.
+- 🚀 **Releases** — versioned feature and improvement history.
+- 🔧 **Hardening** — internal improvements (refactors, CI/CD, documentation).
 
 ---
 
-## [0.2.0] - 2026-02-14
+## 🔥 Production Incidents
 
-### Added
-- Exact total calculation with adjusted last installment
-- `valor_ultima_parcela` field in database model
-- `valor_ultima_parcela` field in API DTO responses
-- Smart UI display for equal vs. adjusted installments
-- Comprehensive frontend tests for new features
+### INC-001 · API Simulation Failure (404 Not Found)
+**Period**: v1.0.0 → v1.1.0 (Refactoring Phase)
+**Affected**: `POST /api/pagamentos/simular` — Frontend simulation flow.
 
-### Changed
-- Option 4 installment range from 2-12 to 12-24
-- Recibo entity to calculate and store adjusted last installment
-- ConfirmacaoPagamento component to show installment details
-- Recibo component to display installment breakdown
-- PagamentoForm to enforce new installment limits
+**What happened**
+The backend was refactored to enforce API versioning (`/api/v1/`). However, the frontend configuration in `api.ts` was not synchronized. The frontend continued to call `/api/pagamentos/simular`, resulting in `404 Not Found` errors in production/development environments.
 
-### Backend Changes
-- Updated `Calculadora` class with new validation for option 4
-- Enhanced `Recibo` entity with `valor_ultima_parcela` calculation
-- Modified `PostgresReciboRepository` to persist adjusted last installment
-- Updated `PagamentoResponse` DTO to include `valor_ultima_parcela`
-- Added database migration for new column
+**How it was discovered**
+Discovered via backend logs and a user report showing a broken "Confirmar pagamento" screen where simulation data was missing.
 
-### Frontend Changes
-- Updated `PagamentoForm` with new installment limits (12-24 for option 4)
-- Enhanced `ConfirmacaoPagamento` to display adjusted installments
-- Improved `Recibo` component with detailed installment breakdown
-- Updated type definitions for `valor_ultima_parcela` field
-- Added new test cases for adjusted installments
+**What was tried first (didn't work)**
+Attempted to add a temporary redirect at the server level. This was rejected because it would hide the architectural inconsistency rather than fixing it.
+
+**Root cause**
+Lack of synchronized deployment between backend route changes and frontend configuration.
+
+**Resolution (v1.1.0)**
+Updated `API_BASE_URL` in `frontend/src/config/api.ts` to include the `/v1` prefix. Synchronized all frontend services to match the new versioned path.
+
+**Accepted side effect**
+Existing external clients (if any) using the unversioned `/api/` path will remain broken. This is an intentional breaking change to enforce versioning standards.
 
 ---
 
-## [0.1.0] - Initial Release
+## 🚀 Releases
 
-### Added
-- FastAPI backend with payment calculation engine
-- React + TypeScript frontend
-- Four payment options:
-  - Option 1: Cash with 10% discount
-  - Option 2: Debit card with 5% discount
-  - Option 3: Installments without interest (2-6x)
-  - Option 4: Installments with interest (2-12x)
-- Domain-driven design architecture
-- Repository pattern with PostgreSQL
-- Comprehensive test suite (backend and frontend)
-- API documentation with OpenAPI/Swagger
-- Dark mode support (prepared, not toggled)
-- Tailwind CSS styling
-- Database migrations with Alembic
-- CI/CD workflows (prepared)
+### [1.1.0] - 2026-04-30
+#### Added
+- **API Pagination**: Implemented `limit` and `offset` in all listing endpoints (`/api/v1/pagamentos/`). Default limit set to 20.
+- **Idempotency Support**: Added `Idempotency-Key` header validation for payment creation. Prevents duplicate transactions on network retries.
+- **Structured Error Schema**: All API errors now return a standard `{ error: { code, message, trace_id } }` object.
 
-### Backend
-- Domain layer with `Calculadora` class
-- Service layer with `PagamentoService`
-- Infrastructure layer with PostgreSQL repository
-- API layer with FastAPI endpoints
-- Exception handling and validation
-- Unit and integration tests with pytest
-
-### Frontend
-- React components for payment flow
-- TypeScript type definitions
-- API integration with fetch
-- Component tests with Vitest
-- Responsive design with Tailwind CSS
-- Form validation and error handling
+#### Fixed
+- **INC-001: Redundant API Prefix (404 Error)**: 
+  - **Symptom**: Requests were being sent to `/api/api/v1/` instead of `/api/v1/`.
+  - **Root Cause**: Legacy configuration in `.env.local` (`VITE_API_URL=.../api`) clashed with a naive URL resilience logic that appended `/api/v1` blindly.
+  - **Fix**: Implemented `getBaseApiUrl` normalization in `frontend/src/config/api.ts` that intelligently detects existing prefixes (`/api`, `/api/v1`) before appending, making the frontend resilient to environment variable variations.
+- **Missing Database Column**: Applied missing Alembic migration to add `idempotency_key` to local SQLite database.
+- **PowerShell Syntax**: Fixed `make.ps1` encoding and path resolution issues using `$PSScriptRoot`.
+- **Frontend Error Parsing**: Updated UI to gracefully display structured error messages from the backend.
 
 ---
 
-## Legend
-
-- **Added**: New features
-- **Changed**: Changes in existing functionality
-- **Deprecated**: Soon-to-be removed features
-- **Removed**: Removed features
-- **Fixed**: Bug fixes
-- **Security**: Security improvements
+## 🔧 Hardening
+- **ADR-0002**: Documented Idempotency and Pagination strategies.
+- **Test Suite Expansion**: Reached 94% total coverage with new tests for pagination and idempotency.
+- **Git Branching**: Standardized branch naming convention (e.g., `feat/pagination-idempotency-sync`).
 
 ---
 
-## Notes
-
-### Version 0.2.0 Highlights
-
-The main focus of this release is ensuring exact total calculations when splitting payments into installments. Previously, rounding errors could cause the total to be slightly off (e.g., R$ 100.02 instead of R$ 100.00). Now, the system automatically adjusts the last installment to guarantee the total is exact.
-
-**Example:**
-- **Before**: 6x R$ 16.67 = R$ 100.02 ❌
-- **After**: 5x R$ 16.67 + 1x R$ 16.65 = R$ 100.00 ✅
-
-Additionally, option 4 now clearly differentiates itself from option 3 by requiring a minimum of 12 installments, making it suitable for long-term financing with interest.
-
----
-
-**For detailed instructions on running the project, see the main [README.md](README.md).**
+## [1.0.0] - 2026-04-15
+### Initial Release
+- Basic payment simulation and persistence.
+- SQLite support for local development.
+- Initial frontend with React and TailwindCSS.
+- Basic test suite with 80% coverage.

@@ -25,6 +25,7 @@ class PostgresReciboRepository(ReciboRepository):
             informacoes_adicionais=recibo.informacoes_adicionais,
             valor_parcela=recibo.valor_parcela,
             valor_ultima_parcela=getattr(recibo, "valor_ultima_parcela", None),
+            idempotency_key=recibo.idempotency_key,
             created_at=recibo.data_hora,
         )
         self.db.add(recibo_db)
@@ -32,12 +33,29 @@ class PostgresReciboRepository(ReciboRepository):
         self.db.refresh(recibo_db)
         return self._to_domain(recibo_db)
 
-    def listar(self) -> List[Recibo]:
+    def listar(self, limit: int = 20, offset: int = 0) -> List[Recibo]:
         """
-        Lista todos os recibos do banco de dados.
+        Lista todos os recibos do banco de dados com suporte a paginação.
         """
-        recibos_db = self.db.query(ReciboModel).order_by(ReciboModel.id.desc()).all()  # noqa: E501
+        recibos_db = (
+            self.db.query(ReciboModel)
+            .order_by(ReciboModel.id.desc())
+            .offset(offset)
+            .limit(limit)
+            .all()
+        )
         return [self._to_domain(recibo) for recibo in recibos_db]
+
+    def buscar_por_idempotency_key(self, key: str) -> Recibo | None:
+        """
+        Busca um recibo pelo idempotency_key.
+        """
+        recibo_db = (
+            self.db.query(ReciboModel)
+            .filter(ReciboModel.idempotency_key == key)
+            .first()
+        )
+        return self._to_domain(recibo_db) if recibo_db else None
 
     def _to_domain(self, recibo_db: ReciboModel) -> Recibo:
         recibo = Recibo(
@@ -48,6 +66,7 @@ class PostgresReciboRepository(ReciboRepository):
             informacoes_adicionais=recibo_db.informacoes_adicionais,
             valor_parcela=recibo_db.valor_parcela,
             data_hora=recibo_db.created_at,
+            idempotency_key=recibo_db.idempotency_key,
         )
         # Adicionar valor_ultima_parcela se existir no BD
         if (
