@@ -22,9 +22,7 @@ from config.settings import settings  # noqa: E402
 # DATABASE_URL centralizada
 DATABASE_URL = settings.database_url
 if not DATABASE_URL:
-    raise RuntimeError(
-        "DATABASE_URL deve ser definida para migrações do Alembic"
-    )  # noqa: E501
+    raise RuntimeError("DATABASE_URL deve ser definida para migrações do Alembic")  # noqa: E501
 
 # --------------------------------------------------
 # Configuração do Alembic

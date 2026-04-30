@@ -14,14 +14,12 @@ from infrastructure.repositories.postgres_recibo_repository import (
 
 # Teste de integração para PostgresReciboRepository
 def test_integration_postgres_repository_with_env_var():
-
     engine = create_engine("sqlite:///:memory:")
     Base.metadata.create_all(bind=engine)
     SessionLocal = sessionmaker(bind=engine)
     db = SessionLocal()
 
     try:
-
         repo = PostgresReciboRepository(db)
         recibo1 = Recibo(total=90.0, metodo="dinheiro", parcelas=1)
         recibo2 = Recibo(total=95.0, metodo="cartao", parcelas=1)
@@ -48,7 +46,6 @@ def test_integration_postgres_repository_with_env_var():
 
 
 def test_database_created_with_sqlite_url():
-
     with tempfile.NamedTemporaryFile(suffix=".db", delete=False) as tmp:
         tmp_path = tmp.name
 

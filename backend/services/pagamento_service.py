@@ -108,9 +108,7 @@ class PagamentoService:
         self.processar_pagamento_uc = ProcessarPagamentoUseCase(
             self.calculadora, self.repository, self.taxas
         )
-        self.listar_pagamentos_uc = ListarPagamentosUseCase(
-            self.repository, self.taxas
-        )  # noqa: E501
+        self.listar_pagamentos_uc = ListarPagamentosUseCase(self.repository, self.taxas)  # noqa: E501
 
     def criar_pagamento(
         self,

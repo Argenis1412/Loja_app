@@ -50,9 +50,12 @@ async def lifespan(app: FastAPI):
     # Inicialização
     create_db_and_tables()
     warmup_db()
-    logger.info("app_startup", version=APP_VERSION, env=APP_ENV, routes=[
-        r.path for r in app.routes if hasattr(r, "path")
-    ])
+    logger.info(
+        "app_startup",
+        version=APP_VERSION,
+        env=APP_ENV,
+        routes=[r.path for r in app.routes if hasattr(r, "path")],
+    )
     yield
     # Encerramento
     logger.info("app_shutdown")
