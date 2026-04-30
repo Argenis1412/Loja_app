@@ -19,6 +19,8 @@ This is the core of the Loja App, implementing the business logic, payment calcu
 - **Exact Total splitting**: Last installment adjusted to ensure zero rounding errors.
 - **Domain-Driven Validation**: Custom exceptions (e.g., `ValorInvalidoError`) for business rules.
 - **API First**: Automatic documentation via Swagger and ReDoc.
+- **Observability**: Structured logging with `structlog` and request tracing via `X-Trace-Id`.
+- **Resilience**: Integrated rate limiting with `slowapi`.
 
 ---
 
@@ -32,8 +34,9 @@ This is the core of the Loja App, implementing the business logic, payment calcu
 1.  **Environment**: `python -m venv venv`
 2.  **Activate**: `.\venv\Scripts\activate` (Windows) or `source venv/bin/activate` (Unix)
 3.  **Install**: `pip install -r requirements.txt`
-4.  **Database**: `alembic upgrade head`
-5.  **Run**: `uvicorn api.main:app --reload`
+4.  **Configuration**: Copy `.env.example` to `.env` and adjust settings.
+5.  **Database**: `alembic upgrade head`
+6.  **Run**: `uvicorn api.main:app --reload`
 
 ---
 
@@ -64,12 +67,12 @@ pytest --cov=. --cov-report=html
 
 ---
 
-## 🔌 API Endpoints Summary
+## 🔌 API Endpoints Summary (v1)
 
-- `POST /pagamentos/` — Create and persist a payment.
-- `POST /pagamentos/simular` — Simulate payment without saving.
-- `GET /pagamentos/` — List transaction history.
-- `GET /saude` — Basic health check.
+- `POST /api/v1/pagamentos/` — Create and persist a payment.
+- `POST /api/v1/pagamentos/simular` — Simulate payment without saving.
+- `GET /api/v1/pagamentos/` — List transaction history.
+- `GET /api/v1/saude` — Basic health check with version and environment.
 
 For detailed request/response schemas, refer to the local Swagger UI at `/docs`.
 
