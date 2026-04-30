@@ -104,7 +104,8 @@ export default function App() {
       } else {
         try {
           const errData = await response.json();
-          setErro(errData.detail || 'Erro ao simular pagamento');
+          const message = errData.error?.message || 'Erro ao simular pagamento';
+          setErro(Array.isArray(message) ? message.join(', ') : message);
         } catch {
           setErro('Erro ao comunicar com o servidor de simulação');
         }
@@ -143,7 +144,8 @@ export default function App() {
       } else {
         try {
           const errData = await response.json();
-          setErro(errData.detail || 'Erro ao processar pagamento');
+          const message = errData.error?.message || 'Erro ao processar pagamento';
+          setErro(Array.isArray(message) ? message.join(', ') : message);
         } catch {
           setErro('Ocorreu um erro inesperado no servidor');
         }

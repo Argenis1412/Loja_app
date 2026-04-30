@@ -36,16 +36,22 @@ export async function criarPagamento(dados: CriarPagamentoRequest) {
   const bodyText = await response.text();
 
   if (!response.ok) {
-    console.error('criarPagamento error:', response.status, bodyText);
-    let parsed = bodyText;
+    let errorMessage = `Erro ao processar pagamento (${response.status})`;
     try {
-      parsed = JSON.parse(bodyText);
+      const parsed = JSON.parse(bodyText);
+      if (parsed.error && parsed.error.message) {
+        errorMessage = Array.isArray(parsed.error.message) 
+          ? parsed.error.message.join(', ') 
+          : parsed.error.message;
+        
+        if (parsed.error.code) {
+          errorMessage = `[${parsed.error.code}] ${errorMessage}`;
+        }
+      }
     } catch {
-      // manter bodyText como está
+      // keep default errorMessage if parsing fails
     }
-    throw new Error(
-      `Erro ao processar pagamento (${response.status}): ${JSON.stringify(parsed)}`,
-    );
+    throw new Error(errorMessage);
   }
 
   try {
