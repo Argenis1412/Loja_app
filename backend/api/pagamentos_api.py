@@ -1,6 +1,6 @@
 from typing import List
 
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, Header, status
 
 from api.deps import get_pagamento_service
 from api.dtos.pagamento_request import PagamentoRequest
@@ -19,13 +19,18 @@ router = APIRouter(prefix="/pagamentos", tags=["Pagamentos"])
 )
 def criar_pagamento(
     dados: PagamentoRequest,
+    idempotency_key: str | None = Header(None, alias="Idempotency-Key"),
     service: PagamentoService = Depends(get_pagamento_service),
 ):
     """
     Cria um novo pagamento e o persiste no banco de dados.
+    Suporta Idempotency-Key para evitar duplicados.
     """
     recibo = service.criar_pagamento(
-        opcao=dados.opcao, valor=dados.valor, parcelas=dados.parcelas
+        opcao=dados.opcao,
+        valor=dados.valor,
+        parcelas=dados.parcelas,
+        idempotency_key=idempotency_key,
     )
     return PagamentoResponse.from_domain(recibo)
 
@@ -55,10 +60,13 @@ def simular_pagamento(dados: PagamentoRequest):
     summary="Listar pagamentos",
 )
 def listar_pagamentos(
+    limit: int = 20,
+    offset: int = 0,
     service: PagamentoService = Depends(get_pagamento_service),
 ):
     """
-    Lista todos os pagamentos persistidos.
+    Lista todos os pagamentos persistidos com suporte a paginação.
+    Default limit=20, offset=0.
     """
-    recibos = service.listar_pagamentos()
+    recibos = service.listar_pagamentos(limit=limit, offset=offset)
     return [PagamentoResponse.from_domain(recibo) for recibo in recibos]

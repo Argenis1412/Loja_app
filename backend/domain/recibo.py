@@ -11,6 +11,7 @@ class Recibo:
         valor_parcela: float | None = None,
         data_hora: datetime | None = None,
         id: int | None = None,
+        idempotency_key: str | None = None,
     ):
         if total <= 0:
             raise ValueError("Total inválido")
@@ -22,6 +23,7 @@ class Recibo:
         self.informacoes_adicionais = informacoes_adicionais
         # Opcional: id persistido no banco
         self.id = id
+        self.idempotency_key = idempotency_key
         self.data_hora = data_hora or datetime.now(timezone.utc)
         # Se valor_parcela não for passado, calcula automaticamente
         # Ajustamos para garantir que o total seja sempre exato

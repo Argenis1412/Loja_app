@@ -17,3 +17,4 @@ class ReciboModel(Base):
     informacoes_adicionais = Column(String)
     created_at = Column(DateTime, nullable=False, server_default=func.now())
     deleted_at = Column(DateTime, nullable=True, default=None)
+    idempotency_key = Column(String(255), nullable=True, unique=True, index=True)

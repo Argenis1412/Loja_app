@@ -39,7 +39,15 @@ class ProcessarPagamentoUseCase:
         opcao: int,
         valor: float,
         parcelas: int,
+        idempotency_key: str | None = None,
     ) -> Recibo:
+        # 1. Verificar idempotência
+        if idempotency_key and self.repository:
+            existente = self.repository.buscar_por_idempotency_key(idempotency_key)
+            if existente:
+                return existente
+
+        # 2. Calcular e processar
         recibo = self.calculadora.calcular(
             opcao=opcao,
             valor=valor,
@@ -47,6 +55,7 @@ class ProcessarPagamentoUseCase:
             desconto_vista=self.taxas.get("desconto_vista", 10.0),
             juros_parcelamento=self.taxas.get("juros_parcelamento", 10.0),
         )
+        recibo.idempotency_key = idempotency_key
 
         # Enriquecer com metadados estruturados
         _enrich_with_flags(recibo, self.taxas)
@@ -67,15 +76,11 @@ class ListarPagamentosUseCase:
         self.repository = repository
         self.taxas = taxas
 
-    def execute(self):
+    def execute(self, limit: int = 20, offset: int = 0):
         if not self.repository:
             return []
 
-        recibos = (
-            self.repository.listar_todos()
-            if hasattr(self.repository, "listar_todos")
-            else self.repository.listar()
-        )
+        recibos = self.repository.listar(limit=limit, offset=offset)
 
         # Normalizar: garantir que cada recibo seja uma entidade de domínio
         normalized = []
@@ -116,9 +121,12 @@ class PagamentoService:
         valor: float = 0.0,
         parcelas: int | None = None,
         num_parcelas: int | None = None,
+        idempotency_key: str | None = None,
     ) -> Recibo:
         parcelas_finais = parcelas or num_parcelas or 1
-        return self.processar_pagamento_uc.execute(opcao, valor, parcelas_finais)
+        return self.processar_pagamento_uc.execute(
+            opcao, valor, parcelas_finais, idempotency_key
+        )
 
-    def listar_pagamentos(self):
-        return self.listar_pagamentos_uc.execute()
+    def listar_pagamentos(self, limit: int = 20, offset: int = 0):
+        return self.listar_pagamentos_uc.execute(limit=limit, offset=offset)
