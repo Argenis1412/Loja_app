@@ -14,14 +14,13 @@
 
 The easiest way to get started is using the included PowerShell scripts:
 
-1.  **Setup**: `.\loja_cli.ps1 setup` (Configuração inicial)
-2.  **Dev Full**: `make dev` (Inicia Backend + Frontend)
-3.  **Backend**: `make back` (FastAPI em `localhost:8000`)
-4.  **Frontend**: `make front` (React em `localhost:5173`)
-5.  **Tests**: `make test` (Roda todos os testes)
-6.  **Lint**: `make lint` (Verifica qualidade do código)
+1.  **Setup**: `.\loja_cli.ps1 setup` (Creates venv, installs dependencies for backend and frontend)
+2.  **Run Backend**: `.\loja_cli.ps1 backend` (FastAPI at `localhost:8000`)
+3.  **Run Frontend**: `.\loja_cli.ps1 frontend` (React at `localhost:5173`)
+4.  **Tests**: `.\loja_cli.ps1 test` (Runs backend tests)
+5.  **Linters**: `.\loja_cli.ps1 lint` (Runs Python and TS linters)
 
-*Para detalhes técnicos, veja o [Engineering Playbook](ENGINEERING_PLAYBOOK.md).*
+*For manual setup or Linux/macOS instructions, see the [Backend](backend/README.md) and [Frontend](frontend/README.md) documentation.*
 
 ---
 
