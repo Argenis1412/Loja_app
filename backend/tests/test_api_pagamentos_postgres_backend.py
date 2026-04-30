@@ -54,11 +54,11 @@ def test_deve_persistir_e_recuperar_lista_de_pagamentos_postgres():  # noqa: E50
     ]
 
     for p in payloads:
-        resp = client.post("/api/pagamentos/", json=p)
+        resp = client.post("/api/v1/pagamentos/", json=p)
         assert resp.status_code == 201
 
     # Recuperar lista e verificar quantidade
-    resp = client.get("/api/pagamentos/")
+    resp = client.get("/api/v1/pagamentos/")
     assert resp.status_code == 200
 
     data = resp.json()

@@ -115,7 +115,7 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
         content={
             "error": {
                 "code": "VALIDATION_ERROR",
-                "message": exc.errors(),
+                "message": [err.get("msg", str(err)) for err in exc.errors()],
                 "trace_id": trace_id,
             }
         },
