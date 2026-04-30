@@ -34,7 +34,6 @@ def test_postgres_repository_salvar_com_sqlite():
 
 
 def test_postgres_repository_salvar_multiplos():
-
     engine = create_engine("sqlite:///:memory:")
     Base.metadata.create_all(bind=engine)
     SessionLocal = sessionmaker(bind=engine)

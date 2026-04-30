@@ -37,25 +37,11 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
       
-      - name: Lint com Flake8
+      - name: Lint e Formatação com Ruff
         run: |
-          pip install flake8
-          # Para erros críticos (syntax errors, undefined names)
-          flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
-          # Para avisos (não bloqueante)
-          flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
-      
-      - name: Verificar formatação com Black
-        run: |
-          pip install black
-          black --check --diff .
-        continue-on-error: false
-      
-      - name: Verificar imports com isort
-        run: |
-          pip install isort
-          isort --check-only --diff .
-        continue-on-error: false
+          pip install ruff
+          ruff check .
+          ruff format --check .
 
   tests:
     name: Testes Automatizados

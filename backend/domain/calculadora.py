@@ -26,7 +26,6 @@ class Calculadora:
         desconto_vista: float,
         juros_parcelamento: float,
     ) -> Recibo:
-
         # Validar que o valor seja positivo e tenha sentido monetário (>= 0.01)
         if round(valor, 2) <= 0:
             raise RegraPagamentoInvalida("Valor inválido")
@@ -46,9 +45,7 @@ class Calculadora:
 
         elif opcao == 3:
             if parcelas < 2 or parcelas > 6:
-                raise RegraPagamentoInvalida(
-                    "Opção 3 suporta apenas de 2 a 6 parcelas"
-                )  # noqa: E501
+                raise RegraPagamentoInvalida("Opção 3 suporta apenas de 2 a 6 parcelas")  # noqa: E501
             total = valor
             metodo = "Parcelado sem juros"
             info = None
