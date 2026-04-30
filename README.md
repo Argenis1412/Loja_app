@@ -73,9 +73,21 @@ Loja_app/
 
 ## 📖 Documentation
 
+- **[Engineering Playbook](ENGINEERING_PLAYBOOK.md)**: Standards for reliability and documentation.
+- **[Changelog](CHANGELOG.md)**: Version history and Incident Post-mortems.
 - **[Backend Guide](backend/README.md)**: API Specs, Domain Analysis, and Persistence.
 - **[Frontend Guide](frontend/README.md)**: UI Components, State Management, and Integration.
 - **[Deployment Guide](DEPLOYMENT.md)**: Step-by-step instructions for Cloud hosting.
+
+---
+
+## 🛡️ Resilience & Reliability
+
+This project implements professional-grade patterns for high-stakes environments:
+- **API Versioning**: All endpoints follow `/api/v1/` to ensure contract stability.
+- **Idempotency**: Critical payment endpoints support `Idempotency-Key` to prevent duplicate charges.
+- **Pagination**: Lists are paginated by default (20 records) to prevent DoS and memory exhaustion.
+- **Structured Observability**: Centralized error schema for consistent frontend integration.
 
 ---
 

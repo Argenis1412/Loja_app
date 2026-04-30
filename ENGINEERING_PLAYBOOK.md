@@ -1,134 +1,116 @@
-# 📜 Engineering Playbook & Standards
-*Mandatory engineering standards for all development tasks in this workspace.*
+# 📜 Engineering Playbook
 
-> **CRITICAL RULE**: All documentation (`.md` files), commit messages, pull requests, and git branch names MUST ALWAYS be written in English.
+> Standards are only useful when you understand why they exist. 
+> Every rule here was born from a failure or a hard-learned lesson in system reliability.
 
 ---
 
 ## 1. Commit Protocol (Atomic & Conventional)
-- **Mandatory Use of Conventional Commits**: Every commit must follow the `type(scope): description` format.
-  - `feat`: New features.
-  - `fix`: Bug fixes.
-  - `docs`: Documentation changes.
-  - `test`: Adding or updating tests.
-  - `refactor`: Code changes that neither fix a bug nor add a feature.
-  - `chore`: Build process or auxiliary tool changes.
-  - `perf`: Performance optimizations (query tuning, caching, etc.).
-  - `ci`: Changes to CI/CD pipeline or GitHub Actions configuration.
-- **Atomic Commits**: Small, logical changes. Never mix a feature with a refactor in the same commit.
 
-## 2. Branch Naming Convention
-All branch names must be in English and follow this pattern: `type/short-description`.
+**Format**: `type(scope): description` — [Conventional Commits](https://www.conventionalcommits.org/)
 
-| Pattern | Example |
+| Type | When to use |
 |:---|:---|
-| `feat/TICKET-short-description` | `feat/TICKET-42-redis-deduplication` |
-| `fix/short-description` | `fix/login-null-pointer` |
-| `refactor/short-description` | `refactor/payment-domain-isolation` |
-| `chore/short-description` | `chore/upgrade-dependencies` |
-| `docs/short-description` | `docs/add-adr-caching-strategy` |
+| `feat` | New capability visible to users or API consumers |
+| `fix` | Corrects broken behavior (e.g., INC-001) |
+| `perf` | Measurable performance improvement |
+| `refactor` | Internal restructuring with no behavior change |
+| `test` | Tests only — no production code |
+| `docs` | Documentation only |
+| `ci` | CI/CD pipeline changes |
 
-- Use **lowercase** and **hyphens** only. No underscores, no uppercase.
-- Keep it short and descriptive. Max ~4 words after the type prefix.
+**Atomic commits**: One logical change per commit. Never mix a feature with a refactor. 
 
-## 3. CI/CD Requirements
-**No merge to `main` without a green pipeline.** Every push to any branch triggers:
-
-1. `lint` — `ruff` + `mypy` (or equivalent). Code style is non-negotiable.
-2. `test` — full test suite with coverage threshold enforced.
-3. `build` — Docker build (or equivalent). Proves the artifact is deployable.
-
-If any step fails, the PR is **blocked**. No exceptions, no "I'll fix it in the next commit."
-
-- `ci:` commits that fix broken pipelines are **prioritized above all other work**.
-- Branch protection rules must enforce required status checks on `main`.
-
-## 4. Architecture & Design
-- **Clean Architecture First**: Maintain a strict separation between Domain, Application (Services), and Infrastructure.
-- **Framework Independence**: The business logic (Domain) must not depend on external frameworks (FastAPI, SQLAlchemy, etc.).
-- **Deterministic Logic**: For financial or payment systems, calculations must be centralized in the backend and mathematically exact.
-
-## 5. Definition of Done (DoD)
-A task is NOT finished until:
-1. **Linting & Formatting**: Code passes `ruff` and `mypy` (or equivalents).
-2. **Testing**: New logic has unit tests with `pytest`.
-3. **Documentation**: The `README.md` or technical docs are updated if the system's behavior changed (in English).
-4. **No Placeholders**: Never use placeholder images or comments for features that should be functional.
-
-## 6. Observability & Security
-- **Structured Logging**: Use `structlog` or similar for machine-readable logs.
-- **Defensive Programming**: Implement rate-limiting, honeypots, and strict validation in every public endpoint.
-- **Silent Drops**: Use silent drops for spam/security rejections to avoid providing feedback to attackers.
-
-## 7. API Design Contract
-- **Versioning from Day 1**: Always use `/api/v1/...`. Never break contracts without a `deprecation` notice.
-- **Consistent Error Responses**: All error responses must follow a fixed schema:
-  ```json
-  { "error": { "code": "PAYMENT_FAILED", "message": "...", "trace_id": "..." } }
-  ```
-  Never return raw strings.
-- **Idempotency Keys**: Mutating endpoints (POST for payments, critical resource creation) must accept an `Idempotency-Key` header.
-- **Mandatory Pagination**: No endpoint should return unbounded lists. Default `limit=20`, max `limit=100`.
-
-## 8. Dependency & Environment Hygiene
-- **Exact Pinnings in Production**: `requirements.txt` or `pyproject.toml` must use exact versions (`==`), never ranges (`>=`).
-- **Secrets Never in Code**: All credentials live in `.env` (local) or the cloud provider's secret manager. The `.env.example` documents the variables without real values.
-- **Dependency Audit**: Before adding a new dependency, justify why it cannot be solved with the standard library or existing dependencies.
-
-## 9. Data Integrity & Migrations
-- **Migrations Never Destructive by Default**: Never use `DROP COLUMN` directly in production. The flow is: (1) add new column, (2) migrate data, (3) drop the old column in a later release cycle.
-- **Explicit Transactions**: Any operation that touches multiple tables or services lives in a transaction. If the ORM handles it implicitly, document it.
-- **Soft Deletes for Critical Entities**: Users, orders, invoices are never physically deleted. Use a `deleted_at TIMESTAMP NULL` column.
-
-## 10. Testing Strategy (Pyramid)
-- **70/20/10 Rule**: 70% unit tests, 20% integration tests, 10% e2e. Never invert the pyramid.
-- **Test Naming Convention**: `test_<unit>_<scenario>_<expected_result>` — e.g., `test_payment_with_expired_card_raises_PaymentError`.
-- **No Mocks in the Domain Layer**: If you need to mock to test business logic, the architecture is flawed.
-- **Deterministic Fixtures**: Use seeds and factories for tests. Never use production data in the repository.
-
-## 11. Performance Budgets
-- **Define Before Optimizing**: Document the system's SLOs before writing performance code. E.g., `p99 < 200ms` for critical endpoints.
-- **N+1 is a Bug**: Any query inside a loop is a defect, not a "todo". Detect with `EXPLAIN ANALYZE` or equivalent tools.
-- **Explicit Cache Strategy**: Document TTL, invalidation strategy, and cache miss behavior. Never cache without thinking about stale data.
-
-## 12. Code Review Standards
-- **Author Prepares the PR**: Provide description with context, screenshots (if UI), and a link to the ticket. The reviewer shouldn't need to ask "what does this do?".
-- **Reviewer Approves Logic, Not Style**: Style is resolved by the linter automatically. Human comments are for correctness, security, and design.
-- **Two-Pass Review**: First pass: understand the full change. Second pass: review line by line.
-
-## 13. Incident & Debugging Protocol
-- **Blameless Post-Mortems**: Every major incident generates a document with: timeline, root cause, impact, and concrete actions. No blaming individuals.
-- **Reproducibility First**: Before fixing, write the test that reproduces the bug. The fix makes the test pass.
-- **Feature Flags for Rollouts**: Risky features are deployed behind a flag, not directly to all users.
-
-## 14. Documentation as Code
-- **Language**: All `.md` files must be written in English.
-- **ADRs (Architecture Decision Records)**: Any non-obvious architectural decision lives in `/docs/adr/NNNN-title.md` with context, decision, and consequences.
-- **Docstrings in Public Interfaces**: Every public function/class has a docstring. Internal code can omit it if self-explanatory.
-- **Semantic Changelogs**: `CHANGELOG.md` follows [Keep a Changelog](https://keepachangelog.com). Git history does not replace a human-readable changelog.
-
-## 15. AI-Assisted Development
-- **Review everything AI generates**: No AI output goes to production without human review.
-- **Never feed secrets or PII to AI tools**: API keys, user data, and passwords never go into prompts.
-- **AI writes code, humans own it**: If you can't explain the code, don't commit it.
+**`ci:` commits are prioritized above all other work.** A broken pipeline is a blocked project.
 
 ---
 
-## 🛠 Refinement Roadmap (Current Project)
+## 2. Branch Naming Convention
 
-### Phase 1 & 2: Infrastructure & Observability [DONE]
-- API Versioning (`/api/v1`).
-- Structured Logging (`structlog`).
-- Trace ID Middleware.
-- Standardized Error Schema.
-- Soft Deletes (`deleted_at`).
+**Pattern**: `type/short-description` — lowercase, hyphens only.
 
-### Phase 3: Business Rules & API [PENDING]
-- **Pagination**: Implement `limit` and `offset` in all list endpoints.
-- **Idempotency**: Implement `Idempotency-Key` validation for payment creation.
+```text
+feat/pagination-support
+fix/api-404-versioning
+refactor/repository-pattern
+docs/add-adr-idempotency
+```
 
-### Phase 4: Integration & Verification [PENDING]
-- **Frontend Sync**: Update API client to support `/v1` and new error schema.
-- **Full Test Coverage**: Reach 90% coverage on domain logic.
-- **ADR Finalization**: Document all key architectural decisions.
+---
 
+## 3. CI/CD — Green Pipeline Requirement
+
+No merge to `main` without passing:
+
+1. **`lint`** — `ruff` + `mypy`. Style is automated, not debated in reviews.
+2. **`test`** — Full suite with 90%+ coverage threshold enforced.
+3. **`build`** — Docker build succeeds. Proves the artifact is deployable.
+
+**Why this matters**: In financial apps, a missing column in a production migration can crash the entire payment flow. The `build` and `test` steps ensure the schema and code are perfectly synced.
+
+---
+
+## 4. Architecture & Design
+
+**Clean Architecture layers**: `Domain → Services → Infrastructure`.
+
+- **The Rule**: Business logic (Domain) MUST NOT import from infrastructure (SQLAlchemy, FastAPI).
+- **The Proof**: We can swap SQLite for Postgres or an In-Memory Repo for tests without changing a single line in `domain/recibo.py`.
+
+---
+
+## 5. API Design Contract
+
+**Versioning from Day 1**: All routes at `/api/v1/...`. 
+**Why**: INC-001 showed that unversioned changes break frontend consumers. Versioning allows for safe evolution.
+
+**Consistent Error Schema**:
+```json
+{
+  "error": {
+    "code": "PAYMENT_FAILED",
+    "message": "Detailed message for humans",
+    "trace_id": "unique-request-uuid"
+  }
+}
+```
+Never return raw strings. Standard schemas allow the frontend to implement a single, robust error handling strategy.
+
+---
+
+## 6. Financial Integrity (Idempotency)
+
+**Mutating endpoints** (POST for payments) must accept an `Idempotency-Key` header.
+- **Decision**: Duplicate requests with the same key return the original response without creating a second record.
+- **Why**: Prevents double-charging a user if their internet drops during a transaction and the browser retries the request.
+
+---
+
+## 7. Performance & Pagination
+
+**No unbounded lists**. Every listing endpoint must support `limit` and `offset`.
+- **Defaults**: `limit=20`, `max=100`.
+- **Why**: Returning 10,000 records from a single request causes memory exhaustion in the backend and freezes the frontend.
+
+---
+
+## 8. Definition of Done (DoD)
+
+A task is **NOT DONE** until:
+- [ ] Passes `ruff` and `pytest` locally.
+- [ ] New logic has unit tests covering success and failure scenarios.
+- [ ] `CHANGELOG.md` updated if behavior changed.
+- [ ] `ARCHITECTURE.md` or ADRs updated for non-obvious decisions.
+- [ ] No placeholders, no `TODO` comments in committed code.
+
+---
+
+## 9. Incident Protocol
+
+Every significant production failure generates an entry in `CHANGELOG.md` under `🔥 Production Incidents`.
+- **Format**: What happened, Root Cause, Resolution, and Accepted Side Effects.
+- **Goal**: Technical honesty. We don't hide failures; we document them so they never happen again.
+
+---
+
+*Last updated: 2026-04-30 (v1.1.0)*
