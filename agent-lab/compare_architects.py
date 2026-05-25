@@ -99,7 +99,7 @@ def run_gemini(prompt: str) -> tuple[str, dict, float]:
 def run_claude(prompt: str) -> tuple[str, dict, float]:
     """Call Claude Sonnet and return (raw_json, tokens, cost)."""
     client = anthropic.Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
-    model = "claude-3-5-sonnet-20241022"
+    model = "claude-sonnet-4-6"
     print(f"[Claude] calling {model} ...")
     start = time.time()
     response = client.messages.create(

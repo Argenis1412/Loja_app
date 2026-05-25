@@ -1,5 +1,5 @@
 # Agent Lab — Plan de Implementación
-> Estado actual: Scout ✅ | Architect (Gemini) ✅ | Architect (Claude) ❌ (Error 404) | Executor ⏳ | Validator ⏳
+> Estado actual: Scout ✅ | Architect (Gemini) ✅ | Architect (Claude) ✅ | Executor ⏳ | Validator ⏳
 
 ---
 
@@ -176,22 +176,21 @@ class ArchitectOutput(BaseModel):
 
 **Costo real del Scout en Loja App: ~$0.004**
 
-### ⚠️ Architect — Parcialmente completo
-
-**Lo que corrió:** Gemini Flash
+### ⚠️ Architect — Completo
 
 **Resultados obtenidos (logs en `agent-lab/logs/`):**
-- Gemini Flash ejecutó con éxito.
-- Costo: $0.00039.
-- Validación de esquema: OK.
+- Gemini Flash ejecutó con éxito ($0.00040).
+- Claude Sonnet (`claude-sonnet-4-6`) ejecutó con éxito ($0.03562).
+- Ambos validaron correctamente contra el esquema.
 
-**Problemas:**
-- Claude Sonnet falló (Error 404: model not found). Se intentó con `claude-3-5-sonnet-20241022` y `claude-3-5-sonnet-20240620`. Verificar acceso a la API o nombre del modelo.
+**Comparativa:**
+- Claude demostró mayor profundidad al identificar *false positives* y riesgos sistémicos (ej. ausencia de tests, disparidad de entornos) que Gemini no vio.
+- La diferencia de costo es notable (Ratio ~88x), justificando el uso estratégico de modelos premium solo para tareas de Architect/Reviewer.
 
-**Lo que falta:**
-- Solucionar error 404 de Claude Sonnet.
-- Correr Claude sobre `scout_output_sample.json`.
-- Comparar outputs.
+**Lecciones aprendidas:**
+| Problema encontrado | Causa real | Solución aplicada |
+|---|---|---|
+| Error 404 en Claude Sonnet | Nombre de modelo desactualizado | Usar `claude-sonnet-4-6` |
 
 ### ⏳ Executor — Pendiente
 
@@ -215,7 +214,7 @@ class ArchitectOutput(BaseModel):
 | Loop infinito en Windows | `rglob` atraviesa junctions antes de filtrar | Cambiar a `os.walk` con IGNORE_DIRS |
 | 429 con 50 líneas por archivo | Payload > 250K tokens free tier | Estrategia dos pasadas (árbol → selección) |
 | SDK deprecado `google.generativeai` | Google migró a `google-genai` | `uv remove google-generativeai && uv add google-genai` |
-| Architect corrió en Gemini no Claude | Cambio sin documentar | Documentado aquí — pendiente comparación |
+| Error 404 en Claude Sonnet | Nombre de modelo desactualizado | Usar `claude-sonnet-4-6` — los modelos claude-3-x ya no están disponibles |
 | JSON con markdown fences | Gemini añade ```json a veces | Strip explícito antes de `json.loads` |
 
 ---
@@ -239,8 +238,8 @@ class ArchitectOutput(BaseModel):
 ```
 [✅] 1. Crear schemas/architect_output.py con Pydantic
 [✅] 2. Reescribir architect.py para usar Claude Sonnet
-[❌] 3. Correr Claude sobre scout_output_sample.json (Error 404)
-[ ] 4. Comparar output Claude vs output Gemini del Architect
+[✅] 3. Correr Claude sobre scout_output_sample.json
+[✅] 4. Comparar output Claude vs output Gemini del Architect
 [ ] 5. Documentar diferencias — eso valida el modelo correcto por capa
 [ ] 6. Implementar executor.py con routing por risk_level
 [ ] 7. Implementar validator.py con scripts reales
