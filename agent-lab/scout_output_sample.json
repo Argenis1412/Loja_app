@@ -1,0 +1,11 @@
+{
+  "hotspots": [
+    {"file": "backend/domain/recibo.py", "issue": "Complex financial rounding logic for parcel payments. Errors here directly impact financial accuracy.", "severity": "high", "risk_level": "high", "dependencies": ["backend/services/pagamento_service.py", "backend/infrastructure/repositories/postgres_recibo_repository.py"]},
+    {"file": "backend/api/pagamentos_api.py", "issue": "Idempotency key implementation across API, database model, and repository is critical. Correctness is paramount.", "severity": "high", "risk_level": "high", "dependencies": ["backend/infrastructure/db/models/recibo_models.py"]},
+    {"file": "backend/config/settings.py", "issue": "Complex database URL logic based on environment. Inconsistent handling for SQLite vs. Postgres. Central point of failure.", "severity": "medium", "risk_level": "high", "dependencies": []},
+    {"file": "backend/services/pagamento_service.py", "issue": "Anti-pattern: Conditional Complexity/Switch Statement. Mixes hardcoded values with values from the `taxas` dictionary and directly mutates the `Recibo` object.", "severity": "medium", "risk_level": "medium", "dependencies": []},
+    {"file": "frontend/src/services/api.ts", "issue": "Anti-pattern: Converts frontend string methods to backend integer options, silently assigns 'avista' for unhandled cases.", "severity": "medium", "risk_level": "medium", "dependencies": []}
+  ],
+  "recommended_order": ["backend/domain/recibo.py", "backend/api/pagamentos_api.py", "backend/infrastructure/db/models/recibo_models.py", "backend/services/pagamento_service.py"],
+  "risks": ["Financial inaccuracy due to complex calculation logic.", "Data integrity issues from incorrect idempotency implementation.", "Deployment and environment configuration challenges."]
+}
