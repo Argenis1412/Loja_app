@@ -1,5 +1,5 @@
 # Agent Lab — Plan de Implementación
-> Estado actual: Scout ✅ | Architect (Gemini) ✅ | Architect (Claude) ⏳ | Executor ⏳ | Validator ⏳
+> Estado actual: Scout ✅ | Architect (Gemini) ✅ | Architect (Claude) ❌ (Error 404) | Executor ⏳ | Validator ⏳
 
 ---
 
@@ -178,25 +178,20 @@ class ArchitectOutput(BaseModel):
 
 ### ⚠️ Architect — Parcialmente completo
 
-**Lo que corrió:** Gemini Flash (desviación del diseño)
+**Lo que corrió:** Gemini Flash
 
-**Output generado (válido pero incompleto):**
-- TASK-001: Refactor `settings.py` — Alta prioridad, esfuerzo medio
-- TASK-002: Fix rounding en `recibo.py` — Alta prioridad, esfuerzo alto
-- TASK-003: Idempotency en `pagamentos_api.py` — Alta prioridad, esfuerzo alto
-- TASK-004: Refactor conditional complexity en `pagamento_service.py` — Media
-- TASK-005: Alinear contrato frontend/backend — Media
+**Resultados obtenidos (logs en `agent-lab/logs/`):**
+- Gemini Flash ejecutó con éxito.
+- Costo: $0.00039.
+- Validación de esquema: OK.
+
+**Problemas:**
+- Claude Sonnet falló (Error 404: model not found). Se intentó con `claude-3-5-sonnet-20241022` y `claude-3-5-sonnet-20240620`. Verificar acceso a la API o nombre del modelo.
 
 **Lo que falta:**
-- Correr el mismo JSON con Claude Sonnet
-- Comparar outputs — Claude debería detectar inconsistencias en el ordering
-- Crear `schemas/architect_output.py` con Pydantic
-- Logging con costo real de Claude
-
-**Próximo paso concreto:**
-```bash
-uv run python agents/architect.py scout_output_sample.json --model claude
-```
+- Solucionar error 404 de Claude Sonnet.
+- Correr Claude sobre `scout_output_sample.json`.
+- Comparar outputs.
 
 ### ⏳ Executor — Pendiente
 
@@ -242,9 +237,9 @@ uv run python agents/architect.py scout_output_sample.json --model claude
 ## 10. Próximos pasos en orden
 
 ```
-[ ] 1. Crear schemas/architect_output.py con Pydantic
-[ ] 2. Reescribir architect.py para usar Claude Sonnet
-[ ] 3. Correr Claude sobre scout_output_sample.json
+[✅] 1. Crear schemas/architect_output.py con Pydantic
+[✅] 2. Reescribir architect.py para usar Claude Sonnet
+[❌] 3. Correr Claude sobre scout_output_sample.json (Error 404)
 [ ] 4. Comparar output Claude vs output Gemini del Architect
 [ ] 5. Documentar diferencias — eso valida el modelo correcto por capa
 [ ] 6. Implementar executor.py con routing por risk_level
