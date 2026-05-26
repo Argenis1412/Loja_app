@@ -9,7 +9,6 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from dotenv import load_dotenv
 import anthropic
-from schemas.scout_output import ScoutOutput
 from schemas.architect_output import ArchitectOutput
 from logger import log_call
 
@@ -62,7 +61,7 @@ def call_claude(prompt: str, agent_label: str) -> tuple[str, dict, float]:
 
             return raw, tokens, cost
 
-        except anthropic.RateLimitError as e:
+        except anthropic.RateLimitError:
             if attempt == 0:
                 print(f"[{agent_label}] Rate limit. Waiting 60s...")
                 time.sleep(60)

@@ -199,11 +199,12 @@ class ArchitectOutput(BaseModel):
 - Claude para tareas MEDIUM/HIGH
 - Nunca ejecutar sin output validado del Architect
 
-### ⏳ Validator — Pendiente
-
-- Scripts reales primero: `pytest`, `ruff`, `tsc --noEmit`
-- LLM solo resume stderr — no ejecuta herramientas directamente
-- Output: pass/fail + categorización de errores
+### ✅ Validator — Completo
+- ruff check sobre proyecto completo
+- pytest con rc=5 tratado como PASS (no tests aún)
+- tsc --noEmit con detección dinámica de frontend/
+- Gemini Flash resume stderr solo si hay fallos
+- load_dotenv con path explícito al .env de agent-lab
 
 ---
 
@@ -216,6 +217,9 @@ class ArchitectOutput(BaseModel):
 | SDK deprecado `google.generativeai` | Google migró a `google-genai` | `uv remove google-generativeai && uv add google-genai` |
 | Error 404 en Claude Sonnet | Nombre de modelo desactualizado | Usar `claude-sonnet-4-6` — los modelos claude-3-x ya no están disponibles |
 | JSON con markdown fences | Gemini añade ```json a veces | Strip explícito antes de `json.loads` |
+| ruff escribe en stdout, no stderr | Convención distinta a pytest/tsc | _summarize_errors usa r.stderr or r.stdout |
+| pytest rc=5 no es fallo | "no tests collected" es estado vacío | passed = rc in (0, 5) |
+| llama3-70b-8192 deprecado en Groq | Groq retiró modelo sin aviso | Migrar a llama-3.3-70b-versatile |
 
 ---
 

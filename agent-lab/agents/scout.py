@@ -178,7 +178,7 @@ def run_scout(target_path: str) -> ScoutOutput:
 
     # ── Pasada 2: contenido → diagnóstico JSON
     contents = read_selected_files(root, selected)
-    print(f"[Scout] Reading selected files. Running analysis...")
+    print("[Scout] Reading selected files. Running analysis...")
 
     raw2, tokens2, cost2 = call_gemini(
         PASS2_PROMPT.format(file_contents=contents),
