@@ -4,8 +4,8 @@
 Stabilize the `agent-lab` system, ensuring interfaces are consistent, entrypoints are functional, and metrics are reliable.
 
 ## Phase 1: Critical Stabilization
-- [ ] **1.1 Fix Pipeline ↔ Agent Interfaces**: Align `Pipeline` calls with `run()` signatures in agents. 
-- [ ] **1.2 Fix `__main__` Entrypoints**: Rename invalid function calls (`run_scout`, `run_architect`, `validate`) to `run()` across all agent files.
+- [x] **1.1 Fix Pipeline ↔ Agent Interfaces**: Align `Pipeline` calls with `run()` signatures in agents. 
+- [x] **1.2 Fix `__main__` Entrypoints**: Rename invalid function calls (`run_scout`, `run_architect`, `validate`) to `run()` across all agent files.
 
 ## Phase 2: Quality & Testing
 - [ ] **2.1 Standardize Tests**: Rewrite `tests/test_signatures.py` to use `pytest` assertions.

@@ -22,6 +22,8 @@ from agents.validator import run as run_validator
 # The refactored functions return (Output, dict).
 # We mock dependencies to prevent them from crashing the agent initialization.
 
+from schemas.scout_output import ScoutOutput
+
 def test():
     # Test Scout (needs target path)
     # Mocking the client inside scout would be hard, so just try running it
@@ -31,11 +33,13 @@ def test():
     except Exception as e:
         print(f"FAIL: Scout signature verification failed: {e}")
 
-    # Test Architect (needs scout output file)
+    # Test Architect (needs scout output object)
     dummy_file = Path("agent-lab/architect_test.json")
     if dummy_file.exists():
         try:
-            _, meta = run_architect(str(dummy_file))
+            with open(dummy_file, "r") as f:
+                scout_output = ScoutOutput.model_validate_json(f.read())
+            _, meta = run_architect(scout_output)
             print(f"PASS: Architect signature verified. Meta: {meta}")
         except Exception as e:
             print(f"FAIL: Architect signature verification failed: {e}")
