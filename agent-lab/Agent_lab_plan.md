@@ -242,7 +242,7 @@ class ArchitectOutput(BaseModel):
 [✅] 4. Comparar output Claude vs output Gemini del Architect
 [✅] 5. Documentar diferencias — eso valida el modelo correcto por capa
 [✅] 6. Implementar executor.py con routing por risk_level (rama: `feat/phase-6-executor`)
-[ ] 7. Implementar validator.py con scripts reales (rama: `feat/phase-7-validator`)
+[✅] 7. Implementar validator.py con scripts reales (rama: `feat/phase-7-validator`)
 [ ] 8. Conectar pipeline.py end-to-end (rama: `feat/phase-8-pipeline`)
 [ ] 9. Correr pipeline completo sobre loja_app (rama: `feat/phase-8-pipeline`)
 [ ] 10. Documentar como ADR los patrones que funcionaron (rama: `feat/phase-9-final-docs`)
