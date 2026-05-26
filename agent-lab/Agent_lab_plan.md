@@ -47,6 +47,12 @@ Target project: **Loja App** — payments system built with FastAPI + React.
 | Validator | Real scripts + LLM summary | ❌ | lint, tests, typecheck, stderr summary |
 | Reviewer | Claude Sonnet | ❌ | High-risk diffs only |
 
+**Contract**: Each agent `run()` method now returns a tuple `(Output, meta_dict)`, where `meta_dict` contains:
+- `tokens_input` (int)
+- `tokens_output` (int)
+- `cost_usd` (float)
+- `model_used` (str)
+
 ---
 
 ## 3. Golden Rule: Scout NEVER implements
