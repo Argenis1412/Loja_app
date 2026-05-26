@@ -309,7 +309,7 @@ def run() -> tuple[ValidatorOutput, dict]:
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
 
-    output = validate()
+    output, _ = run()
 
     print(f"\n{'PASS' if output.overall_passed else 'FAIL'}")
     print(f"Run ID : {output.run_id}")

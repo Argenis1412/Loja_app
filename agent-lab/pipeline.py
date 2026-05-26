@@ -45,6 +45,10 @@ class Pipeline:
 
             # ── Stage: Architect ────────────────────────────────────────────
             if self.from_stage in [None, "scout"]:
+                # scout_output viene de stage_scout (u otro camino)
+                # Ensure scout_output exists if not loading from stage
+                if scout_output is None:
+                     scout_output = self._load_stage_output(ScoutOutput, "scout")
                 architect_output = self._stage_architect(scout_output)
             elif self.from_stage == "architect":
                 architect_output = self._load_stage_output(ArchitectOutput, "architect")
