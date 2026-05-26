@@ -5,6 +5,8 @@ import time
 import sys
 from pathlib import Path
 from google import genai
+from schemas.scout_output import ScoutOutput
+from logger import log_call
 
 # Mock placeholder for tests
 if os.getenv("GOOGLE_API_KEY"):
