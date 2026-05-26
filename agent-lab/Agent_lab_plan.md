@@ -253,8 +253,8 @@ class ArchitectOutput(BaseModel):
 [✅] 5. Document differences — this validates the correct model per layer
 [✅] 6. Implement executor.py with routing by risk_level (branch: `feat/phase-6-executor`)
 [✅] 7. Implement validator.py with real scripts (branch: `feat/phase-7-validator`)
-[ ] 8. Connect pipeline.py end-to-end (branch: `feat/phase-8-pipeline`)
-[ ] 9. Run full pipeline on loja_app (branch: `feat/phase-8-pipeline`)
+[✅] 8. Connect pipeline.py end-to-end (branch: `feat/phase-8-pipeline`)
+[✅] 9. Run full pipeline on loja_app (branch: `feat/phase-8-pipeline`)
 [ ] 10. Document functional patterns as ADR (branch: `feat/phase-9-final-docs`)
 ```
 
