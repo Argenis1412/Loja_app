@@ -1,34 +1,34 @@
 # ADR 0003: Architect Model Comparison
 
-## Contexto
-Durante la fase de desarrollo del agente `Architect`, se evaluaron dos modelos: Gemini Flash (usado por el Scout) y Claude Sonnet (`claude-sonnet-4-6`). El objetivo del Architect es recibir los hallazgos del `Scout` (en formato JSON), validarlos, detectar falsos positivos, priorizarlos y generar un plan de implementación robusto.
+## Context
+During the development phase of the `Architect` agent, two models were evaluated: Gemini Flash (used by the Scout) and Claude Sonnet (`claude-sonnet-4-6`). The Architect's goal is to receive the `Scout`'s findings (in JSON format), validate them, detect false positives, prioritize them, and generate a robust implementation plan.
 
-Se ejecutó un script `compare_architects.py` que envió la misma entrada (output del Scout) a ambos modelos para analizar sus respuestas.
+A `compare_architects.py` script was executed, which sent the same input (Scout output) to both models to analyze their responses.
 
-### Resultados de la Comparativa
+### Comparison Results
 
-| Métrica | Gemini Flash | Claude Sonnet (`claude-sonnet-4-6`) |
+| Metric | Gemini Flash | Claude Sonnet (`claude-sonnet-4-6`) |
 | :--- | :--- | :--- |
-| **Tiempo de ejecución** | 25.96s | 43.26s |
+| **Execution Time** | 25.96s | 43.26s |
 | **Tokens (In / Out)** | 720 / 1165 | 762 / 2222 |
-| **Costo** | $0.00040 | $0.03562 |
-| **Tareas identificadas**| 5 | 6 |
-| **Falsos positivos** | 0 | 2 |
+| **Cost** | $0.00040 | $0.03562 |
+| **Tasks Identified** | 5 | 6 |
+| **False Positives** | 0 | 2 |
 
-#### Hallazgos Clave
-1. **Profundidad de Análisis**: Gemini Flash proporcionó resúmenes de alto nivel sobre los hallazgos del Scout, pero Claude Sonnet detalló el porqué de los riesgos (ej. falta de validación cruzada, contratos frontend-backend implícitos, mutación de modelos de dominio por la capa de servicio).
-2. **Detección de Falsos Positivos**: Claude Sonnet identificó correctamente 2 falsos positivos del Scout:
-   - Notó que `recibo_models.py` es un artefacto downstream de la preocupación de idempotencia en `pagamentos_api.py`, no un hotspot independiente.
-   - Rebajó la severidad de `settings.py`, señalando que es un rol arquitectónico (riesgo latente) y no un defecto activo a menos que cause un fallo conocido.
-3. **Análisis de Dependencias y Archivos**: Claude fue capaz de identificar archivos afectados adicionales que no fueron listados por Gemini (ej. `postgres_recibo_repository.py`).
-4. **Blockers y Riesgos Sistémicos**: Los blockers propuestos por Claude fueron accionables y secuenciales (ej. "T-03 debe estar completo antes de T-05", "ausencia de tests bloquea modificaciones de alto riesgo"), mientras que Gemini dio blockers más genéricos.
+#### Key Findings
+1. **Analysis Depth**: Gemini Flash provided high-level summaries of the Scout's findings, but Claude Sonnet detailed the *why* behind the risks (e.g., lack of cross-validation, implicit frontend-backend contracts, mutation of domain models by the service layer).
+2. **False Positive Detection**: Claude Sonnet correctly identified 2 false positives from the Scout:
+   - It noted that `recibo_models.py` is a downstream artifact of the idempotency concern in `pagamentos_api.py`, not an independent hotspot.
+   - It downgraded the severity of `settings.py`, noting it is an architectural role (latent risk) and not an active defect unless it causes a known failure.
+3. **Dependency and File Analysis**: Claude was able to identify additional affected files not listed by Gemini (e.g., `postgres_recibo_repository.py`).
+4. **Blockers and Systemic Risks**: The blockers proposed by Claude were actionable and sequential (e.g., "T-03 must be complete before T-05", "lack of tests blocks high-risk modifications"), whereas Gemini gave more generic blockers.
 
-## Decisión
-Se ha decidido utilizar **Claude Sonnet** como el modelo principal y exclusivo para el rol de `Architect`. 
+## Decision
+It has been decided to use **Claude Sonnet** as the primary and exclusive model for the `Architect` role.
 
-Aunque el costo de Claude Sonnet es significativamente mayor (~88x más caro que Gemini Flash), su capacidad de razonamiento justifica completamente la inversión en esta etapa crítica del pipeline. 
+Although the cost of Claude Sonnet is significantly higher (~88x more expensive than Gemini Flash), its reasoning capability fully justifies the investment at this critical stage of the pipeline.
 
-## Consecuencias
-- **Eficacia**: Se asegura una fase de planificación mucho más robusta. Claude evita que el Executor trabaje sobre falsos positivos, reduciendo el retrabajo.
-- **Costo**: Se incrementa el presupuesto gastado por corrida en esta etapa (a ~$0.035), pero se mantiene un enfoque económicamente viable al usar Gemini Flash para el `Scout` (exploración masiva) y DeepSeek para el `Executor` en tareas mecánicas.
-- **Mantenimiento**: El rol de diseño arquitectónico, la priorización de tareas secuenciales y la validación lógica compleja quedan estrictamente reservados para Claude.
+## Consequences
+- **Efficacy**: A much more robust planning phase is ensured. Claude prevents the Executor from working on false positives, reducing rework.
+- **Cost**: The budget spent per run at this stage is increased (to ~$0.035), but an economically viable approach is maintained by using Gemini Flash for the `Scout` (massive exploration) and DeepSeek for the `Executor` in mechanical tasks.
+- **Maintenance**: The architectural design role, sequential task prioritization, and complex logic validation are strictly reserved for Claude.
