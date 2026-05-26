@@ -23,7 +23,6 @@ export async function criarPagamento(dados: CriarPagamentoRequest) {
     parcelas: dados.parcelas ?? 1,
   };
   // Debug log do payload antes de enviar a requisição
-  console.log('criarPagamento payload:', payload);
 
   const response = await fetch(API_ENDPOINTS.pagamentos, {
     method: 'POST',

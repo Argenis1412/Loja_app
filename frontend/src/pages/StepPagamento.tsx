@@ -9,7 +9,6 @@ export function StepPagamento() {
     metodo: MetodoPagamento;
     parcelas: number;
   }) {
-    console.log('Pagamento enviado:', dados);
   }
 
   return (

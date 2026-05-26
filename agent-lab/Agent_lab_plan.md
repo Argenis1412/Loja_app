@@ -20,7 +20,7 @@ Proyecto objetivo: **Loja App** — sistema de pagos construido con FastAPI + Re
 ```
 ┌─────────────┐     JSON      ┌─────────────┐     Plan JSON   ┌─────────────┐
 │    SCOUT    │ ────────────► │  ARCHITECT  │ ──────────────► │  EXECUTOR   │
-│ Gemini Flash│               │ Claude Sonnet│                 │   DeepSeek  │
+│ Gemini Flash│               │ Claude Sonnet│                 │Gemini/Groq/C│
 └─────────────┘               └─────────────┘                 └──────┬──────┘
   Read-only                    Valida, prioriza                       │
   Observa, clasifica           Detecta edge cases              ┌──────▼──────┐
@@ -43,7 +43,7 @@ Proyecto objetivo: **Loja App** — sistema de pagos construido con FastAPI + Re
 |---|---|---|---|
 | Scout | Gemini Flash | ❌ NUNCA | Scan, clasificar, generar JSON |
 | Architect | Claude Sonnet | ❌ NUNCA | Validar findings, priorizar, diseñar orden |
-| Executor | DeepSeek / Qwen | ✅ solo tareas aprobadas | Cambios mecánicos de bajo riesgo |
+| Executor | Gemini / Groq / Claude | ✅ solo tareas aprobadas | Cambios (LOW/MED), diff (HIGH) |
 | Validator | Scripts reales + LLM summary | ❌ | lint, tests, typecheck, stderr summary |
 | Reviewer | Claude Sonnet | ❌ | Solo en diffs de alto riesgo |
 
@@ -65,7 +65,7 @@ Esto no es confianza en el modelo — es constraint de diseño.
 ## 4. Risk Policy (Routing del Executor)
 
 ```
-RIESGO BAJO → Executor (DeepSeek/Qwen)
+RIESGO BAJO → Gemini Flash (Executor)
   - rename de variables
   - agregar type hints
   - mover imports
@@ -73,7 +73,7 @@ RIESGO BAJO → Executor (DeepSeek/Qwen)
   - eliminar console.log / print debug
   - fix de linting (noqa, line length)
 
-RIESGO MEDIO → Claude Executor
+RIESGO MEDIO → Groq (Llama 3 70B)
   - refactor de función con side effects
   - cambio de interfaz interna
   - alteración de middleware no crítico
@@ -224,8 +224,8 @@ class ArchitectOutput(BaseModel):
 | Agente | Modelo | Costo estimado/llamada | Costo real observado |
 |---|---|---|---|
 | Scout (2 pasadas) | Gemini Flash | ~$0.004 | **$0.004** ✅ |
-| Architect | Claude Sonnet | ~$0.013 | pendiente |
-| Executor (low risk) | DeepSeek | ~$0.001 | pendiente |
+| Architect | Claude Sonnet | ~$0.013 | ~$0.035 ✅ |
+| Executor (LOW/MED) | Gemini / Groq | $0.00 (Free) | pendiente |
 | Validator | Scripts + LLM | ~$0.002 | pendiente |
 
 **Budget Claude disponible: ~$2.50**
@@ -241,7 +241,7 @@ class ArchitectOutput(BaseModel):
 [✅] 3. Correr Claude sobre scout_output_sample.json
 [✅] 4. Comparar output Claude vs output Gemini del Architect
 [✅] 5. Documentar diferencias — eso valida el modelo correcto por capa
-[ ] 6. Implementar executor.py con routing por risk_level (rama: `feat/phase-6-executor`)
+[✅] 6. Implementar executor.py con routing por risk_level (rama: `feat/phase-6-executor`)
 [ ] 7. Implementar validator.py con scripts reales (rama: `feat/phase-7-validator`)
 [ ] 8. Conectar pipeline.py end-to-end (rama: `feat/phase-8-pipeline`)
 [ ] 9. Correr pipeline completo sobre loja_app (rama: `feat/phase-8-pipeline`)
@@ -267,9 +267,9 @@ class ArchitectOutput(BaseModel):
 
 ```bash
 # .env
-ANTHROPIC_API_KEY=sk-ant-...    # Claude Sonnet — Architect + Reviewer
-GOOGLE_API_KEY=...               # Gemini Flash — Scout
-DEEPSEEK_API_KEY=...             # DeepSeek — Executor
+ANTHROPIC_API_KEY=sk-ant-...    # Claude Sonnet — Architect + Reviewer + Executor (HIGH)
+GOOGLE_API_KEY=...               # Gemini Flash — Scout + Executor (LOW)
+GROQ_API_KEY=...                 # Groq Llama 3 — Executor (MEDIUM)
 ```
 
 **SDKs instalados:**
