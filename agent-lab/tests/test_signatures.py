@@ -9,7 +9,7 @@ sys.modules["anthropic"] = MagicMock()
 sys.modules["dotenv"] = MagicMock()
 
 # Add 'agent-lab' to sys.path so we can import agents
-agent_lab_path = Path(__file__).resolve().parent.parent / "agent-lab"
+agent_lab_path = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(agent_lab_path))
 
 # Import agents (these are already refactored to return (Output, dict))
