@@ -8,8 +8,8 @@ Stabilize the `agent-lab` system, ensuring interfaces are consistent, entrypoint
 - [x] **1.2 Fix `__main__` Entrypoints**: Rename invalid function calls (`run_scout`, `run_architect`, `validate`) to `run()` across all agent files.
 
 ## Phase 2: Quality & Testing
-- [ ] **2.1 Standardize Tests**: Rewrite `tests/test_signatures.py` to use `pytest` assertions.
-- [ ] **2.2 Define Quality Gate**: Create a standard checklist/command set for pre-merge validation.
+- [x] **2.1 Standardize Tests**: Replace legacy signature test with modular suite (test_scout.py, test_architect.py, test_executor.py, test_validator.py, test_schemas.py).
+- [x] **2.2 Define Quality Gate**: Create a standard checklist/command set for pre-merge validation.
 
 ## Phase 3: Observability
 - [ ] **3.1 Fix Metrics**: Ensure actual token usage is reported by `executor` and `validator` instead of estimations or zeros.

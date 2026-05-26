@@ -1,20 +1,13 @@
 # agents/scout.py
 import os
 import json
-import sys
 import time
+import sys
 from pathlib import Path
-
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
-
-from dotenv import load_dotenv
-from google import genai
 from schemas.scout_output import ScoutOutput
 from logger import log_call
+from clients.gemini_client import get_gemini_client
 
-load_dotenv()
-
-client = genai.Client(api_key=os.getenv("GOOGLE_API_KEY"))
 MODEL = "gemini-2.5-flash"
 
 COST_PER_1M_INPUT  = 0.075
@@ -61,6 +54,7 @@ def read_selected_files(root: Path, selected: list[str], max_lines: int = 40) ->
 
 def call_gemini(prompt: str, agent_label: str) -> tuple[str, dict, float]:
     """Wrapper con retry y logging."""
+    client = get_gemini_client()
     for attempt in range(2):
         try:
             response = client.models.generate_content(

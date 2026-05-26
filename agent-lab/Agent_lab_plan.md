@@ -255,7 +255,9 @@ class ArchitectOutput(BaseModel):
 [✅] 7. Implement validator.py with real scripts (branch: `feat/phase-7-validator`)
 [✅] 8. Connect pipeline.py end-to-end (branch: `feat/phase-8-pipeline`)
 [✅] 9. Run full pipeline on loja_app (branch: `feat/phase-8-pipeline`)
-[ ] 10. Document functional patterns as ADR (branch: `feat/phase-9-final-docs`)
+[✅] 9. Run full pipeline on loja_app (branch: `feat/phase-8-pipeline`)
+[✅] 10. Quality & Testing (Phase 2): Standardize tests & Quality Gate
+[ ] 11. Finalize ADR: Document the finalized contract and operational policies. (branch: `feat/phase-9-final-docs`)
 ```
 
 ---

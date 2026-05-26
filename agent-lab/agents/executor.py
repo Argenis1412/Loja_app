@@ -24,32 +24,20 @@ import uuid
 from datetime import datetime, timezone
 from pathlib import Path
 
-import httpx
-import anthropic
-from google import genai
-from google.genai import types
-from dotenv import load_dotenv
-
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
-
 from schemas.architect_output import ArchitectOutput, Task
 from schemas.executor_output import ExecutorOutput, FileChange
-
-load_dotenv()
+from clients.gemini_client import get_gemini_client
+from clients.anthropic_client import get_anthropic_client
+from clients.groq_client import get_groq_client
 
 # ---------------------------------------------------------------------------
 # Configuración
 # ---------------------------------------------------------------------------
 
-GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY", "")
 MODEL_GEMINI = "gemini-2.5-flash"
-
-GROQ_API_KEY = os.getenv("GROQ_API_KEY", "")
-GROQ_BASE_URL = "https://api.groq.com/openai/v1"
 MODEL_GROQ = "llama-3.3-70b-versatile"
-
-CLAUDE_API_KEY = os.getenv("ANTHROPIC_API_KEY", "")
 MODEL_CLAUDE = "claude-sonnet-4-6"
+
 COST_PER_1M_INPUT_CLAUDE = 3.00
 COST_PER_1M_OUTPUT_CLAUDE = 15.00
 
@@ -61,21 +49,27 @@ PROJECT_ROOT = Path(
 )
 
 LOGS_DIR = Path(__file__).parent.parent / "logs"
-LOGS_DIR.mkdir(exist_ok=True)
 
 # ---------------------------------------------------------------------------
-# Logger
+# Logger (lazy)
 # ---------------------------------------------------------------------------
 
-logger = logging.getLogger("executor")
-logger.setLevel(logging.DEBUG)
+_logger = None
 
-_handler = logging.FileHandler(LOGS_DIR / "executor.log", encoding="utf-8")
-_handler.setFormatter(
-    logging.Formatter("%(asctime)s [%(levelname)s] %(message)s")
-)
-logger.addHandler(_handler)
-logging.getLogger("httpx").setLevel(logging.WARNING)
+def _get_logger():
+    global _logger
+    if _logger is None:
+        LOGS_DIR.mkdir(exist_ok=True)
+        lgr = logging.getLogger("executor")
+        lgr.setLevel(logging.DEBUG)
+        _handler = logging.FileHandler(LOGS_DIR / "executor.log", encoding="utf-8")
+        _handler.setFormatter(
+            logging.Formatter("%(asctime)s [%(levelname)s] %(message)s")
+        )
+        lgr.addHandler(_handler)
+        logging.getLogger("httpx").setLevel(logging.WARNING)
+        _logger = lgr
+    return _logger
 
 # ---------------------------------------------------------------------------
 # Helpers Modelos
@@ -113,8 +107,10 @@ def _strip_markdown(content: str) -> str:
     return content.strip()
 
 def _call_gemini(prompt: str, run_id: str) -> tuple[str, int, int]:
-    client = genai.Client(api_key=GOOGLE_API_KEY)
-    logger.debug("[%s] Gemini request | model=%s | prompt_chars=%d",
+    from google.genai import types
+    client = get_gemini_client()
+    log = _get_logger()
+    log.debug("[%s] Gemini request | model=%s | prompt_chars=%d",
                  run_id, MODEL_GEMINI, len(prompt))
 
     t0 = time.perf_counter()
@@ -131,15 +127,18 @@ def _call_gemini(prompt: str, run_id: str) -> tuple[str, int, int]:
     input_tokens = usage.prompt_token_count if usage else 0
     output_tokens = usage.candidates_token_count if usage else 0
 
-    logger.info("[%s] Gemini OK | latency=%.2fs | in=%d | out=%d",
+    log.info("[%s] Gemini OK | latency=%.2fs | in=%d | out=%d",
                 run_id, elapsed, input_tokens, output_tokens)
 
     return content, input_tokens, output_tokens
 
 
 def _call_groq(prompt: str, run_id: str) -> tuple[str, int, int]:
+    import httpx
+    log = _get_logger()
+    client = get_groq_client()
     headers = {
-        "Authorization": f"Bearer {GROQ_API_KEY}",
+        "Authorization": f"Bearer {os.getenv('GROQ_API_KEY')}",
         "Content-Type": "application/json",
     }
     payload = {
@@ -148,17 +147,16 @@ def _call_groq(prompt: str, run_id: str) -> tuple[str, int, int]:
         "temperature": 0.0,
     }
 
-    logger.debug("[%s] Groq request | model=%s | prompt_chars=%d",
+    log.debug("[%s] Groq request | model=%s | prompt_chars=%d",
                  run_id, MODEL_GROQ, len(prompt))
 
     t0 = time.perf_counter()
-    with httpx.Client(timeout=TIMEOUT_SECONDS) as client:
-        response = client.post(
-            f"{GROQ_BASE_URL}/chat/completions",
-            headers=headers,
-            json=payload,
-        )
-        response.raise_for_status()
+    response = client.post(
+        "/chat/completions",
+        headers=headers,
+        json=payload,
+    )
+    response.raise_for_status()
 
     elapsed = time.perf_counter() - t0
     data = response.json()
@@ -169,15 +167,16 @@ def _call_groq(prompt: str, run_id: str) -> tuple[str, int, int]:
     input_tokens = usage.get("prompt_tokens", 0)
     output_tokens = usage.get("completion_tokens", 0)
     
-    logger.info("[%s] Groq OK | latency=%.2fs | in=%d | out=%d",
+    log.info("[%s] Groq OK | latency=%.2fs | in=%d | out=%d",
                 run_id, elapsed, input_tokens, output_tokens)
 
     return content, input_tokens, output_tokens
 
 
 def _call_claude(prompt: str, run_id: str) -> tuple[str, int, int]:
-    client = anthropic.Anthropic(api_key=CLAUDE_API_KEY)
-    logger.debug("[%s] Claude request | model=%s | prompt_chars=%d",
+    client = get_anthropic_client()
+    log = _get_logger()
+    log.debug("[%s] Claude request | model=%s | prompt_chars=%d",
                  run_id, MODEL_CLAUDE, len(prompt))
 
     t0 = time.perf_counter()
@@ -194,7 +193,7 @@ def _call_claude(prompt: str, run_id: str) -> tuple[str, int, int]:
     input_tokens = response.usage.input_tokens
     output_tokens = response.usage.output_tokens
 
-    logger.info("[%s] Claude OK | latency=%.2fs | in=%d | out=%d",
+    log.info("[%s] Claude OK | latency=%.2fs | in=%d | out=%d",
                 run_id, elapsed, input_tokens, output_tokens)
 
     return content, input_tokens, output_tokens
@@ -206,7 +205,7 @@ def _call_claude(prompt: str, run_id: str) -> tuple[str, int, int]:
 
 def _apply_task(task: Task, run_id: str) -> FileChange:
     if not task.files_to_modify:
-        logger.warning("[%s] Task %s sin files_to_modify — skip", run_id, task.task_id)
+        _get_logger().warning("[%s] Task %s sin files_to_modify — skip", run_id, task.task_id)
         return FileChange(
             task_id=task.task_id, file="", status="error", error="files_to_modify vacío"
         )
@@ -216,7 +215,7 @@ def _apply_task(task: Task, run_id: str) -> FileChange:
 
     if not file_path.exists():
         msg = f"Archivo no encontrado: {file_path}"
-        logger.error("[%s] %s", run_id, msg)
+        _get_logger().error("[%s] %s", run_id, msg)
         return FileChange(
             task_id=task.task_id, file=relative_path, status="error", error=msg
         )
@@ -248,9 +247,9 @@ def _apply_task(task: Task, run_id: str) -> FileChange:
             modified_content = raw
             break
 
-        except (httpx.HTTPError, ValueError, anthropic.APIError) as exc:
-            # Capturamos excepciones generales
-            logger.warning("[%s] Intento %d/%d fallido para task %s: %s",
+        except (ValueError, Exception) as exc:
+            log = _get_logger()
+            log.warning("[%s] Intento %d/%d fallido para task %s: %s",
                            run_id, attempt + 1, MAX_RETRIES + 1, task.task_id, exc)
             if attempt == MAX_RETRIES:
                 return FileChange(
@@ -267,21 +266,21 @@ def _apply_task(task: Task, run_id: str) -> FileChange:
     diff = _make_diff(original_content, modified_content, relative_path)
     
     if not diff:
-        logger.info("[%s] Task %s — sin cambios (idempotente)", run_id, task.task_id)
+        _get_logger().info("[%s] Task %s — sin cambios (idempotente)", run_id, task.task_id)
         return FileChange(
             task_id=task.task_id, file=relative_path, status="applied",
             diff="(sin cambios — ya aplicado)", tokens_used=input_tokens + output_tokens, cost_usd=cost_this_call
         )
 
     if task.risk_level == "high":
-        logger.info("[%s] Task %s — DIFF GENERADO (HIGH risk, no escrito)", run_id, task.task_id)
+        _get_logger().info("[%s] Task %s — DIFF GENERADO (HIGH risk, no escrito)", run_id, task.task_id)
         return FileChange(
             task_id=task.task_id, file=relative_path, status="pending_human_review",
             diff=diff, tokens_used=input_tokens + output_tokens, cost_usd=cost_this_call
         )
     else:
         file_path.write_text(modified_content, encoding="utf-8")
-        logger.info("[%s] Task %s — APLICADO en %s", run_id, task.task_id, relative_path)
+        _get_logger().info("[%s] Task %s — APLICADO en %s", run_id, task.task_id, relative_path)
         return FileChange(
             task_id=task.task_id, file=relative_path, status="applied",
             diff=diff, tokens_used=input_tokens + output_tokens, cost_usd=cost_this_call
@@ -306,7 +305,7 @@ def _make_diff(original: str, modified: str, filename: str) -> str:
 
 def run(architect_output: ArchitectOutput) -> tuple[ExecutorOutput, dict]:
     run_id = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S") + "-" + uuid.uuid4().hex[:6]
-    logger.info("=== Executor run %s ===", run_id)
+    _get_logger().info("=== Executor run %s ===", run_id)
 
     model_string = f"GM:{MODEL_GEMINI}|GQ:{MODEL_GROQ}|CL:{MODEL_CLAUDE}"
     result = ExecutorOutput(model=model_string, run_id=run_id)
@@ -315,7 +314,7 @@ def run(architect_output: ArchitectOutput) -> tuple[ExecutorOutput, dict]:
     total_tokens_output = 0
 
     for task in architect_output.implementation_plan:
-        logger.info("[%s] Task %s | risk=%s | title=%s",
+        _get_logger().info("[%s] Task %s | risk=%s | title=%s",
                     run_id, task.task_id, task.risk_level, task.title)
 
         for file_relative in task.files_to_modify:
@@ -341,7 +340,7 @@ def run(architect_output: ArchitectOutput) -> tuple[ExecutorOutput, dict]:
     output_path = LOGS_DIR / f"executor_{run_id}.json"
     output_path.write_text(result.model_dump_json(indent=2), encoding="utf-8")
     
-    logger.info(
+    _get_logger().info(
         "[%s] Finalizado | applied=%d | pending_review=%d | errors=%d | cost=$%.6f | log=%s",
         run_id, len(result.applied), len(result.pending_review), len(result.errors),
         result.total_cost_usd, output_path.name
@@ -369,21 +368,21 @@ if __name__ == "__main__":
     architect_data = json.loads(architect_json_path.read_text(encoding="utf-8"))
     architect_output = ArchitectOutput.model_validate(architect_data)
 
-    output = execute(architect_output)
+    result, _ = run(architect_output)
 
-    print(f"\n[OK] Aplicados   : {len(output.applied)}")
-    print(f"[~] Pending review : {len(output.pending_review)}")
-    print(f"[X] Errores     : {len(output.errors)}")
-    print(f"[$] Costo total : ${output.total_cost_usd:.6f}")
+    print(f"\n[OK] Aplicados   : {len(result.applied)}")
+    print(f"[~] Pending review : {len(result.pending_review)}")
+    print(f"[X] Errores     : {len(result.errors)}")
+    print(f"[$] Costo total : ${result.total_cost_usd:.6f}")
 
-    if output.applied:
+    if result.applied:
         print("\n--- Diffs aplicados ---")
-        for change in output.applied:
+        for change in result.applied:
             print(f"\n[{change.task_id}] {change.file}")
             print(change.diff)
 
-    if output.pending_review:
+    if result.pending_review:
         print("\n--- Diffs PENDIENTES (HIGH risk, no escritos) ---")
-        for change in output.pending_review:
+        for change in result.pending_review:
             print(f"\n[{change.task_id}] {change.file}")
             print(change.diff)

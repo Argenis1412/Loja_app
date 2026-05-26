@@ -1,15 +1,24 @@
 [project]
 name = "agent-lab"
 version = "0.1.0"
-description = "Add your description here"
-readme = "README.md"
-requires-python = ">=3.11"
+description = "Multi-agent pipeline for code analysis"
+requires-python = ">=3.12,<3.13"
 dependencies = [
-    "anthropic>=0.104.1",
+    "anthropic>=0.45.0",
     "google-genai>=2.6.0",
-    "httpx>=0.28.1",
-    "pydantic>=2.13.4",
-    "pytest>=9.0.3",
-    "python-dotenv>=1.2.2",
-    "ruff>=0.15.14",
+    "pydantic>=2.10.0",
+    "python-dotenv>=1.0.0",
+    "httpx>=0.28.0",
 ]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.3.0",
+    "ruff>=0.9.0",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+markers = ["unit", "integration"]
+filterwarnings = ["ignore::DeprecationWarning"]
