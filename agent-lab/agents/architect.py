@@ -10,6 +10,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from dotenv import load_dotenv
 import anthropic
 from schemas.architect_output import ArchitectOutput
+from schemas.scout_output import ScoutOutput
 from logger import log_call
 
 load_dotenv()
