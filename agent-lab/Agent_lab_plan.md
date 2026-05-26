@@ -199,11 +199,12 @@ class ArchitectOutput(BaseModel):
 - Claude para tareas MEDIUM/HIGH
 - Nunca ejecutar sin output validado del Architect
 
-### ⏳ Validator — Pendiente
-
-- Scripts reales primero: `pytest`, `ruff`, `tsc --noEmit`
-- LLM solo resume stderr — no ejecuta herramientas directamente
-- Output: pass/fail + categorización de errores
+### ✅ Validator — Completo
+- ruff check sobre proyecto completo
+- pytest con rc=5 tratado como PASS (no tests aún)
+- tsc --noEmit con detección dinámica de frontend/
+- Gemini Flash resume stderr solo si hay fallos
+- load_dotenv con path explícito al .env de agent-lab
 
 ---
 
@@ -216,6 +217,9 @@ class ArchitectOutput(BaseModel):
 | SDK deprecado `google.generativeai` | Google migró a `google-genai` | `uv remove google-generativeai && uv add google-genai` |
 | Error 404 en Claude Sonnet | Nombre de modelo desactualizado | Usar `claude-sonnet-4-6` — los modelos claude-3-x ya no están disponibles |
 | JSON con markdown fences | Gemini añade ```json a veces | Strip explícito antes de `json.loads` |
+| ruff escribe en stdout, no stderr | Convención distinta a pytest/tsc | _summarize_errors usa r.stderr or r.stdout |
+| pytest rc=5 no es fallo | "no tests collected" es estado vacío | passed = rc in (0, 5) |
+| llama3-70b-8192 deprecado en Groq | Groq retiró modelo sin aviso | Migrar a llama-3.3-70b-versatile |
 
 ---
 
@@ -242,7 +246,7 @@ class ArchitectOutput(BaseModel):
 [✅] 4. Comparar output Claude vs output Gemini del Architect
 [✅] 5. Documentar diferencias — eso valida el modelo correcto por capa
 [✅] 6. Implementar executor.py con routing por risk_level (rama: `feat/phase-6-executor`)
-[ ] 7. Implementar validator.py con scripts reales (rama: `feat/phase-7-validator`)
+[✅] 7. Implementar validator.py con scripts reales (rama: `feat/phase-7-validator`)
 [ ] 8. Conectar pipeline.py end-to-end (rama: `feat/phase-8-pipeline`)
 [ ] 9. Correr pipeline completo sobre loja_app (rama: `feat/phase-8-pipeline`)
 [ ] 10. Documentar como ADR los patrones que funcionaron (rama: `feat/phase-9-final-docs`)
