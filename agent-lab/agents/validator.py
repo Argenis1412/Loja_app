@@ -27,39 +27,41 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 from schemas.validator_output import ToolResult, ValidatorOutput
-from dotenv import load_dotenv
-
-load_dotenv(Path(__file__).parent.parent / ".env")
 
 
 # ---------------------------------------------------------------------------
 # Configuración
 # ---------------------------------------------------------------------------
 
-GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY", "")
-MODEL_GEMINI = "gemini-2.0-flash" # Assuming a correct model name, user had "gemini-2.5-flash" but that likely doesn't exist, I will use a safe default or keep what they had. Let's use gemini-2.0-flash as it's common. Actually, I'll stick to what they had if it works, or fix it if I suspect it's wrong. Let's use gemini-2.0-flash or gemini-1.5-flash. I'll use gemini-1.5-flash which is widely available. Wait, I should probably stick to what they wrote in the file if they specified it, unless I know it's wrong. The user provided the content. I'll stick to it.
+MODEL_GEMINI = "gemini-2.5-flash"
 
 # Costo Gemini Flash en free tier
 COST_PER_SUMMARY = 0.0
 
 PROJECT_ROOT = Path(".").resolve()
 LOGS_DIR = Path(__file__).parent.parent / "logs"
-LOGS_DIR.mkdir(exist_ok=True)
 
 SUBPROCESS_TIMEOUT = 120   # segundos — pytest puede ser lento
 
 # ---------------------------------------------------------------------------
-# Logger
+# Logger (lazy)
 # ---------------------------------------------------------------------------
 
-logger = logging.getLogger("validator")
-logger.setLevel(logging.DEBUG)
+_logger = None
 
-_handler = logging.FileHandler(LOGS_DIR / "validator.log", encoding="utf-8")
-_handler.setFormatter(
-    logging.Formatter("%(asctime)s [%(levelname)s] %(message)s")
-)
-logger.addHandler(_handler)
+def _get_logger():
+    global _logger
+    if _logger is None:
+        LOGS_DIR.mkdir(exist_ok=True)
+        lgr = logging.getLogger("validator")
+        lgr.setLevel(logging.DEBUG)
+        _handler = logging.FileHandler(LOGS_DIR / "validator.log", encoding="utf-8")
+        _handler.setFormatter(
+            logging.Formatter("%(asctime)s [%(levelname)s] %(message)s")
+        )
+        lgr.addHandler(_handler)
+        _logger = lgr
+    return _logger
 
 # ---------------------------------------------------------------------------
 # Helper: Frontend Detection
@@ -89,7 +91,7 @@ def _run(
     Ejecuta un comando externo con subprocess y captura stdout/stderr.
     return_code != 0 → passed = False.
     """
-    logger.info("[%s] Ejecutando %s: %s (cwd=%s)", run_id, tool_name, " ".join(cmd), cwd)
+    _get_logger().info("[%s] Ejecutando %s: %s (cwd=%s)", run_id, tool_name, " ".join(cmd), cwd)
     t0 = time.perf_counter()
 
     try:
@@ -102,7 +104,7 @@ def _run(
         )
     except FileNotFoundError:
         msg = f"Comando no encontrado: {cmd[0]} — ¿está instalado y en PATH?"
-        logger.error("[%s] %s", run_id, msg)
+        _get_logger().error("[%s] %s", run_id, msg)
         return ToolResult(
             tool=tool_name,          # type: ignore[arg-type]
             passed=False,
@@ -111,7 +113,7 @@ def _run(
         )
     except subprocess.TimeoutExpired:
         msg = f"Timeout ({SUBPROCESS_TIMEOUT}s) ejecutando {cmd[0]}"
-        logger.error("[%s] %s", run_id, msg)
+        _get_logger().error("[%s] %s", run_id, msg)
         return ToolResult(
             tool=tool_name,          # type: ignore[arg-type]
             passed=False,
@@ -122,12 +124,12 @@ def _run(
     elapsed = time.perf_counter() - t0
     passed = proc.returncode in (0, 5)
 
-    logger.info(
+    _get_logger().info(
         "[%s] %s → %s | rc=%d | latency=%.2fs",
         run_id, tool_name, "PASS" if passed else "FAIL", proc.returncode, elapsed,
     )
     if not passed:
-        logger.debug("[%s] %s stderr:\n%s", run_id, tool_name, proc.stderr[:2000])
+        _get_logger().debug("[%s] %s stderr:\n%s", run_id, tool_name, proc.stderr[:2000])
 
     return ToolResult(
         tool=tool_name,              # type: ignore[arg-type]
@@ -154,7 +156,7 @@ def run_pytest(run_id: str) -> ToolResult:
 def run_tsc(run_id: str) -> ToolResult:
     frontend = _find_frontend_dir(PROJECT_ROOT)
     if frontend is None:
-        logger.warning("[%s] frontend/ no encontrado — skip tsc", run_id)
+        _get_logger().warning("[%s] frontend/ no encontrado — skip tsc", run_id)
         return ToolResult(
             tool="tsc",
             passed=True,
@@ -173,10 +175,8 @@ def _summarize_errors(failed_tools: list[ToolResult], run_id: str) -> str:
     Llama a Gemini Flash para resumir los stderr de las tools que fallaron.
     Si Gemini falla, devuelve un fallback con el stderr crudo — nunca bloquea.
     """
-    from google import genai
-    if not GOOGLE_API_KEY:
-
-        logger.warning("[%s] GOOGLE_API_KEY no configurada — skip summary", run_id)
+    if not os.getenv("GOOGLE_API_KEY"):
+        _get_logger().warning("[%s] GOOGLE_API_KEY no configurada — skip summary", run_id)
         return "[summary no disponible — GOOGLE_API_KEY ausente]"
 
 
@@ -198,11 +198,12 @@ ERRORS
 {stderr_sections}
 """
 
-    logger.debug("[%s] Gemini summary request | tools=%s", run_id, [r.tool for r in failed_tools])
+    _get_logger().debug("[%s] Gemini summary request | tools=%s", run_id, [r.tool for r in failed_tools])
     t0 = time.perf_counter()
 
     try:
-        client = genai.Client(api_key=GOOGLE_API_KEY)
+        from clients.gemini_client import get_gemini_client
+        client = get_gemini_client()
         response = client.models.generate_content(
             model=MODEL_GEMINI,
             contents=prompt,
@@ -215,14 +216,14 @@ ERRORS
         input_tok = getattr(usage, "prompt_token_count", 0) if usage else 0
         output_tok = getattr(usage, "candidates_token_count", 0) if usage else 0
 
-        logger.info(
+        _get_logger().info(
             "[%s] Gemini summary OK | latency=%.2fs | in=%d | out=%d | cost=$0.00 (free tier)",
             run_id, elapsed, input_tok, output_tok,
         )
         return summary
 
     except Exception as exc:  # noqa: BLE001
-        logger.error("[%s] Gemini summary falló: %s — usando stderr crudo", run_id, exc)
+        _get_logger().error("[%s] Gemini summary falló: %s — usando stderr crudo", run_id, exc)
         # Fallback: devolver stderr truncado, no bloquear el pipeline
         return "\n".join(
             f"[{r.tool}] {(r.stderr or r.stdout)[:500]}" for r in failed_tools
@@ -239,7 +240,7 @@ def run() -> tuple[ValidatorOutput, dict]:
     Corre ruff → pytest → tsc, luego Gemini resume si hay fallos.
     """
     run_id = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S") + "-" + uuid.uuid4().hex[:6]
-    logger.info("=== Validator run %s ===", run_id)
+    _get_logger().info("=== Validator run %s ===", run_id)
 
     results: list[ToolResult] = [
         run_ruff(run_id),
@@ -286,7 +287,7 @@ def run() -> tuple[ValidatorOutput, dict]:
         encoding="utf-8",
     )
 
-    logger.info(
+    _get_logger().info(
         "[%s] Finalizado | overall=%s | failed_tools=%s | log=%s",
         run_id,
         "PASS" if overall_passed else "FAIL",

@@ -5,17 +5,10 @@ import sys
 import time
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
-
-from dotenv import load_dotenv
-import anthropic
 from schemas.architect_output import ArchitectOutput
 from schemas.scout_output import ScoutOutput
 from logger import log_call
-
-load_dotenv()
-
-client = anthropic.Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
+from clients.anthropic_client import get_anthropic_client
 MODEL = "claude-3-5-sonnet-20241022"
 
 COST_PER_1M_INPUT  = 3.00
@@ -23,6 +16,7 @@ COST_PER_1M_OUTPUT = 15.00
 
 def call_claude(prompt: str, agent_label: str) -> tuple[str, dict, float]:
     """Wrapper with retry and logging for Claude."""
+    client = get_anthropic_client()
     for attempt in range(2):
         try:
             response = client.messages.create(
@@ -62,13 +56,11 @@ def call_claude(prompt: str, agent_label: str) -> tuple[str, dict, float]:
 
             return raw, tokens, cost
 
-        except anthropic.RateLimitError:
-            if attempt == 0:
+        except Exception as e:
+            if "rate" in str(e).lower() and attempt == 0:
                 print(f"[{agent_label}] Rate limit. Waiting 60s...")
                 time.sleep(60)
                 continue
-            raise
-        except Exception as e:
             raise RuntimeError(f"[{agent_label}] Failed: {e}")
 
     raise RuntimeError(f"[{agent_label}] Failed after retry.")

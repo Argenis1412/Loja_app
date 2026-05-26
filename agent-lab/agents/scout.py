@@ -4,15 +4,9 @@ import json
 import time
 import sys
 from pathlib import Path
-from google import genai
 from schemas.scout_output import ScoutOutput
 from logger import log_call
-
-# Mock placeholder for tests
-if os.getenv("GOOGLE_API_KEY"):
-    client = genai.Client(api_key=os.getenv("GOOGLE_API_KEY"))
-else:
-    client = None
+from clients.gemini_client import get_gemini_client
 
 MODEL = "gemini-2.5-flash"
 
@@ -60,6 +54,7 @@ def read_selected_files(root: Path, selected: list[str], max_lines: int = 40) ->
 
 def call_gemini(prompt: str, agent_label: str) -> tuple[str, dict, float]:
     """Wrapper con retry y logging."""
+    client = get_gemini_client()
     for attempt in range(2):
         try:
             response = client.models.generate_content(
