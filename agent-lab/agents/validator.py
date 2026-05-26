@@ -26,12 +26,11 @@ import uuid
 from datetime import datetime, timezone
 from pathlib import Path
 
-import google.genai as genai
+from schemas.validator_output import ToolResult, ValidatorOutput
 from dotenv import load_dotenv
 
-from schemas.validator_output import ToolResult, ValidatorOutput
-
 load_dotenv(Path(__file__).parent.parent / ".env")
+
 
 # ---------------------------------------------------------------------------
 # Configuración
@@ -174,9 +173,12 @@ def _summarize_errors(failed_tools: list[ToolResult], run_id: str) -> str:
     Llama a Gemini Flash para resumir los stderr de las tools que fallaron.
     Si Gemini falla, devuelve un fallback con el stderr crudo — nunca bloquea.
     """
+    from google import genai
     if not GOOGLE_API_KEY:
+
         logger.warning("[%s] GOOGLE_API_KEY no configurada — skip summary", run_id)
         return "[summary no disponible — GOOGLE_API_KEY ausente]"
+
 
     stderr_sections = "\n\n".join(
         f"### {r.tool.upper()} (rc={r.return_code})\n{(r.stderr or r.stdout)[:3000]}"
