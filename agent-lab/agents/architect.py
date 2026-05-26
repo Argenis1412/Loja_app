@@ -10,6 +10,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from dotenv import load_dotenv
 import anthropic
 from schemas.architect_output import ArchitectOutput
+from schemas.scout_output import ScoutOutput
 from logger import log_call
 
 load_dotenv()
@@ -106,11 +107,11 @@ Output: ONLY valid JSON matching this exact schema. No explanation. No markdown:
 {scout_data}
 """
 
-def run(scout_json_path: str) -> tuple[ArchitectOutput, dict]:
-    print(f"[Architect] Reading Scout data from {scout_json_path} ...")
-    
-    with open(scout_json_path, "r", encoding="utf-8") as f:
-        scout_data = f.read()
+def run(scout_output: ScoutOutput) -> tuple[ArchitectOutput, dict]:
+    print(f"[Architect] Processing ScoutOutput object...")
+
+    # Generar prompt con el objeto
+    scout_data = scout_output.model_dump_json()
 
     print(f"[Architect] Asking {MODEL} to structure the implementation plan...")
 
@@ -147,6 +148,9 @@ if __name__ == "__main__":
         sys.exit(1)
         
     scout_path = sys.argv[1]
-    result = run_architect(scout_path)
+    with open(scout_path, "r") as f:
+        scout_data = ScoutOutput.model_validate_json(f.read())
+        
+    result, _ = run(scout_data)
     print("\n-- Architect Output --")
     print(json.dumps(result.model_dump(), indent=2))

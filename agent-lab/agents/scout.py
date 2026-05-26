@@ -213,6 +213,6 @@ def run(target_path: str) -> tuple[ScoutOutput, dict]:
 
 if __name__ == "__main__":
     target = sys.argv[1] if len(sys.argv) > 1 else "targets/loja_app"
-    result = run_scout(target)
+    result, _ = run(target)
     print("\n-- Scout Output --")
     print(json.dumps(result.model_dump(), indent=2))
