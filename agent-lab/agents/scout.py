@@ -1,20 +1,17 @@
 # agents/scout.py
 import os
 import json
-import sys
 import time
+import sys
 from pathlib import Path
-
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
-
-from dotenv import load_dotenv
 from google import genai
-from schemas.scout_output import ScoutOutput
-from logger import log_call
 
-load_dotenv()
+# Mock placeholder for tests
+if os.getenv("GOOGLE_API_KEY"):
+    client = genai.Client(api_key=os.getenv("GOOGLE_API_KEY"))
+else:
+    client = None
 
-client = genai.Client(api_key=os.getenv("GOOGLE_API_KEY"))
 MODEL = "gemini-2.5-flash"
 
 COST_PER_1M_INPUT  = 0.075
