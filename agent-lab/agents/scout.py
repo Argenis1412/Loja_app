@@ -159,7 +159,7 @@ Respond ONLY with valid JSON matching this exact schema. No explanation. No mark
 
 # ── main ───────────────────────────────────────────────────────────────────
 
-def run_scout(target_path: str) -> ScoutOutput:
+def run(target_path: str) -> tuple[ScoutOutput, dict]:
     root = Path(target_path).resolve()
     print(f"[Scout] scanning {root} ...")
 
@@ -198,7 +198,15 @@ def run_scout(target_path: str) -> ScoutOutput:
         raise
 
     output = ScoutOutput(**data)
-    return output
+    
+    meta = {
+        "tokens_input": tokens1["input"] + tokens2["input"],
+        "tokens_output": tokens1["output"] + tokens2["output"],
+        "cost_usd": total_cost,
+        "model_used": MODEL
+    }
+    
+    return output, meta
 
 
 # ── entrypoint ─────────────────────────────────────────────────────────────

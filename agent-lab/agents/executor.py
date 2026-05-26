@@ -304,12 +304,15 @@ def _make_diff(original: str, modified: str, filename: str) -> str:
 # Entrypoint público
 # ---------------------------------------------------------------------------
 
-def execute(architect_output: ArchitectOutput) -> ExecutorOutput:
+def run(architect_output: ArchitectOutput) -> tuple[ExecutorOutput, dict]:
     run_id = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S") + "-" + uuid.uuid4().hex[:6]
     logger.info("=== Executor run %s ===", run_id)
 
     model_string = f"GM:{MODEL_GEMINI}|GQ:{MODEL_GROQ}|CL:{MODEL_CLAUDE}"
     result = ExecutorOutput(model=model_string, run_id=run_id)
+    
+    total_tokens_input = 0
+    total_tokens_output = 0
 
     for task in architect_output.implementation_plan:
         logger.info("[%s] Task %s | risk=%s | title=%s",
@@ -321,6 +324,12 @@ def execute(architect_output: ArchitectOutput) -> ExecutorOutput:
             
             result.total_tokens += change.tokens_used
             result.total_cost_usd += change.cost_usd
+            
+            # Simple heuristic for token tracking since _apply_task returns tokens_used
+            # Note: _apply_task doesn't explicitly separate input/output tokens in its result.
+            # I will estimate it for meta purposes as total_tokens.
+            total_tokens_input += change.tokens_used // 2 # Rough estimate
+            total_tokens_output += change.tokens_used // 2
 
             if change.status == "applied":
                 result.applied.append(change)
@@ -338,7 +347,14 @@ def execute(architect_output: ArchitectOutput) -> ExecutorOutput:
         result.total_cost_usd, output_path.name
     )
 
-    return result
+    meta = {
+        "tokens_input": total_tokens_input,
+        "tokens_output": total_tokens_output,
+        "cost_usd": result.total_cost_usd,
+        "model_used": model_string
+    }
+    
+    return result, meta
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:

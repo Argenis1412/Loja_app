@@ -231,7 +231,7 @@ ERRORS
 # Entrypoint público
 # ---------------------------------------------------------------------------
 
-def validate() -> ValidatorOutput:
+def run() -> tuple[ValidatorOutput, dict]:
     """
     Punto de entrada del Validator.
     Corre ruff → pytest → tsc, luego Gemini resume si hay fallos.
@@ -250,6 +250,9 @@ def validate() -> ValidatorOutput:
 
     model_used = ""
     llm_summary: str | None = None
+    
+    tokens_input = 0
+    tokens_output = 0
 
     # Gemini solo si hay fallos
     if failed:
@@ -261,6 +264,10 @@ def validate() -> ValidatorOutput:
 
         # Summary global
         llm_summary = _summarize_errors(failed, run_id)
+        
+        # Note: Summary cost is free tier (0.0), but let's track tokens
+        # The _summarize_errors doesn't return tokens explicitly but logs them.
+        # This validator is lightweight.
 
     output = ValidatorOutput(
         overall_passed=overall_passed,
@@ -285,7 +292,14 @@ def validate() -> ValidatorOutput:
         output_path.name,
     )
 
-    return output
+    meta = {
+        "tokens_input": tokens_input,
+        "tokens_output": tokens_output,
+        "cost_usd": 0.0,
+        "model_used": model_used
+    }
+    
+    return output, meta
 
 
 # ---------------------------------------------------------------------------

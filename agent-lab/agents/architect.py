@@ -106,7 +106,7 @@ Output: ONLY valid JSON matching this exact schema. No explanation. No markdown:
 {scout_data}
 """
 
-def run_architect(scout_json_path: str) -> ArchitectOutput:
+def run(scout_json_path: str) -> tuple[ArchitectOutput, dict]:
     print(f"[Architect] Reading Scout data from {scout_json_path} ...")
     
     with open(scout_json_path, "r", encoding="utf-8") as f:
@@ -130,7 +130,15 @@ def run_architect(scout_json_path: str) -> ArchitectOutput:
         raise
 
     output = ArchitectOutput(**data)
-    return output
+    
+    meta = {
+        "tokens_input": tokens["input"],
+        "tokens_output": tokens["output"],
+        "cost_usd": cost,
+        "model_used": MODEL
+    }
+    
+    return output, meta
 
 
 if __name__ == "__main__":
