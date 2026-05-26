@@ -240,12 +240,12 @@ class ArchitectOutput(BaseModel):
 [✅] 2. Reescribir architect.py para usar Claude Sonnet
 [✅] 3. Correr Claude sobre scout_output_sample.json
 [✅] 4. Comparar output Claude vs output Gemini del Architect
-[ ] 5. Documentar diferencias — eso valida el modelo correcto por capa
-[ ] 6. Implementar executor.py con routing por risk_level
-[ ] 7. Implementar validator.py con scripts reales
-[ ] 8. Conectar pipeline.py end-to-end
-[ ] 9. Correr pipeline completo sobre loja_app
-[ ] 10. Documentar como ADR los patrones que funcionaron
+[✅] 5. Documentar diferencias — eso valida el modelo correcto por capa
+[ ] 6. Implementar executor.py con routing por risk_level (rama: `feat/phase-6-executor`)
+[ ] 7. Implementar validator.py con scripts reales (rama: `feat/phase-7-validator`)
+[ ] 8. Conectar pipeline.py end-to-end (rama: `feat/phase-8-pipeline`)
+[ ] 9. Correr pipeline completo sobre loja_app (rama: `feat/phase-8-pipeline`)
+[ ] 10. Documentar como ADR los patrones que funcionaron (rama: `feat/phase-9-final-docs`)
 ```
 
 ---
@@ -259,6 +259,7 @@ class ArchitectOutput(BaseModel):
 5. **Claude entra como reviewer, no como explorer.**
 6. **Cualquier cambio de modelo se documenta.** No cambiar Gemini↔Claude sin registrarlo.
 7. **Retry policy explícita por agente.** JSON inválido → 1 retry. Path alucinado → reject.
+8. **Flujo de trabajo PRs:** Cada PR se trabaja secuencialmente solo: branch → cambios → ruff + tests → commit → push → PR → merge → git checkout main && git pull → siguiente PR.
 
 ---
 
