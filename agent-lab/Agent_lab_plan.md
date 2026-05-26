@@ -1,55 +1,55 @@
-# Agent Lab — Plan de Implementación
-> Estado actual: Scout ✅ | Architect (Gemini) ✅ | Architect (Claude) ✅ | Executor ⏳ | Validator ⏳
+# Agent Lab — Implementation Plan
+> Current status: Scout ✅ | Architect (Gemini) ✅ | Architect (Claude) ✅ | Executor ⏳ | Validator ⏳
 
 ---
 
-## 1. Contexto
+## 1. Context
 
-Laboratorio de aprendizaje para construir un pipeline multi-agente de análisis y refactoring de código.
-Proyecto objetivo: **Loja App** — sistema de pagos construido con FastAPI + React.
+Learning lab to build a multi-agent pipeline for code analysis and refactoring.
+Target project: **Loja App** — payments system built with FastAPI + React.
 
-**Objetivo del lab:**
-- Aprender orchestration de agentes AI sin frameworks
-- Validar el patrón Scout → Architect → Executor → Validator
-- Controlar costos usando modelos baratos para tareas de exploración y modelos premium solo para razonamiento
+**Lab Objective:**
+- Learn AI agent orchestration without frameworks.
+- Validate the Scout → Architect → Executor → Validator pattern.
+- Control costs using cheap models for exploration tasks and premium models only for reasoning.
 
 ---
 
-## 2. Arquitectura del Pipeline
+## 2. Pipeline Architecture
 
 ```
 ┌─────────────┐     JSON      ┌─────────────┐     Plan JSON   ┌─────────────┐
 │    SCOUT    │ ────────────► │  ARCHITECT  │ ──────────────► │  EXECUTOR   │
 │ Gemini Flash│               │ Claude Sonnet│                 │Gemini/Groq/C│
 └─────────────┘               └─────────────┘                 └──────┬──────┘
-  Read-only                    Valida, prioriza                       │
-  Observa, clasifica           Detecta edge cases              ┌──────▼──────┐
-  Output: JSON schema          NO implementa                   │  VALIDATOR  │
-                                                               │scripts reales│
+  Read-only                    Validates, prioritizes                 │
+  Observes, classifies         Detects edge cases              ┌──────▼──────┐
+  Output: JSON schema          DOES NOT implement              │  VALIDATOR  │
+                                                               │real scripts │
                                                                │+ LLM summary│
                                                                └──────┬──────┘
                                                                       │
                                                                ┌──────▼──────┐
                                                                │   REVIEWER  │
                                                                │Claude Sonnet│
-                                                               │SOLO si diff │
-                                                               │es delicado  │
+                                                               │ONLY if diff │
+                                                               │is sensitive │
                                                                └─────────────┘
 ```
 
-### Responsabilidades por capa
+### Layer Responsibilities
 
-| Agente | Modelo | Puede escribir archivos | Responsabilidad |
+| Agent | Model | Can write files | Responsibility |
 |---|---|---|---|
-| Scout | Gemini Flash | ❌ NUNCA | Scan, clasificar, generar JSON |
-| Architect | Claude Sonnet | ❌ NUNCA | Validar findings, priorizar, diseñar orden |
-| Executor | Gemini / Groq / Claude | ✅ solo tareas aprobadas | Cambios (LOW/MED), diff (HIGH) |
-| Validator | Scripts reales + LLM summary | ❌ | lint, tests, typecheck, stderr summary |
-| Reviewer | Claude Sonnet | ❌ | Solo en diffs de alto riesgo |
+| Scout | Gemini Flash | ❌ NEVER | Scan, classify, generate JSON |
+| Architect | Claude Sonnet | ❌ NEVER | Validate findings, prioritize, design order |
+| Executor | Gemini / Groq / Claude | ✅ approved tasks only | Changes (LOW/MED), diff (HIGH) |
+| Validator | Real scripts + LLM summary | ❌ | lint, tests, typecheck, stderr summary |
+| Reviewer | Claude Sonnet | ❌ | High-risk diffs only |
 
 ---
 
-## 3. Regla de Oro: El Scout NUNCA implementa
+## 3. Golden Rule: Scout NEVER implements
 
 ```python
 class ScoutAgent:
@@ -57,64 +57,64 @@ class ScoutAgent:
     FORBIDDEN_TOOLS = ["write_file", "run_command", "delete_file"]
 ```
 
-Si el Scout tiene permiso de escribir, el pipeline pierde su punto de control.
-Esto no es confianza en el modelo — es constraint de diseño.
+If the Scout has write permissions, the pipeline loses its control point.
+This is not about trust in the model — it is a design constraint.
 
 ---
 
-## 4. Risk Policy (Routing del Executor)
+## 4. Risk Policy (Executor Routing)
 
 ```
-RIESGO BAJO → Gemini Flash (Executor)
-  - rename de variables
-  - agregar type hints
-  - mover imports
-  - formateo de código
-  - eliminar console.log / print debug
-  - fix de linting (noqa, line length)
+LOW RISK → Gemini Flash (Executor)
+  - variable renaming
+  - adding type hints
+  - moving imports
+  - code formatting
+  - removing console.log / debug print
+  - linting fixes (noqa, line length)
 
-RIESGO MEDIO → Groq (Llama 3 70B)
-  - refactor de función con side effects
-  - cambio de interfaz interna
-  - alteración de middleware no crítico
+MEDIUM RISK → Groq (Llama 3 70B)
+  - function refactoring with side effects
+  - internal interface change
+  - alteration of non-critical middleware
 
-RIESGO ALTO → Claude + human review obligatorio
-  - cualquier cosa que toca migrations
-  - cambios en auth / payments
-  - alteración de contratos de API
-  - lógica financiera (recibo.py, calculadora.py)
+HIGH RISK → Claude + mandatory human review
+  - anything touching migrations
+  - auth / payments changes
+  - API contract alterations
+  - financial logic (recibo.py, calculadora.py)
 ```
 
 ---
 
-## 5. Estructura del Proyecto
+## 5. Project Structure
 
 ```
 agent-lab/
-├── .env                        # API keys — nunca commitear
-├── pipeline.py                 # orquestración manual (pendiente)
-├── logger.py                   # logging de todas las llamadas
+├── .env                        # API keys — never commit
+├── pipeline.py                 # manual orchestration (pending)
+├── logger.py                   # logging of all calls
 ├── schemas/
 │   ├── __init__.py
-│   ├── scout_output.py         # ✅ implementado
-│   └── architect_output.py     # ⏳ pendiente
+│   ├── scout_output.py         # ✅ implemented
+│   └── architect_output.py     # ⏳ pending
 ├── agents/
 │   ├── __init__.py
-│   ├── scout.py                # ✅ Gemini Flash — dos pasadas
-│   ├── architect.py            # ⚠️  corrió con Gemini, pendiente Claude
-│   ├── executor.py             # ⏳ pendiente
-│   └── validator.py            # ⏳ pendiente
+│   ├── scout.py                # ✅ Gemini Flash — two passes
+│   ├── architect.py            # ⚠️  ran with Gemini, pending Claude
+│   ├── executor.py             # ⏳ pending
+│   └── validator.py            # ⏳ pending
 ├── logs/
 │   ├── scout_pass1.log
 │   ├── scout_pass2.log
 │   └── architect.log
 └── targets/
-    └── loja_app/               # repo objetivo
+    └── loja_app/               # target repo
 ```
 
 ---
 
-## 6. Schemas Implementados
+## 6. Implemented Schemas
 
 ### ScoutOutput (`schemas/scout_output.py`) ✅
 
@@ -136,7 +136,7 @@ class ScoutOutput(BaseModel):
     summary: str
 ```
 
-### ArchitectOutput (`schemas/architect_output.py`) ⏳ pendiente
+### ArchitectOutput (`schemas/architect_output.py`) ⏳ pending
 
 ```python
 from pydantic import BaseModel
@@ -162,112 +162,112 @@ class ArchitectOutput(BaseModel):
 
 ---
 
-## 7. Estado actual de implementación
+## 7. Current Implementation Status
 
-### ✅ Scout — Completo
+### ✅ Scout — Complete
 
-- Estrategia de dos pasadas (árbol → selección → análisis)
-- Pasada 1: solo file tree, < 5K tokens, costo ~$0.001
-- Pasada 2: lee 8-12 archivos seleccionados, costo ~$0.003
-- Retry automático en 429 (rate limit)
-- Logging de tokens y costo por pasada
-- Protección contra loop infinito en Windows (os.walk)
-- SDK: `google-genai` (nuevo, no deprecado)
+- Two-pass strategy (tree → selection → analysis)
+- Pass 1: file tree only, < 5K tokens, cost ~$0.001
+- Pass 2: reads 8-12 selected files, cost ~$0.003
+- Automatic retry on 429 (rate limit)
+- Token and cost logging per pass
+- Windows infinite loop protection (os.walk)
+- SDK: `google-genai` (new, not deprecated)
 
-**Costo real del Scout en Loja App: ~$0.004**
+**Real cost of Scout on Loja App: ~$0.004**
 
-### ⚠️ Architect — Completo
+### ⚠️ Architect — Complete
 
-**Resultados obtenidos (logs en `agent-lab/logs/`):**
-- Gemini Flash ejecutó con éxito ($0.00040).
-- Claude Sonnet (`claude-sonnet-4-6`) ejecutó con éxito ($0.03562).
-- Ambos validaron correctamente contra el esquema.
+**Results obtained (logs in `agent-lab/logs/`):**
+- Gemini Flash executed successfully ($0.00040).
+- Claude Sonnet (`claude-sonnet-4-6`) executed successfully ($0.03562).
+- Both correctly validated against the schema.
 
-**Comparativa:**
-- Claude demostró mayor profundidad al identificar *false positives* y riesgos sistémicos (ej. ausencia de tests, disparidad de entornos) que Gemini no vio.
-- La diferencia de costo es notable (Ratio ~88x), justificando el uso estratégico de modelos premium solo para tareas de Architect/Reviewer.
+**Comparison:**
+- Claude demonstrated greater depth by identifying *false positives* and systemic risks (e.g., lack of tests, environment disparity) that Gemini missed.
+- The cost difference is notable (Ratio ~88x), justifying the strategic use of premium models only for Architect/Reviewer tasks.
 
-**Lecciones aprendidas:**
-| Problema encontrado | Causa real | Solución aplicada |
+**Lessons learned:**
+| Problem encountered | Real cause | Applied solution |
 |---|---|---|
-| Error 404 en Claude Sonnet | Nombre de modelo desactualizado | Usar `claude-sonnet-4-6` |
+| 404 Error in Claude Sonnet | Outdated model name | Use `claude-sonnet-4-6` |
 
-### ⏳ Executor — Pendiente
+### ⏳ Executor — Pending
 
-- Implementar routing por risk_level
-- DeepSeek para tareas LOW
-- Claude para tareas MEDIUM/HIGH
-- Nunca ejecutar sin output validado del Architect
+- Implement routing by risk_level
+- DeepSeek for LOW tasks
+- Claude for MEDIUM/HIGH tasks
+- Never execute without Architect's validated output
 
-### ✅ Validator — Completo
-- ruff check sobre proyecto completo
-- pytest con rc=5 tratado como PASS (no tests aún)
-- tsc --noEmit con detección dinámica de frontend/
-- Gemini Flash resume stderr solo si hay fallos
-- load_dotenv con path explícito al .env de agent-lab
+### ✅ Validator — Complete
+- ruff check on full project
+- pytest with rc=5 treated as PASS (no tests yet)
+- tsc --noEmit with dynamic detection of frontend/
+- Gemini Flash summarizes stderr only if there are failures
+- load_dotenv with explicit path to agent-lab .env
 
 ---
 
-## 8. Lecciones aprendidas hasta ahora
+## 8. Lessons Learned So Far
 
-| Problema encontrado | Causa real | Solución aplicada |
+| Problem encountered | Real cause | Applied solution |
 |---|---|---|
-| Loop infinito en Windows | `rglob` atraviesa junctions antes de filtrar | Cambiar a `os.walk` con IGNORE_DIRS |
-| 429 con 50 líneas por archivo | Payload > 250K tokens free tier | Estrategia dos pasadas (árbol → selección) |
-| SDK deprecado `google.generativeai` | Google migró a `google-genai` | `uv remove google-generativeai && uv add google-genai` |
-| Error 404 en Claude Sonnet | Nombre de modelo desactualizado | Usar `claude-sonnet-4-6` — los modelos claude-3-x ya no están disponibles |
-| JSON con markdown fences | Gemini añade ```json a veces | Strip explícito antes de `json.loads` |
-| ruff escribe en stdout, no stderr | Convención distinta a pytest/tsc | _summarize_errors usa r.stderr or r.stdout |
-| pytest rc=5 no es fallo | "no tests collected" es estado vacío | passed = rc in (0, 5) |
-| llama3-70b-8192 deprecado en Groq | Groq retiró modelo sin aviso | Migrar a llama-3.3-70b-versatile |
+| Infinite loop on Windows | `rglob` traverses junctions before filtering | Switch to `os.walk` with IGNORE_DIRS |
+| 429 with 50 lines per file | Payload > 250K tokens free tier | Two-pass strategy (tree → selection) |
+| Deprecated SDK `google.generativeai` | Google migrated to `google-genai` | `uv remove google-generativeai && uv add google-genai` |
+| 404 Error in Claude Sonnet | Outdated model name | Use `claude-sonnet-4-6` — claude-3-x models no longer available |
+| JSON with markdown fences | Gemini sometimes adds ```json | Explicit strip before `json.loads` |
+| ruff writes to stdout, not stderr | Different convention than pytest/tsc | _summarize_errors uses r.stderr or r.stdout |
+| pytest rc=5 is not failure | "no tests collected" is empty state | passed = rc in (0, 5) |
+| llama3-70b-8192 deprecated in Groq | Groq retired model without warning | Migrate to llama-3.3-70b-versatile |
 
 ---
 
-## 9. Costos reales vs estimados
+## 9. Real vs Estimated Costs
 
-| Agente | Modelo | Costo estimado/llamada | Costo real observado |
+| Agent | Model | Estimated cost/call | Observed real cost |
 |---|---|---|---|
-| Scout (2 pasadas) | Gemini Flash | ~$0.004 | **$0.004** ✅ |
+| Scout (2 passes) | Gemini Flash | ~$0.004 | **$0.004** ✅ |
 | Architect | Claude Sonnet | ~$0.013 | ~$0.035 ✅ |
-| Executor (LOW/MED) | Gemini / Groq | $0.00 (Free) | pendiente |
-| Validator | Scripts + LLM | ~$0.002 | pendiente |
+| Executor (LOW/MED) | Gemini / Groq | $0.00 (Free) | pending |
+| Validator | Scripts + LLM | ~$0.002 | pending |
 
-**Budget Claude disponible: ~$2.50**
-**Llamadas Architect posibles: ~190**
+**Available Claude Budget: ~$2.50**
+**Possible Architect calls: ~190**
 
 ---
 
-## 10. Próximos pasos en orden
+## 10. Next Steps in Order
 
 ```
-[✅] 1. Crear schemas/architect_output.py con Pydantic
-[✅] 2. Reescribir architect.py para usar Claude Sonnet
-[✅] 3. Correr Claude sobre scout_output_sample.json
-[✅] 4. Comparar output Claude vs output Gemini del Architect
-[✅] 5. Documentar diferencias — eso valida el modelo correcto por capa
-[✅] 6. Implementar executor.py con routing por risk_level (rama: `feat/phase-6-executor`)
-[✅] 7. Implementar validator.py con scripts reales (rama: `feat/phase-7-validator`)
-[ ] 8. Conectar pipeline.py end-to-end (rama: `feat/phase-8-pipeline`)
-[ ] 9. Correr pipeline completo sobre loja_app (rama: `feat/phase-8-pipeline`)
-[ ] 10. Documentar como ADR los patrones que funcionaron (rama: `feat/phase-9-final-docs`)
+[✅] 1. Create schemas/architect_output.py with Pydantic
+[✅] 2. Rewrite architect.py to use Claude Sonnet
+[✅] 3. Run Claude on scout_output_sample.json
+[✅] 4. Compare Claude output vs Gemini Architect output
+[✅] 5. Document differences — this validates the correct model per layer
+[✅] 6. Implement executor.py with routing by risk_level (branch: `feat/phase-6-executor`)
+[✅] 7. Implement validator.py with real scripts (branch: `feat/phase-7-validator`)
+[ ] 8. Connect pipeline.py end-to-end (branch: `feat/phase-8-pipeline`)
+[ ] 9. Run full pipeline on loja_app (branch: `feat/phase-8-pipeline`)
+[ ] 10. Document functional patterns as ADR (branch: `feat/phase-9-final-docs`)
 ```
 
 ---
 
-## 11. Reglas del laboratorio
+## 11. Lab Rules
 
-1. **Scout es read-only.** Sin excepciones.
-2. **Logging desde el día 1.** Prompt, response, tokens, latency, costo.
-3. **Schema primero.** Define el contrato entre agentes antes de escribir el agente.
-4. **Validator usa scripts reales.** LLM solo resume stderr.
-5. **Claude entra como reviewer, no como explorer.**
-6. **Cualquier cambio de modelo se documenta.** No cambiar Gemini↔Claude sin registrarlo.
-7. **Retry policy explícita por agente.** JSON inválido → 1 retry. Path alucinado → reject.
-8. **Flujo de trabajo PRs:** Cada PR se trabaja secuencialmente solo: branch → cambios → ruff + tests → commit → push → PR → merge → git checkout main && git pull → siguiente PR.
+1. **Scout is read-only.** No exceptions.
+2. **Logging from day 1.** Prompt, response, tokens, latency, cost.
+3. **Schema first.** Define the contract between agents before writing the agent.
+4. **Validator uses real scripts.** LLM only summarizes stderr.
+5. **Claude acts as reviewer, not explorer.**
+6. **Any model change must be documented.** Do not switch Gemini↔Claude without logging it.
+7. **Explicit retry policy per agent.** Invalid JSON → 1 retry. Hallucinated path → reject.
+8. **PR workflow:** Each PR is worked on sequentially only: branch → changes → ruff + tests → commit → push → PR → merge → git checkout main && git pull → next PR.
 
 ---
 
-## 12. APIs configuradas
+## 12. Configured APIs
 
 ```bash
 # .env
@@ -276,7 +276,7 @@ GOOGLE_API_KEY=...               # Gemini Flash — Scout + Executor (LOW)
 GROQ_API_KEY=...                 # Groq Llama 3 — Executor (MEDIUM)
 ```
 
-**SDKs instalados:**
+**Installed SDKs:**
 ```toml
 anthropic = "*"
 google-genai = "*"

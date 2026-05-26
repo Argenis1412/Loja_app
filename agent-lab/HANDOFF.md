@@ -1,9 +1,9 @@
-# Handoff: Pipeline de Análisis y Refactoring
+# Handoff: Analysis and Refactoring Pipeline
 
-| Agente | Estado | Descripción |
+| Agent | Status | Description |
 |---|---|---|
-| Scout | ✅ Completo | Gemini Flash (2 pasadas), read-only, JSON output. |
-| Architect | ✅ Completo | Claude Sonnet, validador de findings, planificador. |
-| Executor | ⏳ Pendiente | Routing por risk_level, implementación de cambios. |
-| Validator | ✅ Completo | ruff + pytest + tsc, Gemini summary de errores. |
-| Reviewer | ⏳ Pendiente | Claude Sonnet, revisión final en cambios de alto riesgo. |
+| Scout | ✅ Complete | Gemini Flash (2 passes), read-only, JSON output. |
+| Architect | ✅ Complete | Claude Sonnet, findings validator, planner. |
+| Executor | ⏳ Pending | Routing by risk_level, implementation of changes. |
+| Validator | ✅ Complete | ruff + pytest + tsc, Gemini error summary. |
+| Reviewer | ⏳ Pending | Claude Sonnet, final review for high-risk changes. |
