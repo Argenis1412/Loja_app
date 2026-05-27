@@ -1,6 +1,6 @@
 # Quality Gate — Pre-Merge Checklist
 
-## Comandos obligatorios (deben pasar todos)
+## Mandatory commands (all must pass)
 
 ### 1. Lint
 ```bash
@@ -17,8 +17,8 @@ python -c "from schemas.scout_output import ScoutOutput; from schemas.architect_
 pytest tests/ -m unit -v
 ```
 
-## Criterios de aprobación
-- [ ] `ruff check .` → 0 errores
+## Approval criteria
+- [ ] `ruff check .` → 0 errors
 - [ ] `pytest tests/ -m unit` → 100% pass
-- [ ] Ningún `print("PASS")` ni `print("FAIL")` en tests
-- [ ] Todo agente retorna `tuple[Output, dict]` con meta completo
+- [ ] No `print("PASS")` or `print("FAIL")` in tests
+- [ ] Every agent returns `tuple[Output, dict]` with full metadata
