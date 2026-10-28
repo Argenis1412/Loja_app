@@ -1,16 +1,6 @@
-import {
-  PagamentoForm,
-  type MetodoPagamento,
-} from '../components/PagamentoForm';
+import { PagamentoForm } from '../components/PagamentoForm';
 
 export function StepPagamento() {
-  function handleCriarPagamento(dados: {
-    valor: number;
-    metodo: MetodoPagamento;
-    parcelas: number;
-  }) {
-  }
-
   return (
     <div className="mx-auto max-w-md space-y-6 p-6">
       <header className="text-center">
@@ -20,7 +10,7 @@ export function StepPagamento() {
         </p>
       </header>
 
-      <PagamentoForm onSubmit={handleCriarPagamento} />
+      <PagamentoForm />
     </div>
   );
 }
