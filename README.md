@@ -1,99 +1,146 @@
-# Loja App — Payment System Laboratory
+# Loja App
 
-[![Backend CI](https://github.com/Argenis1412/Loja_app/actions/workflows/backend-ci.yml/badge.svg)](https://github.com/Argenis1412/Loja_app/actions/workflows/backend-ci.yml)
-[![Frontend CI](https://github.com/Argenis1412/Loja_app/actions/workflows/frontend-ci.yml/badge.svg)](https://github.com/Argenis1412/Loja_app/actions/workflows/frontend-ci.yml)
-[![Python 3.12+](https://img.shields.io/badge/python-3.12+-blue.svg)](https://www.python.org/downloads/)
-[![TypeScript](https://img.shields.io/badge/typescript-5.0+-blue.svg)](https://www.typescriptlang.org/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE.txt)
+A learning project for simulating payment options and saving receipts. It does not process real charges. The interface and API field names are in Portuguese.
 
-**Loja App** is a learning laboratory focused on backend-first architecture and payment logic. It demonstrates how to build a robust payment system with explicit business rules, layered architecture, and a focused frontend.
+## How it works
 
----
+The React interface follows a form → simulation → confirmation → receipt flow. FastAPI calculates the amounts and saves confirmed payments through SQLAlchemy.
 
-## 🚀 Quick Start (Windows)
+| Option (`opcao`) | Method | Installments | Rule |
+| --- | --- | --- | --- |
+| 1 | Cash | 1 | 10% discount |
+| 2 | Debit | 1 | 5% discount |
+| 3 | Credit, without interest | 2–6 | Original amount |
+| 4 | Credit, with interest | 12–24 | 10% added to the total |
 
-The easiest way to get started is using the included PowerShell scripts:
+Amounts are rounded to two decimal places. The last installment is adjusted to account for rounding. These are the current API defaults; `backend/config/taxas.json` is not loaded by the payment flow.
 
-1.  **Setup**: `.\loja_cli.ps1 setup` (Initial configuration)
-2.  **Dev Full**: `make dev` (Starts Backend + Frontend)
-3.  **Backend**: `make back` (FastAPI at `localhost:8000`)
-4.  **Frontend**: `make front` (React at `localhost:5173`)
-5.  **Tests**: `make test` (Runs all tests)
-6.  **Lint**: `make lint` (Checks code quality)
+## Structure
 
-*For technical details, see the [Engineering Playbook](ENGINEERING_PLAYBOOK.md).*
+- `frontend/`: React, TypeScript, Vite and Tailwind CSS; forms, API calls, receipts and theme toggle.
+- `backend/api/`: FastAPI routes and request/response models.
+- `backend/services/`: payment creation, idempotency lookup and listing.
+- `backend/domain/`: payment calculations, receipts and repository interface.
+- `backend/infrastructure/`: SQLAlchemy models, database sessions and repositories.
+- `backend/alembic/`: database migrations.
 
----
+## Run locally
 
-## 🏗 Architecture
+Use Python 3.11, Node.js 22.12+ and npm. Run the backend and frontend in separate terminals, starting from the repository root.
 
-The project follows a **Clean Architecture** approach, ensuring business logic is isolated from external frameworks.
+### Backend
 
-```mermaid
-graph TD
-    UI[Frontend: React + TS] -->|HTTP/JSON| API[REST API: FastAPI]
-    API --> Service[Service Layer: Orchestration]
-    Service --> Domain[Domain Layer: Business Rules]
-    Domain --> DB[(PostgreSQL / SQLite)]
+```sh
+cd backend
+python -m venv .venv
 ```
 
-### Core Responsibilities
-- **Backend as Source of Truth**: All calculations (discounts, interest, installment splitting) happen in the backend domain layer.
-- **Explicit Domain Logic**: Payment rules are isolated in `domain/calculadora.py` and are 100% unit-tested.
-- **Frontend as API Consumer**: The UI collects input and renders results without performing calculations.
+Activate the environment:
 
----
-
-## 📊 Business Rules
-
-The system supports four primary payment methods with configurable rules:
-
-| Option | Mode | Installments | Rule |
-|:---:|---|---|---|
-| **1** | Cash | 1x | 10% Discount |
-| **2** | Debit | 1x | 5% Discount |
-| **3** | Credit | 2-6x | No Interest |
-| **4** | Credit | 12-24x | 10% Interest |
-
-**Exact Total Splitting**: When payments are split, the system automatically adjusts the last installment to ensure the total is mathematically exact (preventing rounding errors).
-
----
-
-## 📁 Project Structure
-
-```text
-Loja_app/
-├── backend/    # FastAPI + Clean Architecture
-├── frontend/   # React + TypeScript + Tailwind
-├── docs/       # Visual documentation & images
-├── Makefile    # Build automation
-└── DEPLOYMENT.md # Production guides (Render/Vercel)
+```sh
+# Bash
+source .venv/bin/activate
 ```
 
----
+```powershell
+# PowerShell
+.\.venv\Scripts\Activate.ps1
+```
 
-## 📖 Documentation
+Install dependencies, then create `.env` in the current `backend/` directory:
 
-- **[Engineering Playbook](ENGINEERING_PLAYBOOK.md)**: Standards for reliability and documentation.
-- **[Changelog](CHANGELOG.md)**: Version history and Incident Post-mortems.
-- **[Backend Guide](backend/README.md)**: API Specs, Domain Analysis, and Persistence.
-- **[Frontend Guide](frontend/README.md)**: UI Components, State Management, and Integration.
-- **[Deployment Guide](DEPLOYMENT.md)**: Step-by-step instructions for Cloud hosting.
+```sh
+python -m pip install -r requirements.txt
+```
 
----
+```dotenv
+DATABASE_URL=sqlite:///./loja_app.db
+```
 
-## 🛡️ Resilience & Reliability
+Start the API:
 
-This project implements professional-grade patterns for high-stakes environments:
-- **API Versioning**: All endpoints follow `/api/v1/` to ensure contract stability.
-- **Idempotency**: Critical payment endpoints support `Idempotency-Key` to prevent duplicate charges.
-- **Pagination**: Lists are paginated by default (20 records) to prevent DoS and memory exhaustion.
-- **Structured Observability**: Centralized error schema for consistent frontend integration.
+```sh
+python -m uvicorn api.main:app --reload
+```
 
----
+The API runs at [localhost:8000](http://localhost:8000), with [Swagger UI](http://localhost:8000/docs) and a [health endpoint](http://localhost:8000/api/v1/saude). Startup creates missing tables, but does not migrate existing ones. Alembic migrations are included for schema changes.
 
-## 👥 Author & License
+### Frontend
 
-Developed by **Argenis Mauricio López Salazar** ([LinkedIn](https://www.linkedin.com/in/argenis1412/) | [GitHub](https://github.com/Argenis1412)).
+```sh
+cd frontend
+npm ci
+npm run dev
+```
 
-Licensed under the **MIT License**. See `LICENSE.txt` for details.
+Open [localhost:5173](http://localhost:5173). Development requests default to `http://127.0.0.1:8000/api/v1`.
+
+## Configuration
+
+- `DATABASE_URL`: database connection string, read from the environment or `backend/.env`. Use the explicit SQLite URL above for local setup, or `postgresql+psycopg2://USER:PASSWORD@HOST:5432/DB_NAME` for PostgreSQL.
+- `ENVIRONMENT`: when `DATABASE_URL` is absent, `development` selects `sqlite:///./test.db`; other values use the `DB_USER`, `DB_PASSWORD`, `DB_HOST`, `DB_PORT` and `DB_NAME` settings. That fallback selects the `psycopg` driver, while the included requirements install `psycopg2`; set `DATABASE_URL` explicitly.
+- `APP_ENV`: label returned by the health endpoint and included in startup logs. Set it in the process environment; it does not select the database.
+- `VITE_API_URL`: optional frontend override in `frontend/.env.local`, for example `VITE_API_URL=http://localhost:8000`. The frontend normalizes the API prefix to `/api/v1`. Production builds default to the same origin. Set this before building when hosting the frontend separately.
+
+## API
+
+| Method | Path | Behavior |
+| --- | --- | --- |
+| POST | `/api/v1/pagamentos/simular` | Calculate a receipt without saving |
+| POST | `/api/v1/pagamentos/` | Calculate and save a payment |
+| GET | `/api/v1/pagamentos/` | List saved payments, newest first |
+| GET | `/api/v1/saude` | Return status, application version and environment label |
+
+Example simulation:
+
+```sh
+curl -X POST http://localhost:8000/api/v1/pagamentos/simular \
+  -H "Content-Type: application/json" \
+  -d '{"opcao":3,"valor":100,"parcelas":3}'
+```
+
+Requests use `opcao`, `valor` and `parcelas`. Options 1 and 2 force one installment; options 3 and 4 require their respective installment ranges. See Swagger UI for response fields.
+
+Creation accepts an optional `Idempotency-Key` header. Reusing a saved key returns the existing receipt, without comparing the new payload. The frontend does not send this header.
+
+Listing accepts `limit` and `offset`, defaulting to 20 and 0. It returns a JSON array; the endpoint does not enforce a maximum limit.
+
+Domain and request validation errors include `error.code`, `error.message` and `error.trace_id`; other errors can have different formats. Responses include an `X-Trace-Id` header.
+
+## Tests and build
+
+With the backend virtual environment active, run from `backend/`:
+
+```sh
+python -m pytest
+```
+
+The backend test setup uses SQLite in memory.
+
+Run from `frontend/`:
+
+```sh
+npm test -- --run
+npm run build
+```
+
+## Docker
+
+The root Dockerfile builds the frontend and serves it through FastAPI on port 7860. Run from the repository root:
+
+```sh
+docker build -t loja-app .
+docker volume create loja-data
+docker run --rm -p 7860:7860 \
+  -e DATABASE_URL=sqlite:////data/loja_app.db \
+  -e APP_ENV=production \
+  -v loja-data:/data loja-app
+```
+
+Open [localhost:7860](http://localhost:7860). The named volume keeps the SQLite database between container runs.
+
+## Author and license
+
+Argenis Mauricio López Salazar ([GitHub](https://github.com/Argenis1412)).
+
+[MIT license](LICENSE.txt).
